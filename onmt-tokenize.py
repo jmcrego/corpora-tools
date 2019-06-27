@@ -34,25 +34,25 @@ while len(sys.argv):
         tokopts['case_feature'] = True
 
     elif tok=="-joiner":
-	tokopts['joiner_annotate'] = True
+        tokopts['joiner_annotate'] = True
 
     elif tok=="-mode" and len(sys.argv):
-	tokopts['mode'] = sys.argv.pop(0)
+        tokopts['mode'] = sys.argv.pop(0)
 
     elif tok=="-bpe" and len(sys.argv):
-	tokopts['bpe_model_path'] = sys.argv.pop(0)
+        tokopts['bpe_model_path'] = sys.argv.pop(0)
 
     elif tok=="-vocabulary" and len(sys.argv):
-  	tokopts['vocabulary'] = sys.argv.pop(0)
+        tokopts['vocabulary'] = sys.argv.pop(0)
 
     elif tok=="-h":
-	sys.stderr.write("{}".format(usage))
-	sys.exit()
+        sys.stderr.write("{}".format(usage))
+        sys.exit()
 
     else:
-    	sys.stderr.write('error: unparsed {} option\n'.format(tok))
-    	sys.stderr.write("{}".format(usage))
-    	sys.exit()
+        sys.stderr.write('error: unparsed {} option\n'.format(tok))
+        sys.stderr.write("{}".format(usage))
+        sys.exit()
 
 if fjson is not None: ### read tokenizer options from json file
     with open(fjson) as jsonfile: 

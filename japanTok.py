@@ -16,6 +16,19 @@ usage = """usage: {} < file
    -oneline : output a single line per sentence (default False)
    -sep CHR : use CHR as wrd/pos separator when -oneline (default '{}')
    -h               : this message
+
+Uses MeCab segmenter/tagger
+Input is one sentence per line
+Ex: echo "これが私のテスト文です。" | python tokenise/japanTok.py -pos
+これ   コレ   名詞-代名詞-一般 名詞-代名詞-一般
+が     ガ     助詞-格助詞-一般 助詞-格助詞-一般
+私     ワタシ 名詞-代名詞-一般 名詞-代名詞-一般
+の     ノ     助詞-連体化      助詞-連体化
+テスト テスト 名詞-サ変接続    名詞-サ変接続
+文     ブン   名詞-一般        名詞-一般
+です   デス   助動詞           助動詞
+。     。     記号-句点        記号-句点
+          (note the empty line at the end of each sentence)
 """.format(sys.argv.pop(0),sep)
 
 while len(sys.argv):
@@ -71,7 +84,7 @@ for line in sys.stdin:
         for idx,r in enumerate(res.split('\n')):
             tags = r.split('\t')
             if len(tags) >=4:
-                snt.append(tags[0]+sep+tags[1]+sep+jitao_map(tags[3]))
+                snt.append(tags[0]+sep+tags[1]+sep+jitao_map(tags[3])+sep+tags[3])
         if oneline:
             print(' '.join(snt))
         else:
