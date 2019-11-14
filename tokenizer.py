@@ -18,9 +18,9 @@ def build_tokenizer(args):
         sys.stderr.write('error: missing mode in tokenizer options\n')
         sys.exit()
         
-    sys.stderr.write("tokenizer args = {}\n".format(local_args))
     mode = local_args['mode']
     del local_args['mode']
-    if 'vocabulary' in local_args: del local_args['vocabulary']
+    if 'vocabulary' in local_args: 
+        del local_args['vocabulary']
 
     return pyonmttok.Tokenizer(mode, **local_args)
