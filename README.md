@@ -89,7 +89,7 @@ usage: multi-bleu.pl [-lc] REF < HYP
 usage: chrF.py [-h] --ref REF --hyp HYP [--beta FLOAT] [--ngram INT] [--space] [--precision] [--recall]
 ```
 ```
-python Eval/RIBES.py -z -r REF -c HYP
+python RIBES.py -z -r REF -c HYP
 ```
 
 ## POS-tagger (Japanese)
