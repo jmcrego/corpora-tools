@@ -19,7 +19,7 @@ Cleaner, Tokeniser, POS-tagger for different languages, Fuzzy matcher, TfIdf, Ev
    -v          : verbose output (default False)
    -h          : this help
 
-   The script needs pyonmttok installed (pip install OpenNMT-tf)
+   The script needs pyonmttok installed (pip install pyonmttok)
    Output files are tokenised following opennmt tokenizer 'space' mode
 ```
 
@@ -35,7 +35,24 @@ usage: onmt-tokenize.py
    -lc              : lowercase all data (use -case_feature)
    -vocabulary FILE : vocabulary file
    -h               : this message
+   The script needs pyonmttok installed (pip install pyonmttok)
 ```
+You can also use the OpenNMT/Tokenizer:
+```
+pip install pyonmttok
+echo "Hello World!" | onmt-tokenize-text --tokenizer OpenNMTTokenizer --tokenizer_config tokconfig
+```
+OR
+```
+git clone https://github.com/OpenNMT/Tokenizer.git
+cd Tokenizer
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+make
+echo "Hello World!" | cli/tokenize --mode conservative --joiner_annotate
+```
+
 ## FuzzyMathing
 ```
 usage: fuzzyMatching.py  -mod FILE -trn FILE -tst FILE [-tok FILE] [-nbest INT]

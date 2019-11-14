@@ -47,7 +47,7 @@ if __name__ == '__main__':
    -v          : verbose output (default False)
    -h          : this help
 
-   The script needs pyonmttok installed (pip install OpenNMT-tf)
+   The script needs pyonmttok installed (pip install pyonmttok)
    Output files are tokenised following opennmt tokenizer 'space' mode
 '''.format(name,tag,tok_mode,Min,Max,Maxw,Fert,Uniq,Equals,seed)
     tag = None

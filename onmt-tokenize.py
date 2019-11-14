@@ -20,6 +20,8 @@ usage = """usage: {}
    -lc              : lowercase all data (use -case_feature)
    -vocabulary FILE : vocabulary file
    -h               : this message
+
+   The script needs pyonmttok installed (pip install pyonmttok)
 """.format(sys.argv.pop(0))
 
 while len(sys.argv):
