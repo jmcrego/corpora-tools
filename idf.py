@@ -74,6 +74,8 @@ def main():
        -data FILE : file used to learn/inference
        -save FILE : save tfidf model after building it with data file      (LEARNING)
        -load FILE : load tfidf model and use it for inference on data file (INFERENCE)
+
+The script needs pyonmttok installed (pip install pyonmttok)
 '''.format(name)
 
     ftok = None

@@ -279,6 +279,8 @@ if __name__ == '__main__':
        -maxNgram INT : max length for test ngrams (default 4)
        -testSet      : collect similar sentences to the entire test set rather than to each input sentence (default false)
        -sortByEDist  : sort collected sentences by edit distance rather than by ngram overlap counts (default false)
+
+The script needs pyonmttok installed (pip install pyonmttok)
 '''.format(name)
 
     Nbest = 10

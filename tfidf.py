@@ -170,6 +170,8 @@ def main():
        -trn STRING : file:tag used for the given domain
        -max      N : max vocabulary size (default 0: use all)
        -snt        : compute tfidf values for each sentence rather the entire tst file
+
+The script needs pyonmttok installed (pip install pyonmttok)
 '''.format(name)
 
     ftok = None

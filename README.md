@@ -75,6 +75,8 @@ usage: fuzzyMatching.py  -mod FILE -trn FILE -tst FILE [-tok FILE] [-nbest INT]
        -maxNgram INT : max length for test ngrams (default 4)
        -testSet      : collect similar sentences to the entire test set rather than to each input sentence (default false)
        -sortByEDist  : sort collected sentences by edit distance rather than by ngram overlap counts (default false)
+
+The script needs pyonmttok installed (pip install pyonmttok)
 ```
 
 ## TfIdf
@@ -86,6 +88,8 @@ usage: tfidf.py -tok FILE -mod FILE ([-trn STRING]+ | -tst FILE [-snt])
        -trn STRING : file:tag used for the given domain
        -max      N : max vocabulary size (default 0: use all)
        -snt        : compute tfidf values for each sentence rather the entire tst file
+
+The script needs pyonmttok installed (pip install pyonmttok)
 ```
 ```
 usage: idf.py [-data FILE] ( -save FILE | -load FILE )
@@ -93,6 +97,8 @@ usage: idf.py [-data FILE] ( -save FILE | -load FILE )
        -data FILE : file used to learn/inference
        -save FILE : save tfidf model after building it with data file      (LEARNING)
        -load FILE : load tfidf model and use it for inference on data file (INFERENCE)
+
+The script needs pyonmttok installed (pip install pyonmttok)
 ```
 
 ## Eval:
