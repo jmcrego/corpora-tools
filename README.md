@@ -3,7 +3,7 @@ Cleaner, Tokeniser, POS-tagger for different languages, Fuzzy matcher, FfIdf, Ev
 
 ## Cleaner:
 
--- usage: corpus-clean-bitext.py -src FILE -tgt FILE [-tag STRING] [-min INT] [-max INT] [-maxw INT] [-fert FLOAT] [-uniq] [-equals] [-seed INT]
+<code> usage: corpus-clean-bitext.py -src FILE -tgt FILE [-tag STRING] [-min INT] [-max INT] [-maxw INT] [-fert FLOAT] [-uniq] [-equals] [-seed INT]
    -src   FILE : input source file
    -tgt   FILE : input target file
    -tag STRING : output files are built adding this prefix to the original file names (default clean_min1_max99_maxw0_fert6.0_uniqFalse_equalsFalse_tokNone)
@@ -22,6 +22,7 @@ Cleaner, Tokeniser, POS-tagger for different languages, Fuzzy matcher, FfIdf, Ev
 
    The script needs pyonmttok installed (pip install OpenNMT-tf)
    Output files are tokenised following opennmt tokenizer 'space' mode
+</code>
 
 ## Tokeniser:
 
