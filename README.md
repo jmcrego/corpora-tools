@@ -12,6 +12,10 @@ tokconfig indicates tokenization options. Ex:
 mode: conservative
 joiner_annotate: true
 ```
+To build vocabularies, use: 
+```
+onmt-build-vocab
+```
 OR
 ```
 git clone https://github.com/OpenNMT/Tokenizer.git
