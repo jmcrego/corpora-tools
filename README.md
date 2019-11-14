@@ -1,2 +1,2 @@
-# tokenise
-Tokeniser and POS-tagger for different languages
+# corpora-tools
+Cleaner, Tokeniser and POS-tagger for different languages
