@@ -1,2 +1,2 @@
 # corpora-tools
-Cleaner, Tokeniser, POS-tagger for different languages, fuzzy matcher
+Cleaner, Tokeniser, POS-tagger for different languages, fuzzy matcher, tfidf
