@@ -1,5 +1,5 @@
 # corpora-tools
-Tokeniser, Cleaner, POS-tagger for different languages, Fuzzy matcher, TfIdf, Eval
+Tokeniser, Cleaner, Analyser, POS-tagger for different languages, Fuzzy matcher, TfIdf, Eval
 
 ## Tokeniser (OpenNMT):
 ```
@@ -27,7 +27,8 @@ Hello World ￭!
 See the [OpenNMT/Tokenizer](https://github.com/OpenNMT/Tokenizer) github site for more details.
 
 ## Cleaner:
-```usage: corpus-clean-bitext.py -src FILE -tgt FILE [-tag STRING] [-min INT] [-max INT] [-maxw INT] [-fert FLOAT] [-uniq] [-equals] [-seed INT]
+```
+usage: corpus-clean-bitext.py -src FILE -tgt FILE [-tag STRING] [-min INT] [-max INT] [-maxw INT] [-fert FLOAT] [-uniq] [-equals] [-seed INT]
    -src   FILE : input source file
    -tgt   FILE : input target file
    -tag STRING : output files are built adding this prefix to the original file names (default clean_min1_max99_maxw0_fert6.0_uniqFalse_equalsFalse_tokNone)
@@ -48,6 +49,15 @@ See the [OpenNMT/Tokenizer](https://github.com/OpenNMT/Tokenizer) github site fo
    Output files are tokenised following opennmt tokenizer 'space' mode
 ```
 
+## Analyser:
+```
+usage: corpus-analyse.py -trn FILE [-tst FILE]* [-tok FILE]
+       -tok FILE : options for tokenizer
+       -trn FILE : train file
+       -tst FILE : test file
+
+   The script needs pyonmttok installed (pip install pyonmttok)
+```
 
 ## FuzzyMathing
 ```

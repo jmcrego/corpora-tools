@@ -63,6 +63,8 @@ def main():
        -tok FILE : options for tokenizer
        -trn FILE : train file
        -tst FILE : test file
+
+The script needs pyonmttok installed (pip install pyonmttok)
 '''.format(name)
 
     ftok = None
