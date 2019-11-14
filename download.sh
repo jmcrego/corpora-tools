@@ -1,10 +1,9 @@
 #!/bin/bash
 
-HERE=$PWD
 ODIR=$HOME/raw
 
 jrc_enfr(){
-    DIR=$ODIR/jrc_enfr
+    DIR=$ODIR/jrc/enfr
     if [ -e $DIR ]; then echo "warning: directory $DIR already exists"; return; fi
     wget -P $DIR http://opus.nlpl.eu/download.php?f=JRC-Acquis/en-fr.txt.zip
     unzip -d $DIR $DIR/download.php\?f\=JRC-Acquis%2Fen-fr.txt.zip
@@ -12,7 +11,7 @@ jrc_enfr(){
 }
 
 emea_enfr(){
-    DIR=$ODIR/emea_enfr
+    DIR=$ODIR/emea/enfr
     if [ -e $DIR ]; then echo "warning: directory $DIR already exists"; return; fi
     wget -P $DIR http://opus.nlpl.eu/download.php?f=EMEA/en-fr.txt.zip
     unzip -d $DIR $DIR/download.php?f=EMEA%2Fen-fr.txt.zip
@@ -20,7 +19,7 @@ emea_enfr(){
 }
 
 ecb_enfr(){
-    DIR=$ODIR/ecb_enfr
+    DIR=$ODIR/ecb/enfr
     if [ -e $DIR ]; then echo "warning: directory $DIR already exists"; return; fi
     wget -P $DIR http://opus.nlpl.eu/download.php?f=ECB/v1/moses/en-fr.txt.zip
     unzip -d $DIR $DIR/download.php?f=ECB%2Fv1%2Fmoses%2Fen-fr.txt.zip
@@ -28,7 +27,7 @@ ecb_enfr(){
 }
 
 epps_enfr(){
-    DIR=$ODIR/epps_enfr
+    DIR=$ODIR/epps/enfr
     if [ -e $DIR ]; then echo "warning: directory $DIR already exists"; return; fi
     #v8
     wget -P $DIR http://opus.nlpl.eu/download.php?f=Europarl/v8/moses/en-fr.txt.zip
@@ -41,7 +40,7 @@ epps_enfr(){
 }
 
 unpc_enfr(){
-    DIR=$ODIR/unpc_enfr
+    DIR=$ODIR/unpc/enfr
     if [ -e $DIR ]; then echo "warning: directory $DIR already exists"; return; fi
     wget -P $DIR http://opus.nlpl.eu/download.php?f=UNPC/v1.0/moses/en-fr.txt.zip
     unzip -d $DIR $DIR/download.php?f=UNPC%2Fv1.0%2Fmoses%2Fen-fr.txt.zip
@@ -49,7 +48,7 @@ unpc_enfr(){
 }
 
 news_enfr(){
-    DIR=$ODIR/news_enfr
+    DIR=$ODIR/news/enfr
     if [ -e $DIR ]; then echo "warning: directory $DIR already exists"; return; fi
     wget -P $DIR http://data.statmt.org/news-commentary/v14/training/news-commentary-v14.en-fr.tsv.gz
     gunzip $DIR/news-commentary-v14.en-fr.tsv.gz
@@ -59,7 +58,7 @@ news_enfr(){
 }
 
 ted_enfr(){
-    DIR=$ODIR/ted_enfr
+    DIR=$ODIR/ted/enfr
     if [ -e $DIR ]; then echo "warning: directory $DIR already exists"; return; fi
     wget -P $DIR http://opus.nlpl.eu/download.php?f=TED2013/en-fr.txt.zip
     unzip -d $DIR $DIR/download.php?f=TED2013%2Fen-fr.txt.zip
