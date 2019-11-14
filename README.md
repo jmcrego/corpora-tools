@@ -35,12 +35,16 @@ usage: onmt-tokenize.py
    -lc              : lowercase all data (use -case_feature)
    -vocabulary FILE : vocabulary file
    -h               : this message
+
    The script needs pyonmttok installed (pip install pyonmttok)
-```
-You can also use the OpenNMT/Tokenizer:
-```
-pip install pyonmttok
+
 echo "Hello World!" | onmt-tokenize-text --tokenizer OpenNMTTokenizer --tokenizer_config tokconfig
+```
+tokconfig indeicates tokenization options. Ex:
+```
+mode: conservative
+joiner_annotate: true
+```
 ```
 OR
 ```
