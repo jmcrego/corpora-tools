@@ -27,7 +27,7 @@ make
 echo "Hello World!" | cli/tokenize --mode conservative --joiner_annotate
 Hello World ￭!
 ```
-To learn BPE models, use: 
+To learn subword models (BPE, sentencepiece), use: 
 ```
 cli/subword_learn
 ```
