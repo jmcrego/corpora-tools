@@ -37,7 +37,7 @@ usage: corpus-clean-bitext.py -src FILE -tgt FILE [-tag STRING] [-min INT] [-max
    -tgt   FILE : input target file
    -tag STRING : output files are built adding this prefix to the original file names (default clean_min1_max99_maxw0_fert6.0_uniqFalse_equalsFalse_tokNone)
 
-   -tok   MODE : use pyonmttok tokenizer aggressive|conservative|space before statistics computation (default None)
+   -tok   MODE : use pyonmttok tokenizer aggressive|conservative|space before filtering (default None)
    -min    INT : discard if src/tgt contains less than [min] words (default 1)
    -max    INT : discard if src/tgt contains more than [max] words (default 99)
    -maxw   INT : discard if src/tgt contains a token with more than [maxw] characters (default 0:not used)

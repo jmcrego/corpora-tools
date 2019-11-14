@@ -35,7 +35,7 @@ if __name__ == '__main__':
    -tgt   FILE : input target file
    -tag STRING : output files are built adding this prefix to the original file names (default {})
 
-   -tok   MODE : use pyonmttok tokenizer aggressive|conservative|space before statistics computation (default {})
+   -tok   MODE : use pyonmttok tokenizer aggressive|conservative|space before filtering (default {})
    -min    INT : discard if src/tgt contains less than [min] words (default {})
    -max    INT : discard if src/tgt contains more than [max] words (default {})
    -maxw   INT : discard if src/tgt contains a token with more than [maxw] characters (default {}:not used)
