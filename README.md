@@ -1,5 +1,5 @@
 # corpora-tools
-Tokeniser, Cleaner, Analyser, POS-tagger for different languages, Fuzzy matcher, TfIdf, Eval
+Tokeniser, Cleaner, Analyser, POS-tagger, Fuzzy matcher, TfIdf, Eval
 
 ## Tokeniser (OpenNMT):
 ```
