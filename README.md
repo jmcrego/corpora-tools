@@ -49,8 +49,8 @@ usage: corpus-clean-bitext.py -src FILE -tgt FILE [-tag STRING] [-min INT] [-max
    -v          : verbose output (default False)
    -h          : this help
 
-   The script needs pyonmttok installed (pip install pyonmttok)
-   Output files are tokenised following opennmt tokenizer 'space' mode
+The script needs pyonmttok installed (pip install pyonmttok)
+Output files are tokenised following opennmt tokenizer 'space' mode
 ```
 
 ## Analyser:
@@ -60,7 +60,7 @@ usage: corpus-analyse.py -trn FILE [-tst FILE]* [-tok FILE]
        -trn FILE : train file
        -tst FILE : test file
 
-   The script needs pyonmttok installed (pip install pyonmttok)
+The script needs pyonmttok installed (pip install pyonmttok)
 ```
 
 ## FuzzyMathing
