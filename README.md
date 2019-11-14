@@ -26,6 +26,8 @@ Cleaner, Tokeniser, POS-tagger for different languages, Fuzzy matcher, TfIdf, Ev
 
 ## Tokeniser:
 ```
+pip install pyonmttok
+
 usage: onmt-tokenize.py
    -json       FILE : json file containing tokenization options (mode, vocabulary, ...)
    -yaml       FILE : yaml file containing tokenization options (mode, vocabulary, ...)
