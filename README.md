@@ -38,7 +38,7 @@ usage: onmt-tokenize.py
 ```
 ## FuzzyMathing
 ```
-fuzzyMatching.py  -mod FILE -trn FILE -tst FILE [-tok FILE] [-nbest INT]
+usage: fuzzyMatching.py  -mod FILE -trn FILE -tst FILE [-tok FILE] [-nbest INT]
        -mod     FILE : Suffix Array model file
        -trn     FILE : train file
        -tst     FILE : test file
@@ -52,7 +52,7 @@ fuzzyMatching.py  -mod FILE -trn FILE -tst FILE [-tok FILE] [-nbest INT]
 
 ## TfIdf
 ```
-tfidf.py -tok FILE -mod FILE ([-trn STRING]+ | -tst FILE [-snt])
+usage: tfidf.py -tok FILE -mod FILE ([-trn STRING]+ | -tst FILE [-snt])
        -tok   FILE : options for tokenizer
        -mod   FILE : tfidf model file (to create/save)
        -tst   FILE : file used for inference
@@ -61,15 +61,12 @@ tfidf.py -tok FILE -mod FILE ([-trn STRING]+ | -tst FILE [-snt])
        -snt        : compute tfidf values for each sentence rather the entire tst file
 ```
 ```
-idf.py [-data FILE] ( -save FILE | -load FILE )
+usage: idf.py [-data FILE] ( -save FILE | -load FILE )
        -tok  FILE : options for tokenizer
        -data FILE : file used to learn/inference
        -save FILE : save tfidf model after building it with data file      (LEARNING)
        -load FILE : load tfidf model and use it for inference on data file (INFERENCE)
 ```
-
-## POS-tagger (Japanese)
-
 
 ## Eval:
 ```
@@ -81,3 +78,5 @@ usage: chrF.py [-h] --ref REF --hyp HYP [--beta FLOAT] [--ngram INT] [--space] [
 ```
 python Eval/RIBES.py -z -r REF -c HYP
 ```
+
+## POS-tagger (Japanese)
