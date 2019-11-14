@@ -59,6 +59,8 @@ echo "Hello World!" | cli/tokenize --mode conservative --joiner_annotate
 Hello World ￭!
 ```
 
+See the [OpenNMT project](https://github.com/OpenNMT/Tokenizer) for more details.
+
 ## FuzzyMathing
 ```
 usage: fuzzyMatching.py  -mod FILE -trn FILE -tst FILE [-tok FILE] [-nbest INT]
