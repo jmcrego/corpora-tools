@@ -45,7 +45,6 @@ tokconfig indeicates tokenization options. Ex:
 mode: conservative
 joiner_annotate: true
 ```
-```
 OR
 ```
 git clone https://github.com/OpenNMT/Tokenizer.git
