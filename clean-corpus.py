@@ -19,6 +19,7 @@ if __name__ == '__main__':
 
     Min = 1
     Max = 99
+    Maxw = 0 #no filtering
     Fert = 6.0
     Uniq = False
     Equals = False
@@ -26,10 +27,10 @@ if __name__ == '__main__':
     seed = None
     fs = None
     ft = None
-    tag = 'clean_min{}_max{}_fert{}_uniq{}_equals{}_tok{}'.format(Min,Max,Fert,Uniq,Equals,tok_mode)
+    tag = 'clean_min{}_max{}_maxw{}_fert{}_uniq{}_equals{}_tok{}'.format(Min,Max,Maxw,Fert,Uniq,Equals,tok_mode)
     verbose = False
     name = sys.argv.pop(0)
-    usage = '''usage: {} -src FILE -tgt FILE [-tag STRING] [-min INT] [-max INT] [-fert FLOAT] [-uniq] [-equals] [-seed INT]
+    usage = '''usage: {} -src FILE -tgt FILE [-tag STRING] [-min INT] [-max INT] [-maxw INT] [-fert FLOAT] [-uniq] [-equals] [-seed INT]
    -src   FILE : input source file
    -tgt   FILE : input target file
    -tag STRING : output files are built adding this prefix to the original file names (default {})
@@ -37,6 +38,7 @@ if __name__ == '__main__':
    -tok   MODE : use pyonmttok tokenizer aggressive|conservative|space before statistics computation (default {})
    -min    INT : discard if src/tgt contains less than [min] words (default {})
    -max    INT : discard if src/tgt contains more than [max] words (default {})
+   -maxw   INT : discard if src/tgt contains a token with more than [maxw] characters (default {}:not used)
    -fert FLOAT : discard if src/tgt is [fert] times bigger than tgt/src (default {})
    -uniq       : discard repeated sentence pairs (default {})
    -equals     : discard if src equals to tgt (default {})
@@ -47,7 +49,7 @@ if __name__ == '__main__':
 
    The script neecds pyonmttok installed (pip install OpenNMT-tf)
    Output files are tokenised following opennmt tokenizer 'space' mode
-'''.format(name,tag,tok_mode,Min,Max,Fert,Uniq,Equals,seed)
+'''.format(name,tag,tok_mode,Min,Max,Maxw,Fert,Uniq,Equals,seed)
     tag = None
 
     while len(sys.argv):
@@ -67,6 +69,8 @@ if __name__ == '__main__':
             Min = int(sys.argv.pop(0))
         elif tok=="-max" and len(sys.argv):
             Max = int(sys.argv.pop(0))
+        elif tok=="-maxw" and len(sys.argv):
+            Maxw = int(sys.argv.pop(0))
         elif tok=="-fert" and len(sys.argv):
             Fert = float(sys.argv.pop(0))
         elif tok=="-tok" and len(sys.argv):
@@ -126,6 +130,7 @@ if __name__ == '__main__':
     nEquals = 0
     nMin = 0
     nMax = 0
+    nMaxw = 0
     nFert = 0
     nUniq = 0
     n_output = 0
@@ -148,6 +153,10 @@ if __name__ == '__main__':
         if lmin > 0:
             fert = lmax / float(lmin)
         pair = lsrc + '\t' + ltgt
+        maxw = 0
+        if Maxw > 0:
+            maxw = max(max(vsrc,key=len), max(vtg,key=len))
+
         if Equals and lsrc == ltgt:
             if (verbose): sys.stderr.write('{} Equals\n'.format(i))
             nEquals += 1
@@ -159,6 +168,10 @@ if __name__ == '__main__':
         if lmax > Max:
             if (verbose): sys.stderr.write('{} Max ({})\n'.format(i,lmax))
             nMax += 1
+            continue
+        if maxw > Maxw:
+            if (verbose): sys.stderr.write('{} Maxw ({})\n'.format(i,maxw))
+            nMaxw += 1
             continue
         if fert > Fert:
             if (verbose): sys.stderr.write('{} Fert ({})\n'.format(i,fert))
@@ -180,4 +193,4 @@ if __name__ == '__main__':
     fs.close()
     ft.close()
 
-    sys.stderr.write('(output {} out of {} [{:.2f}%] nEquals={} nMin={} nMax={} nFert={} nUniq={})\n'.format(n_output,len(src),100*n_output/float(len(src)),nEquals,nMin,nMax,nFert,nUniq))
+    sys.stderr.write('(output {} out of {} [{:.2f}%] nEquals={} nMin={} nMax={} nMaxw={} nFert={} nUniq={})\n'.format(n_output,len(src),100*n_output/float(len(src)),nEquals,nMin,nMax,nMaxw,nFert,nUniq))
