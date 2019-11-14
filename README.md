@@ -105,5 +105,10 @@ usage: chrF.py [-h] --ref REF --hyp HYP [--beta FLOAT] [--ngram INT] [--space] [
 ```
 python RIBES.py -z -r REF -c HYP
 ```
+Use sacrebleu (pip3 install sacrebleu)
+```
+sacrebleu [-options] REF < HYP
+```
+
 
 ## POS-tagger (Japanese)
