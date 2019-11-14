@@ -40,7 +40,7 @@ usage: onmt-tokenize.py
 
 echo "Hello World!" | onmt-tokenize-text --tokenizer OpenNMTTokenizer --tokenizer_config tokconfig
 ```
-tokconfig indeicates tokenization options. Ex:
+tokconfig indicates tokenization options. Ex:
 ```
 mode: conservative
 joiner_annotate: true
