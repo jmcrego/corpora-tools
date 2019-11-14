@@ -23,6 +23,10 @@ make
 echo "Hello World!" | cli/tokenize --mode conservative --joiner_annotate
 Hello World ￭!
 ```
+To learn BPE models, use: 
+```
+cli/subword_learn
+```
 
 See the [OpenNMT/Tokenizer](https://github.com/OpenNMT/Tokenizer) github site for more details.
 
