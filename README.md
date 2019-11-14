@@ -39,6 +39,7 @@ usage: onmt-tokenize.py
    The script needs pyonmttok installed (pip install pyonmttok)
 
 echo "Hello World!" | onmt-tokenize-text --tokenizer OpenNMTTokenizer --tokenizer_config tokconfig
+Hello World ￭!
 ```
 tokconfig indicates tokenization options. Ex:
 ```
@@ -55,6 +56,7 @@ cmake -DCMAKE_BUILD_TYPE=Release ..
 make
 
 echo "Hello World!" | cli/tokenize --mode conservative --joiner_annotate
+Hello World ￭!
 ```
 
 ## FuzzyMathing
