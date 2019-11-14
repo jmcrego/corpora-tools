@@ -59,7 +59,7 @@ echo "Hello World!" | cli/tokenize --mode conservative --joiner_annotate
 Hello World ￭!
 ```
 
-See the [OpenNMT project](https://github.com/OpenNMT/Tokenizer) for more details.
+See the [OpenNMT/Tokenizer](https://github.com/OpenNMT/Tokenizer) github site for more details.
 
 ## FuzzyMathing
 ```
