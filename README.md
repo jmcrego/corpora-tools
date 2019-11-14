@@ -24,22 +24,9 @@ Cleaner, Tokeniser, POS-tagger for different languages, Fuzzy matcher, TfIdf, Ev
 ```
 
 
-## Tokeniser:
+## Tokeniser (OpenNMT):
 ```
 pip install pyonmttok
-
-usage: onmt-tokenize.py
-   -json       FILE : json file containing tokenization options (mode, vocabulary, ...)
-   -yaml       FILE : yaml file containing tokenization options (mode, vocabulary, ...)
-   -mode       MODE : tokenization mode: aggressive, conservative [aggressive]
-   -bpe        FILE : bpe codes to apply bpe subtokenization (use -bpe_model_path)
-   -joiner          : use joiner annotate (use -joiner_annotate))
-   -lc              : lowercase all data (use -case_feature)
-   -vocabulary FILE : vocabulary file
-   -h               : this message
-
-   The script needs pyonmttok installed (pip install pyonmttok)
-
 echo "Hello World!" | onmt-tokenize-text --tokenizer OpenNMTTokenizer --tokenizer_config tokconfig
 Hello World ￭!
 ```
@@ -56,7 +43,6 @@ mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make
-
 echo "Hello World!" | cli/tokenize --mode conservative --joiner_annotate
 Hello World ￭!
 ```
