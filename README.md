@@ -21,7 +21,8 @@ Cleaner, Tokeniser, POS-tagger for different languages, Fuzzy matcher, FfIdf, Ev
    -h          : this help
 
    The script needs pyonmttok installed (pip install OpenNMT-tf)
-   Output files are tokenised following opennmt tokenizer 'space' mode```
+   Output files are tokenised following opennmt tokenizer 'space' mode
+```
 
 
 ## Tokeniser:
