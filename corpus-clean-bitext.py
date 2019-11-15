@@ -28,7 +28,7 @@ if __name__ == '__main__':
     seed = None
     fs = None
     ft = None
-    tag = 'clean_min{}_max{}_maxw{}_fert{}_uniq{}_equals{}_tok{}'.format(Min,Max,Maxw,Fert,Uniq,Equals,tok_mode)
+    tag = 'clean_min{}_max{}_maxw{}_fert{}_uniq{}_equals{}_tok{}_seed{}'.format(Min,Max,Maxw,Fert,Uniq,Equals,tok_mode,seed)
     verbose = False
     name = sys.argv.pop(0)
     usage = '''usage: {} -src FILE -tgt FILE [-tag STRING] [-min INT] [-max INT] [-maxw INT] [-fert FLOAT] [-uniq] [-equals] [-seed INT]
@@ -99,7 +99,7 @@ Output files are tokenised following opennmt tokenizer 'space' mode
         sys.exit()
 
     if tag is None:
-        tag = 'clean_min{}_max{}_maxw{}_fert{}_uniq{}_equals{}_tok{}'.format(Min,Max,Maxw,Fert,Uniq,Equals,tok_mode)
+        tag = 'clean_min{}_max{}_maxw{}_fert{}_uniq{}_equals{}_tok{}_seed{}'.format(Min,Max,Maxw,Fert,Uniq,Equals,tok_mode,seed)
 
     tokenizer_space = pyonmttok.Tokenizer('space', joiner_annotate=False)
     if tok_mode is not None:
