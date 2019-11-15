@@ -30,8 +30,8 @@ if __name__ == '__main__':
    -remain  STRING : name for the remaining set (default trn)
    -seed       INT : seed for randomeness (default 0:do not shuffle)
    -v              : verbose output (default False)
+
 Ex: {} -data file.src -data file.tgt -set val,500 -set dev,1000 -set tst,1000 -remain trn
-    remaining sentences are stored in file.src.remain and file.tgt.remain
 '''.format(name,name)
 
     seed = 0
