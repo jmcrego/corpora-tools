@@ -5,6 +5,9 @@ import glob
 import numpy as np
 from collections import OrderedDict
 prog = sys.argv.pop(0)
+if len(sys.argv) < 2 or not sys.argv[-1].isdigit():
+    sys.stderr.write('usage: {} [file]+ INT\n'.format(prog))
+    sys.exit()
 n = int(sys.argv.pop()) ### 0 outputs the last line of files
 F = np.concatenate([glob.glob(o) for o in sys.argv])
 F = list(OrderedDict.fromkeys(F).keys())
