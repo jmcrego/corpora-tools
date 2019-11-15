@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from random import shuffle
+#from random import shuffle
+import random
 import pyonmttok
 
 def progress(n_line):
@@ -19,7 +20,7 @@ if __name__ == '__main__':
 
     Min = 1
     Max = 99
-    Maxw = 0 #no filtering
+    Maxw = 99
     Fert = 6.0
     Uniq = False
     Equals = False
@@ -36,10 +37,10 @@ if __name__ == '__main__':
    -tag STRING : output files are built adding this prefix to the original file names (default {})
 
    -tok   MODE : use pyonmttok tokenizer aggressive|conservative|space before filtering (default {})
-   -min    INT : discard if src/tgt contains less than [min] words (default {})
-   -max    INT : discard if src/tgt contains more than [max] words (default {})
-   -maxw   INT : discard if src/tgt contains a token with more than [maxw] characters (default {}:not used)
-   -fert FLOAT : discard if src/tgt is [fert] times bigger than tgt/src (default {})
+   -min    INT : discard if src/tgt contains less than [min] words (default {})*
+   -max    INT : discard if src/tgt contains more than [max] words (default {})*
+   -maxw   INT : discard if src/tgt contains a token with more than [maxw] characters (default {})*
+   -fert FLOAT : discard if src/tgt is [fert] times bigger than tgt/src (default {})*
    -uniq       : discard repeated sentence pairs (default {})
    -equals     : discard if src equals to tgt (default {})
 
@@ -47,6 +48,7 @@ if __name__ == '__main__':
    -v          : verbose output (default False)
    -h          : this help
 
+* set to 0 for no filtering
 The script needs pyonmttok installed (pip install pyonmttok)
 Output files are tokenised following opennmt tokenizer 'space' mode
 '''.format(name,tag,tok_mode,Min,Max,Maxw,Fert,Uniq,Equals,seed)
@@ -97,8 +99,7 @@ Output files are tokenised following opennmt tokenizer 'space' mode
         sys.exit()
 
     if tag is None:
-        tag = 'clean_min{}_max{}_fert{}_uniq{}_equals{}_tok{}'.format(Min,Max,Fert,Uniq,Equals,tok_mode)
-
+        tag = 'clean_min{}_max{}_maxw{}_fert{}_uniq{}_equals{}_tok{}'.format(Min,Max,Maxw,Fert,Uniq,Equals,tok_mode)
 
     tokenizer_space = pyonmttok.Tokenizer('space', joiner_annotate=False)
     if tok_mode is not None:
@@ -150,33 +151,33 @@ Output files are tokenised following opennmt tokenizer 'space' mode
         ltgt = ' '.join(vtgt)
         lmax = max(len(vsrc),len(vtgt))
         lmin = min(len(vsrc),len(vtgt))
-        if lmin > 0:
-            fert = lmax / float(lmin)
         pair = lsrc + '\t' + ltgt
-        maxw = 0
-        if Maxw > 0:
-            maxw = max(max(vsrc,key=len), max(vtg,key=len))
 
         if Equals and lsrc == ltgt:
             if (verbose): sys.stderr.write('{} Equals\n'.format(i))
             nEquals += 1
             continue
-        if lmin < Min:
+        if Min != 0 and lmin < Min:
             if (verbose): sys.stderr.write('{} Min ({})\n'.format(i,lmin))
             nMin += 1
             continue
-        if lmax > Max:
+        if Max != 0 and lmax > Max:
             if (verbose): sys.stderr.write('{} Max ({})\n'.format(i,lmax))
             nMax += 1
             continue
-        if maxw > Maxw:
-            if (verbose): sys.stderr.write('{} Maxw ({})\n'.format(i,maxw))
-            nMaxw += 1
-            continue
-        if fert > Fert:
-            if (verbose): sys.stderr.write('{} Fert ({})\n'.format(i,fert))
-            nFert += 1
-            continue
+        if Maxw != 0:
+            maxw = len(max(max(vsrc,key=len), max(vtgt,key=len)))
+            if maxw > Maxw:
+                if (verbose): sys.stderr.write('{} Maxw ({})\n'.format(i,maxw))
+                nMaxw += 1
+                continue
+        if Fert != 0:
+            if lmin > 0:
+                fert = lmax / float(lmin)
+                if fert > Fert:
+                    if (verbose): sys.stderr.write('{} Fert ({})\n'.format(i,fert))
+                    nFert += 1
+                    continue
         if Uniq:
             if pair in output:
                 if (verbose): sys.stderr.write('{} Uniq\n'.format(i))
