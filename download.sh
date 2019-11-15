@@ -57,28 +57,75 @@ news_enfr(){
     rm -f $DIR/news-commentary-v14.en-fr.tsv
 }
 
-ted_enfr(){
-    DIR=$ODIR/ted/enfr
+TED2013_enfr(){
+    DIR=$ODIR/TED2013/enfr
     if [ -e $DIR ]; then echo "warning: directory $DIR already exists"; return; fi
     wget -P $DIR http://opus.nlpl.eu/download.php?f=TED2013/en-fr.txt.zip
     unzip -d $DIR $DIR/download.php?f=TED2013%2Fen-fr.txt.zip
     rm -f $DIR/README $DIR/TED2013.en-fr.ids $DIR/download.php?f=TED2013%2Fen-fr.txt.zip
 }
 
-#
-jrc_enfr
-#
-emea_enfr
-#
-ecb_enfr
-#
-epps_enfr
-#
-unpc_enfr
-#
-news_enfr
-#
-ted_enfr
+GNOME_enfr(){
+    DIR=$ODIR/GNOME/enfr
+    if [ -e $DIR ]; then echo "warning: directory $DIR already exists"; return; fi
+    wget -P $DIR http://opus.nlpl.eu/download.php?f=GNOME/v1/moses/en-fr.txt.zip
+    unzip -d $DIR $DIR/download.php?f=GNOME%2Fv1%2Fmoses%2Fen-fr.txt.zip
+    rm -f $DIR/README $DIR/LICENSE $DIR/GNOME.en-fr.xml $DIR/download.php?f=GNOME%2Fv1%2Fmoses%2Fen-fr.txt.zip
+}
+
+KDE4_enfr(){
+    DIR=$ODIR/KDE4/enfr
+    if [ -e $DIR ]; then echo "warning: directory $DIR already exists"; return; fi
+    wget -P $DIR http://opus.nlpl.eu/download.php?f=KDE4/v2/moses/en-fr.txt.zip
+    unzip -d $DIR $DIR/download.php?f=KDE4%2Fv2%2Fmoses%2Fen-fr.txt.zip
+    rm -f $DIR/README $DIR/LICENSE $DIR/KDE4.en-fr.xml $DIR/download.php?f=KDE4%2Fv2%2Fmoses%2Fen-fr.txt.zip
+}
+
+Ubuntu_enfr(){
+    DIR=$ODIR/Ubuntu/enfr
+    if [ -e $DIR ]; then echo "warning: directory $DIR already exists"; return; fi
+    wget -P $DIR http://opus.nlpl.eu/download.php?f=Ubuntu/v14.10/moses/en-fr.txt.zip
+    unzip -d $DIR $DIR/download.php?f=Ubuntu%2Fv14.10%2Fmoses%2Fen-fr.txt.zip
+    rm -f $DIR/README $DIR/LICENSE $DIR/Ubuntu.en-fr.xml $DIR/download.php?f=Ubuntu%2Fv14.10%2Fmoses%2Fen-fr.txt.zip
+}
+
+PHP_enfr(){
+    DIR=$ODIR/PHP/enfr
+    if [ -e $DIR ]; then echo "warning: directory $DIR already exists"; return; fi
+    wget -P $DIR http://opus.nlpl.eu/download.php?f=PHP/v1/moses/en-fr.txt.zip
+    unzip -d $DIR $DIR/download.php?f=PHP%2Fv1%2Fmoses%2Fen-fr.txt.zip
+    rm -f $DIR/README $DIR/download.php?f=PHP%2Fv1%2Fmoses%2Fen-fr.txt.zip
+}
+
+Wikipedia_enfr(){
+    DIR=$ODIR/Wikipedia/enfr
+    if [ -e $DIR ]; then echo "warning: directory $DIR already exists"; return; fi
+    wget -P $DIR http://opus.nlpl.eu/download.php?f=Wikipedia/v1.0/moses/en-fr.txt.zip
+    unzip -d $DIR $DIR/download.php?f=Wikipedia%2Fv1.0%2Fmoses%2Fen-fr.txt.zip
+    rm -f $DIR/README $DIR/Wikipedia.en-fr.ids $DIR/download.php?f=Wikipedia%2Fv1.0%2Fmoses%2Fen-fr.txt.zip
+}
+
+OSub_enfr(){
+    DIR=$ODIR/OSub/enfr
+    if [ -e $DIR ]; then echo "warning: directory $DIR already exists"; return; fi
+    wget -P $DIR http://opus.nlpl.eu/download.php?f=OpenSubtitles/v2018/moses/en-fr.txt.zip
+    unzip -d $DIR $DIR/download.php?f=OpenSubtitles%2Fv2018%2Fmoses%2Fen-fr.txt.zip
+    rm -f $DIR/README $DIR/OpenSubtitles.en-fr.ids $DIR/download.php?f=OpenSubtitles%2Fv2018%2Fmoses%2Fen-fr.txt.zip
+}
+
+#jrc_enfr
+#emea_enfr
+#ecb_enfr
+#epps_enfr
+#unpc_enfr
+#news_enfr
+#TED2013_enfr
+#GNOME_enfr
+#KDE4_enfr
+#Ubuntu_enfr
+#PHP_enfr
+#Wikipedia_enfr
+#OSub_enfr
 
 exit
 
