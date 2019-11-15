@@ -28,13 +28,15 @@ if __name__ == '__main__':
     seed = None
     fs = None
     ft = None
+    dout = None
     tag = 'clean_min{}_max{}_maxw{}_fert{}_uniq{}_equals{}_tok{}_seed{}'.format(Min,Max,Maxw,Fert,Uniq,Equals,tok_mode,seed)
     verbose = False
     name = sys.argv.pop(0)
-    usage = '''usage: {} -src FILE -tgt FILE [-tag STRING] [-min INT] [-max INT] [-maxw INT] [-fert FLOAT] [-uniq] [-equals] [-seed INT]
+    usage = '''usage: {} -src FILE -tgt FILE [-out STRING] [-tag STRING] [-min INT] [-max INT] [-maxw INT] [-fert FLOAT] [-uniq] [-equals] [-seed INT]
    -src   FILE : input source file
    -tgt   FILE : input target file
    -tag STRING : output files are built adding this prefix to the original file names (default {})
+   -out STRING : place filtered files in this directory (default {}:same as original files)
 
    -tok   MODE : use pyonmttok tokenizer aggressive|conservative|space before filtering (default {})
    -min    INT : discard if src/tgt contains less than [min] words (default {})*
@@ -51,7 +53,7 @@ if __name__ == '__main__':
 * set to 0 for no filtering
 The script needs pyonmttok installed (pip install pyonmttok)
 Output files are tokenised following opennmt tokenizer 'space' mode
-'''.format(name,tag,tok_mode,Min,Max,Maxw,Fert,Uniq,Equals,seed)
+'''.format(name,tag,dout,tok_mode,Min,Max,Maxw,Fert,Uniq,Equals,seed)
     tag = None
 
     while len(sys.argv):
@@ -67,6 +69,8 @@ Output files are tokenised following opennmt tokenizer 'space' mode
             ft = sys.argv.pop(0)
         elif tok=="-tag" and len(sys.argv):
             tag = sys.argv.pop(0)
+        elif tok=="-out" and len(sys.argv):
+            dout = sys.argv.pop(0)
         elif tok=="-min" and len(sys.argv):
             Min = int(sys.argv.pop(0))
         elif tok=="-max" and len(sys.argv):
@@ -121,11 +125,17 @@ Output files are tokenised following opennmt tokenizer 'space' mode
 
     FS = fs.split('/')
     FS[-1] = tag + '.' + FS[-1]    
-    fs = open('/'.join(FS),'w')
+    if dout is not None:
+        fs = open(dout+'/'+FS[-1],'w')
+    else:
+        fs = open('/'.join(FS),'w')
 
     FT = ft.split('/')
     FT[-1] = tag + '.' + FT[-1]
-    ft = open('/'.join(FT),'w')
+    if dout is not None:
+        ft = open(dout+'/'+FT[-1],'w')
+    else:
+        ft = open('/'.join(FT),'w')
 
     output = set()
     nEquals = 0
