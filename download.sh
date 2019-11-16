@@ -2,32 +2,32 @@
 
 ODIR=$HOME/raw
 
-jrc_enfr(){
-    DIR=$ODIR/jrc/enfr
+JRC_enfr(){
+    DIR=$ODIR/JRC/enfr
     if [ -e $DIR ]; then echo "warning: directory $DIR already exists"; return; fi
     wget -P $DIR http://opus.nlpl.eu/download.php?f=JRC-Acquis/en-fr.txt.zip
     unzip -d $DIR $DIR/download.php\?f\=JRC-Acquis%2Fen-fr.txt.zip
     rm -f $DIR/README $DIR/LICENSE $DIR/JRC-Acquis.en-fr.xml $DIR/download.php?f=JRC-Acquis%2Fen-fr.txt.zip
 }
 
-emea_enfr(){
-    DIR=$ODIR/emea/enfr
+EMEA_enfr(){
+    DIR=$ODIR/EMEA/enfr
     if [ -e $DIR ]; then echo "warning: directory $DIR already exists"; return; fi
     wget -P $DIR http://opus.nlpl.eu/download.php?f=EMEA/en-fr.txt.zip
     unzip -d $DIR $DIR/download.php?f=EMEA%2Fen-fr.txt.zip
     rm -f $DIR/README $DIR/download.php?f=EMEA%2Fen-fr.txt.zip
 }
 
-ecb_enfr(){
-    DIR=$ODIR/ecb/enfr
+ECB_enfr(){
+    DIR=$ODIR/ECB/enfr
     if [ -e $DIR ]; then echo "warning: directory $DIR already exists"; return; fi
     wget -P $DIR http://opus.nlpl.eu/download.php?f=ECB/v1/moses/en-fr.txt.zip
     unzip -d $DIR $DIR/download.php?f=ECB%2Fv1%2Fmoses%2Fen-fr.txt.zip
     rm -f $DIR/README $DIR/ECB.en-fr.ids $DIR/download.php?f=ECB%2Fv1%2Fmoses%2Fen-fr.txt.zip
 }
 
-epps_enfr(){
-    DIR=$ODIR/epps/enfr
+EPPS_enfr(){
+    DIR=$ODIR/EPPS/enfr
     if [ -e $DIR ]; then echo "warning: directory $DIR already exists"; return; fi
     #v8
     wget -P $DIR http://opus.nlpl.eu/download.php?f=Europarl/v8/moses/en-fr.txt.zip
@@ -39,8 +39,8 @@ epps_enfr(){
     #rm -f $DIR/fr-en.tgz
 }
 
-unpc_enfr(){
-    DIR=$ODIR/unpc/enfr
+UNPC_enfr(){
+    DIR=$ODIR/UNPC/enfr
     if [ -e $DIR ]; then echo "warning: directory $DIR already exists"; return; fi
     wget -P $DIR http://opus.nlpl.eu/download.php?f=UNPC/v1.0/moses/en-fr.txt.zip
     unzip -d $DIR $DIR/download.php?f=UNPC%2Fv1.0%2Fmoses%2Fen-fr.txt.zip

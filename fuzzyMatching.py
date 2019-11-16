@@ -281,6 +281,9 @@ if __name__ == '__main__':
        -sortByEDist  : sort collected sentences by edit distance rather than by ngram overlap counts (default false)
 
 The script needs pyonmttok installed (pip install pyonmttok)
+Examples:
+python fuzzyMatching.py -trn trn.en -mod trn.en.fm (build index)
+python fuzzyMatching.py -tst tst.en -mod trn.en.fm (inference)
 '''.format(name)
 
     Nbest = 10
