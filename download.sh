@@ -3,7 +3,7 @@
 ODIR=$HOME/raw
 
 JRC_enfr(){
-    DIR=$ODIR/JRC/enfr
+    DIR=$ODIR/JRC-Acquis/enfr
     if [ -e $DIR ]; then echo "warning: directory $DIR already exists"; return; fi
     wget -P $DIR http://opus.nlpl.eu/download.php?f=JRC-Acquis/en-fr.txt.zip
     unzip -d $DIR $DIR/download.php\?f\=JRC-Acquis%2Fen-fr.txt.zip
@@ -27,7 +27,7 @@ ECB_enfr(){
 }
 
 EPPS_enfr(){
-    DIR=$ODIR/EPPS/enfr
+    DIR=$ODIR/Europarl/enfr
     if [ -e $DIR ]; then echo "warning: directory $DIR already exists"; return; fi
     #v8
     wget -P $DIR http://opus.nlpl.eu/download.php?f=Europarl/v8/moses/en-fr.txt.zip
@@ -48,7 +48,7 @@ UNPC_enfr(){
 }
 
 news_enfr(){
-    DIR=$ODIR/news/enfr
+    DIR=$ODIR/news-commentary/enfr
     if [ -e $DIR ]; then echo "warning: directory $DIR already exists"; return; fi
     wget -P $DIR http://data.statmt.org/news-commentary/v14/training/news-commentary-v14.en-fr.tsv.gz
     gunzip $DIR/news-commentary-v14.en-fr.tsv.gz
