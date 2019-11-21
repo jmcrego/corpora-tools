@@ -105,8 +105,8 @@ Wikipedia_enfr(){
     rm -f $DIR/README $DIR/Wikipedia.en-fr.ids $DIR/download.php?f=Wikipedia%2Fv1.0%2Fmoses%2Fen-fr.txt.zip
 }
 
-OSub_enfr(){
-    DIR=$ODIR/OSub/enfr
+OpenSubtitles_enfr(){
+    DIR=$ODIR/OpenSubtitles/enfr
     if [ -e $DIR ]; then echo "warning: directory $DIR already exists"; return; fi
     wget -P $DIR http://opus.nlpl.eu/download.php?f=OpenSubtitles/v2018/moses/en-fr.txt.zip
     unzip -d $DIR $DIR/download.php?f=OpenSubtitles%2Fv2018%2Fmoses%2Fen-fr.txt.zip
