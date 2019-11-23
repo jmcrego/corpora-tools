@@ -191,6 +191,7 @@ if __name__ == '__main__':
     -v        : verbose output
 
 This scripts needs edit_distance (pip install edit_distance)
+This scripts works with the fuzzymatch output produced by Systran's FuzzyMatch-cli
 '''.format(name)
 
     fsim = None
