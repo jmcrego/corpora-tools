@@ -180,11 +180,11 @@ if __name__ == '__main__':
 
     name = sys.argv.pop(0)
     usage = '''{} -sim FILE -tst FILE -src FILE -tgt FILE -ali FILE -out FILE [-sep CHAR] [-v]
-    -sim FILE : fuzzy match file indexing -tst with -src, -tgt and -ali
-    -tst FILE : test file (source)
-    -src FILE : source file
-    -tgt FILE : target file
-    -ali FILE : alignments file
+    -sim FILE : FUZZYMATCHES file produced by Systran's FuzzyMatch-cli (FuzzyMatch-cli -a index -c SOURCE / FuzzyMatch-cli -a match -i SOURCE.fmi -f 0.6 -n 1 -P < TEST > FUZZYMATCHES)
+    -tst FILE : TEST file (for which FuzzyMatch-cli has found fuzzy matches)
+    -src FILE : SOURCE file (indexed by FuzzyMatch-cli)
+    -tgt FILE : target file (parallel to SOURCE)
+    -ali FILE : alignments file (parallel to SOURCE)
     -out FILE : output files out.f1 .f2 will be created
     -sep CHAR : feature separator (default \'￨\')
     -repair   : perform fuzzy-match repair (NFR) rather than integration
