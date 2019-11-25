@@ -24,7 +24,7 @@ def build_data_set(data,sname,indexs):
 if __name__ == '__main__':
 
     name = sys.argv.pop(0)
-    usage = '''usage: {} -files FILE -i FILE [-v]
+    usage = '''usage: {} -files FILE -i FILE -pattern STRING [-v]
    -files     FILE : files description 
    -i         FILE : data to split (default stdin)
    -pattern STRING : output pattern file
