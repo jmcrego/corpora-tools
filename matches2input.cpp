@@ -60,7 +60,7 @@ std::vector<std::pair<size_t,size_t> > ALI(std::vector<std::string> A) {
   return result;
 }
 
-void lcs_ali(std::vector<std::string> X, std::vector<std::string> S, std::vector<std::string> T, std::vector<std::string> A, std::vector<bool>& x_related, std::vector<bool>& t_related) {
+void lcs_ali(std::vector<std::string> X, std::vector<std::string> S, std::vector<std::string> T, std::vector<std::string> A, std::vector<bool>& x_related, std::vector<bool>& t_related, bool verbose) {
   std::vector<std::pair<size_t,size_t> > lcs_xs = LCS(X,S);
   std::vector<std::pair<size_t,size_t> > ali_st = ALI(A);
   std::set<size_t> myset;
@@ -109,8 +109,9 @@ void usage(std::string name){
   std::cerr << "   -match FILE : test match file" << std::endl;
   std::cerr << "   -col    INT : column where match index is found (default 0)" << std::endl;
   std::cerr << "   -tag STRING : characters to use {'S','C','T','U'} (default 'SCTU')" << std::endl;
-  std::cerr << "   -sep STRING : word separator (default ' ')" << std::endl;
   std::cerr << "   -o     FILE : output file" << std::endl;
+  std::cerr << "   -sep STRING : word separator (default ' ')" << std::endl;
+  std::cerr << "   -v          : verbose output" << std::endl;
   std::cerr << "" << std::endl;
   std::cerr << "'S' source words without related target (to be freely translated)" << std::endl;
   std::cerr << "'C' source words with related target (to copy some target word)" << std::endl;
@@ -136,6 +137,7 @@ bool load(std::string file, std::vector<std::string> v){
 }
 
 int main(int argc, char** argv) {
+  bool verbose = false;
   std::string fsrc = "";
   std::string ftgt = "";
   std::string fali = "";
@@ -156,6 +158,7 @@ int main(int argc, char** argv) {
     else if (tok == "-col" and i<argc) { i++; col = std::atoi(argv[i]); }
     else if (tok == "-tag" and i<argc) { i++; tag = argv[i]; }
     else if (tok == "-o" and i<argc) { i++; fout = argv[i]; }
+    else if (tok == "-v") { verbose = true; }
     else if (tok == "-h") {
       usage(argv[0]);
       return 1;      
@@ -231,7 +234,7 @@ int main(int argc, char** argv) {
     std::vector<std::string> A = split(vali[j],sep,false);      
     std::vector<bool> x_related(X.size(),false);
     std::vector<bool> t_related(T.size(),false);
-    lcs_ali(X,S,T,A,x_related,t_related);
+    lcs_ali(X,S,T,A,x_related,t_related,verbose);
 
     for (size_t i=0; i<X.size(); i++){
       of1 << (i?" ":"") << X[i];
