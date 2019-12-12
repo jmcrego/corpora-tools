@@ -4,9 +4,12 @@ import edit_distance
 
 class FMI(object):
 
-    def __init__(self, tst, src, tgt, ali, repair, verbose):
+    def __init__(self, tst, src, tgt, ali, repair, repair2, hideR, subseq, verbose):
         self.verbose = verbose
         self.repair = repair
+        self.repair2 = repair2
+        self.hideR = hideR
+        self.subseq = subseq
         self.tst = tst
         self.src = src
         self.tgt = tgt
@@ -106,9 +109,11 @@ class FMI(object):
     def RepairSource(self):
         containsFM = True
         seq = []
-
         for x in range(len(self.tst)):
-            seq.append([self.tst[x],'S'])
+            if not self.repair2 or self.tst2src[x]<0:
+                seq.append([self.tst[x],'S'])
+            else:
+                seq.append([self.tst[x],'C'])
 
         seq.append(['@@@', 'R'])
 
@@ -120,7 +125,19 @@ class FMI(object):
                 for s in range(self.t2s_minmax[t]['min'], self.t2s_minmax[t]['max']+1):
                     if self.src2tst[s] > -1:
                         tag = 'T' ### linked to tst sentence
-            seq.append([self.tgt[t],tag])
+
+            if tag == 'T':
+                seq.append([self.tgt[t],tag])
+
+            else: ### tag is 'R'
+                if not self.hideR:
+                    seq.append([self.tgt[t],tag])
+                else:
+                    if len(seq)==0 or seq[-1][1] != 'R':
+                        seq.append(['@@@','R'])
+                
+        if self.hideR and seq[-1][1] == 'R': #### delete last token if it is 'R'
+            seq.pop()
 
         return containsFM, seq
 
@@ -181,6 +198,7 @@ if __name__ == '__main__':
     name = sys.argv.pop(0)
     usage = '''{} -sim FILE -tst FILE -src FILE -tgt FILE -ali FILE -out FILE [-sep CHAR] [-v]
     -sim FILE : FUZZYMATCHES file produced by Systran's FuzzyMatch-cli (FuzzyMatch-cli -a index -c SOURCE / FuzzyMatch-cli -a match -i SOURCE.fmi -f 0.6 -n 1 -P < TEST > FUZZYMATCHES)
+    -col  INT : column in sim FILE where the training sentence with the match can be found (first column is 0)
     -tst FILE : TEST file (for which FuzzyMatch-cli has found fuzzy matches)
     -src FILE : SOURCE file (indexed by FuzzyMatch-cli)
     -tgt FILE : target file (parallel to SOURCE)
@@ -188,6 +206,9 @@ if __name__ == '__main__':
     -out FILE : output files out.f1 .f2 will be created
     -sep CHAR : feature separator (default \'￨\')
     -repair   : perform fuzzy-match repair (NFR) rather than integration
+    -repair2  : perform fuzzy-match repair on both sides (activates -repair)
+    -hideR    : hide \'R\' words
+    -subseq   : subseq-match mode (default fuzzy-match mode)
     -v        : verbose output
 
 This scripts needs edit_distance (pip install edit_distance)
@@ -200,8 +221,12 @@ This scripts works with the fuzzymatch output produced by Systran's FuzzyMatch-c
     ftgt = None
     fali = None
     fout = None
+    col = None
     sep = '￨'
     repair = False
+    repair2 = False
+    hideR = False
+    subseq = False
     verbose = False
     while len(sys.argv):
         tok = sys.argv.pop(0)
@@ -212,7 +237,13 @@ This scripts works with the fuzzymatch output produced by Systran's FuzzyMatch-c
         elif (tok=="-ali" and len(sys.argv)): fali = sys.argv.pop(0)
         elif (tok=="-out" and len(sys.argv)): fout = sys.argv.pop(0)
         elif (tok=="-sep" and len(sys.argv)): sep = sys.argv.pop(0)
+        elif (tok=="-col" and len(sys.argv)): col = int(sys.argv.pop(0))
         elif (tok=="-repair"): repair = True
+        elif (tok=="-repair2"): 
+            repair2 = True
+            repair = True
+        elif (tok=="-subseq"): subseq = True
+        elif (tok=="-hideR"): hideR = True
         elif (tok=="-v"): verbose = True
         elif (tok=="-h"):
             sys.stderr.write("{}".format(usage))
@@ -224,6 +255,11 @@ This scripts works with the fuzzymatch output produced by Systran's FuzzyMatch-c
 
     if fsim is None or ftst is None or fsrc is None or ftgt is None or fali is None or fout is None:
         sys.stderr.write("error: missing file option\n")
+        sys.stderr.write("{}".format(usage))
+        sys.exit()
+
+    if col is None:
+        sys.stderr.write("error: missing col option\n")
         sys.stderr.write("{}".format(usage))
         sys.exit()
 
@@ -260,20 +296,20 @@ This scripts works with the fuzzymatch output produced by Systran's FuzzyMatch-c
             continue
 
         score = float(line[0])
-        nsim = int(line[1])-1
+        nsim = int(line[col])-1
         if n >= len(src) or nsim >= len(src):
             sys.stderr.write("error: index out of bounds n={} nsim={}\n".format(n+1,nsim))
             sys.exit()
 
         if verbose:
             print('nsim={}'.format(nsim))
-            print('FMS={}'.format(score))
-            print('TST'+'\t'+' '.join(tst[n]))
-            print('SRC'+'\t'+' '.join(src[nsim]))
-            print('TGT'+'\t'+' '.join(tgt[nsim]))
-            print('ALI'+'\t'+' '.join(ali[nsim]))
+            print('score={}'.format(score))
+            print('TST[{}]'.format(n)+'\t'+' '.join(tst[n]))
+            print('SRC[{}]'.format(nsim)+'\t'+' '.join(src[nsim]))
+            print('TGT[{}]'.format(nsim)+'\t'+' '.join(tgt[nsim]))
+            print('ALI[{}]'.format(nsim)+'\t'+' '.join(ali[nsim]))
 
-        F = FMI(tst[n],src[nsim],tgt[nsim],ali[nsim],repair,verbose)
+        F = FMI(tst[n],src[nsim],tgt[nsim],ali[nsim],repair,repair2,hideR,subseq,verbose)
         containsFM, source = F.RewriteSource() #tst[n],src[nsim],tgt[nsim],tst2src,src2tst,tuples,verbose)
         if containsFM:
             S1 = []
