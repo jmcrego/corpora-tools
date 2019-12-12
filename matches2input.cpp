@@ -60,7 +60,7 @@ std::vector<std::pair<size_t,size_t> > ALI(std::vector<std::string> A) {
   return result;
 }
 
-void lcs_ali(std::vector<std::string> X, std::vector<std::string> S, std::vector<std::string> T, std::vector<std::string> A, bool doS, bool doC, bool doT, bool doU) {
+void lcs_ali(std::vector<std::string> X, std::vector<std::string> S, std::vector<std::string> T, std::vector<std::string> A, std::vector<bool>& x_related, std::vector<bool>& t_related) {
   std::vector<std::pair<size_t,size_t> > lcs_xs = LCS(X,S);
   std::vector<std::pair<size_t,size_t> > ali_st = ALI(A);
   std::set<size_t> myset;
@@ -75,10 +75,6 @@ void lcs_ali(std::vector<std::string> X, std::vector<std::string> S, std::vector
   for (size_t i = 0; i < ali_st.size(); i++) {
     t2s[ali_st[i].second].insert(ali_st[i].first);
   }
-
-  //output vectors
-  std::vector<bool> x_related(X.size(),false);
-  std::vector<bool> t_related(T.size(),false);
 
   for (size_t t=0 ; t<T.size(); t++){
     bool all_related = true; //all alignments of this t must be to s which are related to x
@@ -114,6 +110,7 @@ void usage(std::string name){
   std::cerr << "   -col    INT : column where match index is found (default 0)" << std::endl;
   std::cerr << "   -tag STRING : characters to use {'S','C','T','U'} (default 'SCTU')" << std::endl;
   std::cerr << "   -sep STRING : word separator (default ' ')" << std::endl;
+  std::cerr << "   -o     FILE : output file" << std::endl;
   std::cerr << "" << std::endl;
   std::cerr << "'S' source words without related target (to be freely translated)" << std::endl;
   std::cerr << "'C' source words with related target (to copy some target word)" << std::endl;
@@ -143,6 +140,7 @@ int main(int argc, char** argv) {
   std::string ftgt = "";
   std::string fali = "";
   std::string ftst = "";
+  std::string fout = "";
   std::string fmatch = "";
   std::string sep = " ";
   std::string tag = "SCTU";
@@ -157,6 +155,7 @@ int main(int argc, char** argv) {
     else if (tok == "-match" and i<argc) { i++; fmatch = argv[i]; }
     else if (tok == "-col" and i<argc) { i++; col = std::atoi(argv[i]); }
     else if (tok == "-tag" and i<argc) { i++; tag = argv[i]; }
+    else if (tok == "-o" and i<argc) { i++; fout = argv[i]; }
     else if (tok == "-h") {
       usage(argv[0]);
       return 1;      
@@ -166,7 +165,6 @@ int main(int argc, char** argv) {
       usage(argv[0]);
       return 1;
     }
-    std::cout << tok << std::endl;
   }
   if (fsrc.size() == 0 || ftgt.size() == 0 || fali.size() == 0){
       std::cerr << "error: train files are needed!" << std::endl;
@@ -175,6 +173,11 @@ int main(int argc, char** argv) {
   }
   if (ftst.size() == 0 || fmatch.size() == 0){
       std::cerr << "error: test files are needed!" << std::endl;
+      usage(argv[0]);
+      return 1;    
+  }
+  if (fout.size() == 0){
+      std::cerr << "error: output file is needed!" << std::endl;
       usage(argv[0]);
       return 1;    
   }
@@ -210,6 +213,11 @@ int main(int argc, char** argv) {
     return 1;
   }
 
+  std::ofstream of1;
+  of1.open((fout+".f1").c_str(), std::ofstream::out);
+  std::ofstream of2;
+  of2.open((fout+".f2").c_str(), std::ofstream::out);
+
   for (size_t i = 0; i< vtst.size(); i++){
     std::vector<std::string> X = split(vtst[i],sep,false);
     std::vector<std::string> cols = split(vmatch[i],"\t",false);
@@ -221,11 +229,35 @@ int main(int argc, char** argv) {
     std::vector<std::string> S = split(vsrc[j],sep,false);      
     std::vector<std::string> T = split(vtgt[j],sep,false);      
     std::vector<std::string> A = split(vali[j],sep,false);      
-    /*
-    for (size_t i = 0; i < X.size(); i++) std::cout << "X[" << i << "] " << X[i] << std::endl;
-    for (size_t i = 0; i < S.size(); i++) std::cout << "S[" << i << "] " << S[i] << std::endl;
-    */
-    lcs_ali(X,S,T,A,doS,doC,doT,doU);
+    std::vector<bool> x_related(X.size(),false);
+    std::vector<bool> t_related(T.size(),false);
+    lcs_ali(X,S,T,A,x_related,t_related);
+
+    for (size_t i=0; i<X.size(); i++){
+      of1 << (i?" ":"") << X[i];
+      if (x_related[i]){
+	of2 << (i?" ":"") << "C";
+      }
+      else{
+	of2 << (i?" ":"") << "S";
+      }
+    }
+    of1 << " " << "@";
+    of2 << " " << "@";
+    for (size_t i=0; i<T.size(); i++){
+      of1 << " " << T[i];
+      if (t_related[i]){
+	of2 << " " <<  "T";
+      }
+      else{
+	of2 << " " << "U";
+      }
+    }
+    of1 << std::endl;
+    of2 << std::endl;
   }
+  of1.close();
+  of2.close();
+
   return 0;
 }
