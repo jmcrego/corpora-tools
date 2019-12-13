@@ -111,7 +111,7 @@ void related(std::vector<std::string> X, std::vector<std::string> S, std::vector
 
 
 void usage(std::string name){
-  std::cerr << "usage: " << name << " -o FILE -s FILE -t FILE -a FILE -tst FILE -match FILE [-col INT] -v" << std::endl;
+  std::cerr << "usage: " << name << " -o FILE -s FILE -t FILE -a FILE -tst FILE -match FILE [-col INT] [-sep STRING] [-v]" << std::endl;
   std::cerr << "   -o     FILE : output file" << std::endl;
   std::cerr << "   -s     FILE : train src file" << std::endl;
   std::cerr << "   -t     FILE : train tgt file" << std::endl;
@@ -120,14 +120,18 @@ void usage(std::string name){
   std::cerr << "   -match FILE : test match file" << std::endl;
   std::cerr << "   -col    INT : column where match index is found (default 0)" << std::endl;
   std::cerr << "   -embedding  : do not perform alignments" << std::endl;
+  std::cerr << "   -sep STRING : token used to mark sentence boundary (default ‖)" << std::endl;
   std::cerr << "   -v          : verbose output" << std::endl;
-  std::cerr << "" << std::endl;
+  std::cerr << std::endl;
   std::cerr << "Tags used:" << std::endl;
   std::cerr << "S: source words without related target (to be freely translated)" << std::endl;
   std::cerr << "C: source words with related target (to copy some target word)" << std::endl;
   std::cerr << "T: target words with related source (within the match)" << std::endl;
   std::cerr << "U: target words without related source (without the match)" << std::endl;
   std::cerr << "E: target words from similar sentence using embeddings (no alignments performed)" << std::endl;
+  std::cerr << std::endl;
+  std::cerr << "Comments:" << std::endl;
+  std::cerr << "All files are lightly tokenised (split punctuation)" << std::endl;
 
   return;
 }
@@ -155,7 +159,8 @@ int main(int argc, char** argv) {
   std::string ftst = "";
   std::string fout = "";
   std::string fmatch = "";
-  std::string sep = " ";
+  std::string sepwords = " ";
+  std::string sepsents = "‖";
   bool embedding = false;
   size_t col = 0;
   for (size_t i = 1; i < argc; i++){
@@ -167,6 +172,7 @@ int main(int argc, char** argv) {
     else if (tok == "-match" and i<argc) { i++; fmatch = argv[i]; }
     else if (tok == "-col" and i<argc) { i++; col = std::atoi(argv[i]); }
     else if (tok == "-o" and i<argc) { i++; fout = argv[i]; }
+    else if (tok == "-sep" and i<argc) { i++; sepsents = argv[i]; }
     else if (tok == "-embedding") { embedding = true; }
     else if (tok == "-v") { verbose = true; }
     else if (tok == "-h") {
@@ -220,7 +226,7 @@ int main(int argc, char** argv) {
       std::cout << "i=" << i << std::endl;
       std::cout << "X: " << vtst[i] << std::endl;
     }
-    std::vector<std::string> X = split(vtst[i],sep,false);
+    std::vector<std::string> X = split(vtst[i],sepwords,false);
     std::vector<std::string> cols = split(vmatch[i],"\t",false);
     std::vector<std::string> vf1;
     std::vector<std::string> vf2;
@@ -236,9 +242,9 @@ int main(int argc, char** argv) {
 	return 1;
       }
       std::cout << "match=" << j << std::endl;
-      std::vector<std::string> S = split(vsrc[j],sep,false);
-      std::vector<std::string> T = split(vtgt[j],sep,false);
-      std::vector<std::string> A = split(vali[j],sep,false);
+      std::vector<std::string> S = split(vsrc[j],sepwords,false);
+      std::vector<std::string> T = split(vtgt[j],sepwords,false);
+      std::vector<std::string> A = split(vali[j],sepwords,false);
       if (verbose) {
 	std::cout << "S: " << vsrc[j] << std::endl;
 	std::cout << "T: " << vtgt[j] << std::endl;
@@ -255,8 +261,8 @@ int main(int argc, char** argv) {
 	  else vf2.push_back("S");
 	}
       }
-      vf1.push_back("@");
-      vf2.push_back("@");
+      vf1.push_back(sepsents);
+      vf2.push_back(sepsents);
       for (size_t i=0; i<T.size(); i++){
 	vf1.push_back(T[i]);
 	if (embedding) vf2.push_back("E");
