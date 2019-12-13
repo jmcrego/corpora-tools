@@ -112,16 +112,21 @@ void related(std::vector<std::string> X, std::vector<std::string> S, std::vector
 
 void usage(std::string name){
   std::cerr << "usage: " << name << " -o FILE -s FILE -t FILE -a FILE -tst FILE -match FILE [-col INT] [-sep STRING] [-v]" << std::endl;
-  std::cerr << "   -o     FILE : output file" << std::endl;
-  std::cerr << "   -s     FILE : train src file" << std::endl;
-  std::cerr << "   -t     FILE : train tgt file" << std::endl;
-  std::cerr << "   -a     FILE : train ali file" << std::endl;
-  std::cerr << "   -tst   FILE : test source file" << std::endl;
-  std::cerr << "   -match FILE : test match file" << std::endl;
-  std::cerr << "   -col    INT : column where match index is found (default 0)" << std::endl;
-  std::cerr << "   -embedding  : do not perform alignments" << std::endl;
-  std::cerr << "   -sep STRING : token used to mark sentence boundary (default ‖)" << std::endl;
-  std::cerr << "   -v          : verbose output" << std::endl;
+  std::cerr << "   -o      FILE : output file" << std::endl;
+  std::cerr << "   -s      FILE : train src file" << std::endl;
+  std::cerr << "   -t      FILE : train tgt file" << std::endl;
+  std::cerr << "   -a      FILE : train ali file" << std::endl;
+  std::cerr << "   -tst    FILE : test source file" << std::endl;
+  std::cerr << "   -match  FILE : test match file" << std::endl;
+  std::cerr << "   -col     INT : column where match index is found (default 0)" << std::endl;
+  std::cerr << "   -embedding   : do not perform alignments" << std::endl;
+  std::cerr << "   -sep  STRING : token used to mark sentence boundary (default ‖)" << std::endl;
+  std::cerr << "   -tagS STRING : replace tag S by STRING" << std::endl;
+  std::cerr << "   -tagC STRING : replace tag C by STRING" << std::endl;
+  std::cerr << "   -tagT STRING : replace tag T by STRING" << std::endl;
+  std::cerr << "   -tagU STRING : replace tag U by STRING" << std::endl;
+  std::cerr << "   -tagE STRING : replace tag E by STRING" << std::endl;
+  std::cerr << "   -v           : verbose output" << std::endl;
   std::cerr << std::endl;
   std::cerr << "Tags used:" << std::endl;
   std::cerr << "S: source words without related target (to be freely translated)" << std::endl;
@@ -162,6 +167,11 @@ int main(int argc, char** argv) {
   std::string sepwords = " ";
   std::string sepsents = "‖";
   bool embedding = false;
+  std::string tagS = "S";
+  std::string tagC = "C";
+  std::string tagT = "T";
+  std::string tagU = "U";
+  std::string tagE = "E";
   size_t col = 0;
   for (size_t i = 1; i < argc; i++){
     std::string tok = argv[i];
@@ -173,6 +183,11 @@ int main(int argc, char** argv) {
     else if (tok == "-col" and i<argc) { i++; col = std::atoi(argv[i]); }
     else if (tok == "-o" and i<argc) { i++; fout = argv[i]; }
     else if (tok == "-sep" and i<argc) { i++; sepsents = argv[i]; }
+    else if (tok == "-tagS" and i<argc) { i++; tagS = argv[i]; }
+    else if (tok == "-tagC" and i<argc) { i++; tagC = argv[i]; }
+    else if (tok == "-tagT" and i<argc) { i++; tagT = argv[i]; }
+    else if (tok == "-tagU" and i<argc) { i++; tagU = argv[i]; }
+    else if (tok == "-tagE" and i<argc) { i++; tagE = argv[i]; }
     else if (tok == "-embedding") { embedding = true; }
     else if (tok == "-v") { verbose = true; }
     else if (tok == "-h") {
@@ -255,20 +270,20 @@ int main(int argc, char** argv) {
       if (! embedding) related(X,S,T,A,x_related,t_related,verbose);
       for (size_t i=0; i<X.size(); i++){
 	vf1.push_back(X[i]);
-	if (embedding) vf2.push_back("S");
+	if (embedding) vf2.push_back(tagS);
 	else{
-	  if (x_related[i]) vf2.push_back("C"); 
-	  else vf2.push_back("S");
+	  if (x_related[i]) vf2.push_back(tagC); 
+	  else vf2.push_back(tagS);
 	}
       }
       vf1.push_back(sepsents);
       vf2.push_back(sepsents);
       for (size_t i=0; i<T.size(); i++){
 	vf1.push_back(T[i]);
-	if (embedding) vf2.push_back("E");
+	if (embedding) vf2.push_back(tagE);
 	else{
-	  if (t_related[i]) vf2.push_back("T"); 
-	  else vf2.push_back("U");
+	  if (t_related[i]) vf2.push_back(tagT); 
+	  else vf2.push_back(tagU);
 	}
       }
     }
