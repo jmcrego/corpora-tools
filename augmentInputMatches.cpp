@@ -248,7 +248,7 @@ int main(int argc, char** argv) {
     std::vector<std::string> vf2;
     /*** there is no match ********************/
     if (cols.size() < col+1){
-      std::cout << "no match" << std::endl;
+      if (verbose) std::cout << "no match" << std::endl;
     }
     /*** there is a match ********************/
     else {
@@ -257,11 +257,11 @@ int main(int argc, char** argv) {
 	std::cerr << "error: match out of bounds!" << std::endl;
 	return 1;
       }
-      std::cout << "match=" << j << std::endl;
       std::vector<std::string> S = split(vsrc[j],sepwords,false);
       std::vector<std::string> T = split(vtgt[j],sepwords,false);
       std::vector<std::string> A = split(vali[j],sepwords,false);
       if (verbose) {
+	std::cout << "match=" << j << std::endl;
 	std::cout << "S: " << vsrc[j] << std::endl;
 	std::cout << "T: " << vtgt[j] << std::endl;
 	std::cout << "A: " << vali[j] << std::endl;
