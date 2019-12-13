@@ -131,10 +131,10 @@ void usage(std::string name){
   std::cerr << std::endl;
   std::cerr << "Tags used:" << std::endl;
   std::cerr << "S: source words without related target (to be freely translated)" << std::endl;
-  std::cerr << "C: source words with related target (to copy some target word)" << std::endl;
-  std::cerr << "T: target words with related source (within the match)" << std::endl;
-  std::cerr << "U: target words without related source (without the match)" << std::endl;
-  std::cerr << "E: target words from similar sentence using embeddings (no alignments performed)" << std::endl;
+  std::cerr << "C: source words with related target (to copy an augmented target word)" << std::endl;
+  std::cerr << "T: target words with related source (part of the match)" << std::endl;
+  std::cerr << "U: target words without related source (not in the match)" << std::endl;
+  std::cerr << "E: target words from similar sentence found using embeddings (no alignments performed)" << std::endl;
   std::cerr << "Comments:" << std::endl;
   std::cerr << "All files must be lightly tokenised (split punctuation)" << std::endl;
 
