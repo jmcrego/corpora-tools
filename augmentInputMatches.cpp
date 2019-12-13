@@ -110,6 +110,27 @@ void related(std::vector<std::string> X, std::vector<std::string> S, std::vector
   return;
 }
 
+void buildfactors(std::vector<std::string> X, std::vector<std::string> T,std::vector<bool> x_related, std::vector<bool> t_related, std::vector<std::string>& vf1, std::vector<std::string>& vf2, bool embedding, std::string tagS, std::string tagC, std::string tagT, std::string tagU, std::string tagE, std::string sepsents){
+  for (size_t i=0; i<X.size(); i++){
+    vf1.push_back(X[i]);
+    if (embedding) vf2.push_back(tagS);
+    else{
+      if (x_related[i]) vf2.push_back(tagC); 
+      else vf2.push_back(tagS);
+    }
+  }
+  vf1.push_back(sepsents);
+  vf2.push_back(sepsents);
+  for (size_t i=0; i<T.size(); i++){
+    vf1.push_back(T[i]);
+    if (embedding) vf2.push_back(tagE);
+    else{
+      if (t_related[i]) vf2.push_back(tagT); 
+      else vf2.push_back(tagU);
+    }
+  }
+  return;
+}
 
 void usage(std::string name){
   std::cerr << "usage: " << name << " -o FILE -s FILE -t FILE -a FILE -tst FILE -match FILE [-col INT] [-sep STRING] [-v]" << std::endl;
@@ -268,26 +289,9 @@ int main(int argc, char** argv) {
       std::vector<bool> x_related(X.size(),false);
       std::vector<bool> t_related(T.size(),false);
       if (! embedding) related(X,S,T,A,x_related,t_related,verbose);
-      for (size_t i=0; i<X.size(); i++){
-	vf1.push_back(X[i]);
-	if (embedding) vf2.push_back(tagS);
-	else{
-	  if (x_related[i]) vf2.push_back(tagC); 
-	  else vf2.push_back(tagS);
-	}
-      }
-      vf1.push_back(sepsents);
-      vf2.push_back(sepsents);
-      for (size_t i=0; i<T.size(); i++){
-	vf1.push_back(T[i]);
-	if (embedding) vf2.push_back(tagE);
-	else{
-	  if (t_related[i]) vf2.push_back(tagT); 
-	  else vf2.push_back(tagU);
-	}
-      }
+      buildfactors(X,T,x_related,t_related,vf1,vf2,embedding,tagS,tagC,tagT,tagU,tagE,sepsents);
     }
-    //write senetnces in corresponding files
+    /*** write sentences in corresponding files ***************/
     if (verbose) std::cout << "AUGMENTED:";
     for (size_t i=0; i<vf1.size(); i++){
       of1 << (i?" ":"") << vf1[i];
