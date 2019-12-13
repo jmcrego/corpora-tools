@@ -133,14 +133,16 @@ void buildfactors(std::vector<std::string> X, std::vector<std::string> T,std::ve
 }
 
 void usage(std::string name){
-  std::cerr << "usage: " << name << " -o FILE -s FILE -t FILE -a FILE -tst FILE -match FILE [-col INT] [-sep STRING] [-v]" << std::endl;
+  std::cerr << "usage: " << name << " -o FILE -s FILE -t FILE -a FILE -tst FILE -match FILE [-colI INT] [-colS INT] [-sep STRING] [-v]" << std::endl;
   std::cerr << "   -o      FILE : output file (FILE.f1 and FILE.f2 are created)" << std::endl;
   std::cerr << "   -s      FILE : train src file" << std::endl;
   std::cerr << "   -t      FILE : train tgt file" << std::endl;
   std::cerr << "   -a      FILE : train ali file" << std::endl;
   std::cerr << "   -tst    FILE : test source file" << std::endl;
   std::cerr << "   -match  FILE : test match file" << std::endl;
-  std::cerr << "   -col     INT : column where match index is found (default 0)" << std::endl;
+  std::cerr << "   -colI    INT : column where match index is found (default 0)" << std::endl;
+  std::cerr << "   -colS    INT : column where match score is found (default -1:not used)" << std::endl;
+  std::cerr << "   -minS  FLOAT : minimu score to consider a match (default 0.0)" << std::endl;
   std::cerr << "   -embedding   : do not perform alignments" << std::endl;
   std::cerr << "   -sep  STRING : token used to mark sentence boundary (default ‖)" << std::endl;
   std::cerr << "   -tagS STRING : replace tag S by STRING" << std::endl;
@@ -193,7 +195,9 @@ int main(int argc, char** argv) {
   std::string tagT = "T";
   std::string tagU = "U";
   std::string tagE = "E";
-  size_t col = 0;
+  size_t colI = 0;
+  int colS = -1;
+  float minS = 0.0;
   for (size_t i = 1; i < argc; i++){
     std::string tok = argv[i];
     if (tok == "-s" and i<argc) { i++; fsrc = argv[i]; }
@@ -201,7 +205,9 @@ int main(int argc, char** argv) {
     else if (tok == "-a" and i<argc) { i++; fali = argv[i]; }
     else if (tok == "-tst" and i<argc) { i++; ftst = argv[i]; }
     else if (tok == "-match" and i<argc) { i++; fmatch = argv[i]; }
-    else if (tok == "-col" and i<argc) { i++; col = std::atoi(argv[i]); }
+    else if (tok == "-colI" and i<argc) { i++; colI = std::atoi(argv[i]); }
+    else if (tok == "-colS" and i<argc) { i++; colS = std::atoi(argv[i]); }
+    else if (tok == "-minS" and i<argc) { i++; minS = std::atof(argv[i]); }
     else if (tok == "-o" and i<argc) { i++; fout = argv[i]; }
     else if (tok == "-sep" and i<argc) { i++; sepsents = argv[i]; }
     else if (tok == "-tagS" and i<argc) { i++; tagS = argv[i]; }
@@ -267,29 +273,38 @@ int main(int argc, char** argv) {
     std::vector<std::string> vf1;
     std::vector<std::string> vf2;
     /*** there is no match ********************/
-    if (cols.size() < col+1){
+    if (cols.size() < colI+1){
       if (verbose) std::cout << "no match" << std::endl;
     }
     /*** there is a match ********************/
     else {
-      size_t j = std::atoi(cols[col].c_str()) - 1;
+      size_t j = std::atoi(cols[colI].c_str()) - 1;
       if (j >= vsrc.size()){
 	std::cerr << "error: match out of bounds!" << std::endl;
 	return 1;
       }
-      std::vector<std::string> S = split(vsrc[j],sepwords,false);
-      std::vector<std::string> T = split(vtgt[j],sepwords,false);
-      std::vector<std::string> A = split(vali[j],sepwords,false);
-      if (verbose) {
-	std::cout << "match=" << j << std::endl;
-	std::cout << "S: " << vsrc[j] << std::endl;
-	std::cout << "T: " << vtgt[j] << std::endl;
-	std::cout << "A: " << vali[j] << std::endl;
+      float score = 9999.0; //highest score if it is not given in file
+      if (colS >= 0){
+	score = std::atof(cols[colS].c_str());
       }
-      std::vector<bool> x_related(X.size(),false);
-      std::vector<bool> t_related(T.size(),false);
-      if (! embedding) related(X,S,T,A,x_related,t_related,verbose);
-      buildfactors(X,T,x_related,t_related,vf1,vf2,embedding,tagS,tagC,tagT,tagU,tagE,sepsents);
+      if (score >= minS){
+	std::vector<std::string> S = split(vsrc[j],sepwords,false);
+	std::vector<std::string> T = split(vtgt[j],sepwords,false);
+	std::vector<std::string> A = split(vali[j],sepwords,false);
+	if (verbose) {
+	  std::cout << "match=" << j << std::endl;
+	  std::cout << "S: " << vsrc[j] << std::endl;
+	  std::cout << "T: " << vtgt[j] << std::endl;
+	  std::cout << "A: " << vali[j] << std::endl;
+	}
+	std::vector<bool> x_related(X.size(),false);
+	std::vector<bool> t_related(T.size(),false);
+	if (! embedding) related(X,S,T,A,x_related,t_related,verbose);
+	buildfactors(X,T,x_related,t_related,vf1,vf2,embedding,tagS,tagC,tagT,tagU,tagE,sepsents);
+      }
+      else{
+	if (verbose) std::cout << "low match" << std::endl;
+      }
     }
     /*** write sentences in corresponding files ***************/
     if (verbose) std::cout << "AUGMENTED:";
