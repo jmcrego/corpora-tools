@@ -113,7 +113,7 @@ void related(std::vector<std::string> X, std::vector<std::string> S, std::vector
 
 void usage(std::string name){
   std::cerr << "usage: " << name << " -o FILE -s FILE -t FILE -a FILE -tst FILE -match FILE [-col INT] [-sep STRING] [-v]" << std::endl;
-  std::cerr << "   -o      FILE : output file" << std::endl;
+  std::cerr << "   -o      FILE : output file (FILE.f1 and FILE.f2 are created)" << std::endl;
   std::cerr << "   -s      FILE : train src file" << std::endl;
   std::cerr << "   -t      FILE : train tgt file" << std::endl;
   std::cerr << "   -a      FILE : train ali file" << std::endl;
