@@ -48,7 +48,7 @@ std::vector<std::pair<size_t,size_t> > LCS(std::vector<std::string> X, std::vect
   }
   if (verbose){
     std::cout << "lcs";
-    for (size_t i=0; i<lcs_xy.size(); i++) std::cout << " (" << lcs_xy[i].first << " " << lcs_xy[i].second << ")" << std::endl;
+    for (size_t i=0; i<lcs_xy.size(); i++) std::cout << " (" << lcs_xy[i].first << "," << lcs_xy[i].second << ")";
     std::cout << std::endl;
   }
   return lcs_xy;
@@ -67,7 +67,7 @@ std::vector<std::pair<size_t,size_t> > ALI(std::vector<std::string> A, bool verb
   }
   if (verbose){
     std::cout << "ali";
-    for (size_t i=0; i<ali_xy.size(); i++) std::cout << " (" << ali_xy[i].first << " " << ali_xy[i].second << ")" << std::endl;
+    for (size_t i=0; i<ali_xy.size(); i++) std::cout << " (" << ali_xy[i].first << "," << ali_xy[i].second << ")";
     std::cout << std::endl;
   }
   return ali_xy;
