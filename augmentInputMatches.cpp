@@ -1,3 +1,4 @@
+//to compile, use: g++ augmentInputMatches.cpp -o augmentInputMatches
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
