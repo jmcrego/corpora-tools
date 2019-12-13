@@ -39,13 +39,17 @@ std::vector<std::pair<size_t,size_t> > LCS(std::vector<std::string> X, std::vect
     // if same, part of the result
     if (X[x-1] == Y[y-1]) {
       lcs_xy.insert(lcs_xy.begin(),std::make_pair(x-1,y-1));
-      if (verbose) std::cout << "lcs " << x-1 << " " << y-1 << std::endl;
       x--;
       y--;
     }
     // If not same, then find the larger of two and go in the direction of larger value
     else if (L[x-1][y] > L[x][y-1]) x--;
     else y--;
+  }
+  if (verbose){
+    std::cout << "lcs";
+    for (size_t i=0; i<lcs_xy.size(); i++) std::cout << " (" << lcs_xy[i].first << " " << lcs_xy[i].second << ")" << std::endl;
+    std::cout << std::endl;
   }
   return lcs_xy;
 }
@@ -60,7 +64,11 @@ std::vector<std::pair<size_t,size_t> > ALI(std::vector<std::string> A, bool verb
       exit(1);
     }
     ali_xy.push_back(std::make_pair(std::atoi(st[0].c_str()),std::atoi(st[1].c_str())));
-    if (verbose) std::cout << "ali " << st[0] << " " << st[1] << std::endl;
+  }
+  if (verbose){
+    std::cout << "ali";
+    for (size_t i=0; i<ali_xy.size(); i++) std::cout << " (" << ali_xy[i].first << " " << ali_xy[i].second << ")" << std::endl;
+    std::cout << std::endl;
   }
   return ali_xy;
 }
