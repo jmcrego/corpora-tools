@@ -111,22 +111,23 @@ void related(std::vector<std::string> X, std::vector<std::string> S, std::vector
 
 
 void usage(std::string name){
-  std::cerr << "usage: " << name << " -s FILE -t FILE -a FILE -tst FILE -match FILE -tag STRING [-sep STRING]" << std::endl;
+  std::cerr << "usage: " << name << " -o FILE -s FILE -t FILE -a FILE -tst FILE -match FILE [-col INT] -v" << std::endl;
+  std::cerr << "   -o     FILE : output file" << std::endl;
   std::cerr << "   -s     FILE : train src file" << std::endl;
   std::cerr << "   -t     FILE : train tgt file" << std::endl;
   std::cerr << "   -a     FILE : train ali file" << std::endl;
   std::cerr << "   -tst   FILE : test source file" << std::endl;
   std::cerr << "   -match FILE : test match file" << std::endl;
   std::cerr << "   -col    INT : column where match index is found (default 0)" << std::endl;
-  std::cerr << "   -tag STRING : characters to use {'S','C','T','U'} (default 'SCTU')" << std::endl;
-  std::cerr << "   -o     FILE : output file" << std::endl;
-  std::cerr << "   -sep STRING : word separator (default ' ')" << std::endl;
+  std::cerr << "   -embedding  : do not perform alignments" << std::endl;
   std::cerr << "   -v          : verbose output" << std::endl;
   std::cerr << "" << std::endl;
-  std::cerr << "'S' source words without related target (to be freely translated)" << std::endl;
-  std::cerr << "'C' source words with related target (to copy some target word)" << std::endl;
-  std::cerr << "'T' target words with related source (within the match)" << std::endl;
-  std::cerr << "'U' target words without related source (without the match)" << std::endl;
+  std::cerr << "Tags used:" << std::endl;
+  std::cerr << "S: source words without related target (to be freely translated)" << std::endl;
+  std::cerr << "C: source words with related target (to copy some target word)" << std::endl;
+  std::cerr << "T: target words with related source (within the match)" << std::endl;
+  std::cerr << "U: target words without related source (without the match)" << std::endl;
+  std::cerr << "E: target words from similar sentence using embeddings (no alignments performed)" << std::endl;
 
   return;
 }
@@ -155,19 +156,18 @@ int main(int argc, char** argv) {
   std::string fout = "";
   std::string fmatch = "";
   std::string sep = " ";
-  std::string tag = "SCTU";
+  bool embedding = false;
   size_t col = 0;
   for (size_t i = 1; i < argc; i++){
     std::string tok = argv[i];
-    if (tok == "-sep" and i<argc) { i++; sep = argv[i]; }
-    else if (tok == "-s" and i<argc) { i++; fsrc = argv[i]; }
+    if (tok == "-s" and i<argc) { i++; fsrc = argv[i]; }
     else if (tok == "-t" and i<argc) { i++; ftgt = argv[i]; }
     else if (tok == "-a" and i<argc) { i++; fali = argv[i]; }
     else if (tok == "-tst" and i<argc) { i++; ftst = argv[i]; }
     else if (tok == "-match" and i<argc) { i++; fmatch = argv[i]; }
     else if (tok == "-col" and i<argc) { i++; col = std::atoi(argv[i]); }
-    else if (tok == "-tag" and i<argc) { i++; tag = argv[i]; }
     else if (tok == "-o" and i<argc) { i++; fout = argv[i]; }
+    else if (tok == "-embedding") { embedding = true; }
     else if (tok == "-v") { verbose = true; }
     else if (tok == "-h") {
       usage(argv[0]);
@@ -193,22 +193,6 @@ int main(int argc, char** argv) {
       std::cerr << "error: output file is needed!" << std::endl;
       usage(argv[0]);
       return 1;    
-  }
-
-  bool doS = false;
-  bool doC = false;
-  bool doT = false;
-  bool doU = false;
-  for (size_t i = 0; i < tag.size(); i++){
-    if (tag[i] == 'S') doS = true;
-    else if (tag[i] == 'C') doC = true;
-    else if (tag[i] == 'T') doT = true;
-    else if (tag[i] == 'U') doU = true;
-    else {
-      std::cerr << "error: bad tag option!" << std::endl;
-      usage(argv[0]);
-      return 1;          
-    }
   }
 
   std::vector<std::string> vsrc, vtgt, vali, vtst, vmatch;
@@ -243,10 +227,6 @@ int main(int argc, char** argv) {
     /*** there is no match ********************/
     if (cols.size() < col+1){
       std::cout << "no match" << std::endl;
-      for (size_t i=0; i<X.size(); i++){
-	vf1.push_back(X[i]);
-	vf2.push_back("S");
-      }
     }
     /*** there is a match ********************/
     else {
@@ -266,16 +246,24 @@ int main(int argc, char** argv) {
       }
       std::vector<bool> x_related(X.size(),false);
       std::vector<bool> t_related(T.size(),false);
-      related(X,S,T,A,x_related,t_related,verbose);
+      if (! embedding) related(X,S,T,A,x_related,t_related,verbose);
       for (size_t i=0; i<X.size(); i++){
 	vf1.push_back(X[i]);
-	if (x_related[i]) vf2.push_back("C"); else vf2.push_back("S");
+	if (embedding) vf2.push_back("S");
+	else{
+	  if (x_related[i]) vf2.push_back("C"); 
+	  else vf2.push_back("S");
+	}
       }
       vf1.push_back("@");
       vf2.push_back("@");
       for (size_t i=0; i<T.size(); i++){
 	vf1.push_back(T[i]);
-	if (t_related[i]) vf2.push_back("T"); else vf2.push_back("U");
+	if (embedding) vf2.push_back("E");
+	else{
+	  if (t_related[i]) vf2.push_back("T"); 
+	  else vf2.push_back("U");
+	}
       }
     }
     //write senetnces in corresponding files
@@ -283,7 +271,7 @@ int main(int argc, char** argv) {
     for (size_t i=0; i<vf1.size(); i++){
       of1 << (i?" ":"") << vf1[i];
       of2 << (i?" ":"") << vf2[i];
-      if (verbose) std::cout << " " << vf1[i] << " " << vf2[i];
+      if (verbose) std::cout << " " << vf1[i] << ":" << vf2[i];
     }
     of1 << std::endl;
     of2 << std::endl;
