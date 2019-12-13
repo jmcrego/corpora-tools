@@ -234,8 +234,7 @@ int main(int argc, char** argv) {
   for (size_t i = 0; i< vtst.size(); i++){
     if (verbose){
       std::cout << "i=" << i << std::endl;
-      std::cout << "match: " << vmatch[i] << std::endl;
-      std::cout << "tst: " << vtst[i] << std::endl;
+      std::cout << "X: " << vtst[i] << std::endl;
     }
     std::vector<std::string> X = split(vtst[i],sep,false);
     std::vector<std::string> cols = split(vmatch[i],"\t",false);
@@ -243,6 +242,7 @@ int main(int argc, char** argv) {
     std::vector<std::string> vf2;
     /*** there is no match ********************/
     if (cols.size() < col+1){
+      std::cout << "no match" << std::endl;
       for (size_t i=0; i<X.size(); i++){
 	vf1.push_back(X[i]);
 	vf2.push_back("S");
@@ -255,6 +255,7 @@ int main(int argc, char** argv) {
 	std::cerr << "error: match out of bounds!" << std::endl;
 	return 1;
       }
+      std::cout << "match=" << j << std::endl;
       std::vector<std::string> S = split(vsrc[j],sep,false);
       std::vector<std::string> T = split(vtgt[j],sep,false);
       std::vector<std::string> A = split(vali[j],sep,false);
