@@ -135,9 +135,8 @@ void usage(std::string name){
   std::cerr << "T: target words with related source (within the match)" << std::endl;
   std::cerr << "U: target words without related source (without the match)" << std::endl;
   std::cerr << "E: target words from similar sentence using embeddings (no alignments performed)" << std::endl;
-  std::cerr << std::endl;
   std::cerr << "Comments:" << std::endl;
-  std::cerr << "All files are lightly tokenised (split punctuation)" << std::endl;
+  std::cerr << "All files must be lightly tokenised (split punctuation)" << std::endl;
 
   return;
 }
