@@ -269,7 +269,7 @@ This scripts works with the fuzzymatch output produced by Systran's FuzzyMatch-c
     sys.stderr.write('Read ftst={} [{}]\n'.format(ftst,len(tst)))
     if len(sim) != len(tst):
         sys.stderr.write("error: diff number of lines in input sim/tst files\n")
-        sys.exit()
+        #sys.exit()
 
     src = [line.rstrip('\n').split() for line in open(fsrc)]
     sys.stderr.write('Read fsrc={} [{}]\n'.format(fsrc,len(src)))
