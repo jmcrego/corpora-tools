@@ -66,7 +66,7 @@ void usage(std::string name){
   std::cerr << "   -colI    INT : column where match index is found (default 0)" << std::endl;
   std::cerr << "   -colS    INT : column where match score is found (default -1:not used)" << std::endl;
   std::cerr << "   -minS  FLOAT : minimu score to consider a match (default 0.0)" << std::endl;
-  std::cerr << "   -embedding   : do not perform alignments" << std::endl;
+  std::cerr << "   -embedding   : do not perform alignments (uses tag E)" << std::endl;
   std::cerr << "   -sep  STRING : token used to mark sentence boundary (default ‖)" << std::endl;
   std::cerr << "   -tagS STRING : replace tag S by STRING" << std::endl;
   std::cerr << "   -tagC STRING : replace tag C by STRING" << std::endl;
