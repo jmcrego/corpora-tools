@@ -23,20 +23,27 @@ Align::Align(std::vector<std::string> A,size_t x, size_t y){
     y2x[t].insert(s);
     ali_xy.push_back(std::make_pair(s,t));
   }
+
+  len_s = x;
+  len_t = y;
+  std::vector<std::set<size_t> > s2t = x2y;
+  std::vector<std::set<size_t> > t2s = y2x;
   return;
 }
 
-std::set<std::pair<std::set<size_t>, std::set<size_t> > > Align::Groups(bool side_is_src, bool consecutive){ 
-  std::set<std::pair<std::set<size_t>, std::set<size_t> > > groups;
-  size_t len_s = len_x;
-  size_t len_t = len_y;
-  std::vector<std::set<size_t> > s2t = x2y;
-  std::vector<std::set<size_t> > t2s = y2x;    
-  if (!side_is_src){
-    size_t len_s = len_y;
-    size_t len_t = len_x;
-    std::vector<std::set<size_t> > s2t = y2x;
-    std::vector<std::set<size_t> > t2s = x2y;    
+std::vector<std::pair<std::set<size_t>, std::set<size_t> > > Align::Groups(bool side_is_src, bool consecutive){ 
+  std::vector<std::pair<std::set<size_t>, std::set<size_t> > > groups;
+  if (side_is_src){
+    len_s = len_x;
+    len_t = len_y;
+    s2t = x2y;
+    t2s = y2x;
+  }
+  else{
+    len_t = len_x;
+    len_s = len_y;
+    t2s = x2y;
+    s2t = y2x;
   }
 
   std::set<size_t> processed_s;
@@ -63,7 +70,7 @@ std::set<std::pair<std::set<size_t>, std::set<size_t> > > Align::Groups(bool sid
       }
       processed_t.insert(*it);
     }
-    groups.insert(std::make_pair(news,newt));    
+    groups.push_back(std::make_pair(news,newt));    
   }
   //add all words t that are not processed
   for (size_t t=0; t<len_t; t++){
@@ -71,15 +78,15 @@ std::set<std::pair<std::set<size_t>, std::set<size_t> > > Align::Groups(bool sid
       std::set<size_t> news; //empty
       std::set<size_t> newt;
       newt.insert(t);
-      groups.insert(std::make_pair(news,newt));
+      groups.push_back(std::make_pair(news,newt));
     }
   }
 
   if (!side_is_src){ 
-    std::set<std::pair<std::set<size_t>, std::set<size_t> > > groups_new;   
-    for (std::set<std::pair<std::set<size_t>, std::set<size_t> > >::iterator it_groups=groups.begin(); it_groups!=groups.end(); it_groups++){
-      std::pair<std::set<size_t>, std::set<size_t> > s_t = std::make_pair((*it_groups).second,(*it_groups).first);
-      groups_new.insert(s_t);
+    std::vector<std::pair<std::set<size_t>, std::set<size_t> > > groups_new;   
+    for (size_t g=0; g<groups.size(); g++){
+      std::pair<std::set<size_t>, std::set<size_t> > s_t = std::make_pair(groups[g].second, groups[g].first);
+      groups_new.push_back(s_t);
     }
     return groups_new;
   }
@@ -90,7 +97,7 @@ void Align::aligned_to_s(std::set<size_t>& news, std::set<size_t>& newt, bool co
   size_t total = 0;
   while (true){
     for (std::set<size_t>::iterator it_s=news.begin(); it_s!=news.end(); it_s++){
-      for (std::set<size_t>::iterator it_t=x2y[*it_s].begin(); it_t!=x2y[*it_s].end(); it_t++){
+      for (std::set<size_t>::iterator it_t=s2t[*it_s].begin(); it_t!=s2t[*it_s].end(); it_t++){
 	newt.insert(*it_t);
       }
     }
@@ -98,7 +105,7 @@ void Align::aligned_to_s(std::set<size_t>& news, std::set<size_t>& newt, bool co
     total = news.size() + newt.size();
 
     for (std::set<size_t>::iterator it_t=newt.begin(); it_t!=newt.end(); it_t++){
-      for (std::set<size_t>::iterator it_s=y2x[*it_t].begin(); it_s!=y2x[*it_t].end(); it_s++){
+      for (std::set<size_t>::iterator it_s=t2s[*it_t].begin(); it_s!=t2s[*it_t].end(); it_s++){
 	news.insert(*it_s);
       }
     }

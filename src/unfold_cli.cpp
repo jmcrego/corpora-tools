@@ -74,26 +74,25 @@ int main(int argc, char** argv) {
       std::cout << "A: " << vali[i] << std::endl;
     }
     Align a(A,S.size(),T.size());
-    std::set<std::pair<std::set<size_t>, std::set<size_t> > > groups;
+    std::vector<std::pair<std::set<size_t>, std::set<size_t> > > groups;
     if (tgt_consec)
       groups = a.Groups(false,true);
     else if (src_consec)
       groups = a.Groups(true,true);
     else
       groups = a.Groups(true,false);
-    size_t g=0;
-    for (std::set<std::pair<std::set<size_t>, std::set<size_t> > >::iterator it=groups.begin(); it!=groups.end(); it++){
-      std::cout << "Group " << g << ":";
-      for (std::set<size_t>::iterator it_s=(*it).first.begin(); it_s!=(*it).first.end(); it_s++){
-	std::cout << " " << *it_s << ":" << S[*it_s];
+
+    for (size_t g=0; g<groups.size(); g++){
+      for (std::set<size_t>::iterator it_s=groups[g].first.begin(); it_s!=groups[g].first.end(); it_s++){
+	std::cout << (it_s!=groups[g].first.begin()?"___":"") << *it_s << ":" << S[*it_s];
       }
-      std::cout << " |||";
-      for (std::set<size_t>::iterator it_t=(*it).second.begin(); it_t!=(*it).second.end(); it_t++){
-	std::cout << " " << *it_t << ":" << T[*it_t];
+      std::cout << "|||";
+      for (std::set<size_t>::iterator it_t=groups[g].second.begin(); it_t!=groups[g].second.end(); it_t++){
+	std::cout << (it_t!=groups[g].second.begin()?"___":"") << *it_t << ":" << T[*it_t];
       }
-      std::cout << std::endl;
-      g++;
+      if (g<groups.size()-1) std::cout << " ";
     }
+    std::cout << std::endl;
   }
 
   return 0;
