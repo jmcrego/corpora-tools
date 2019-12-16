@@ -76,9 +76,11 @@ int main(int argc, char** argv) {
     Align a(A,S.size(),T.size());
     std::set<std::pair<std::set<size_t>, std::set<size_t> > > groups;
     if (tgt_consec)
-      groups = a.Groups_tgt(tgt_consec);
+      groups = a.Groups(false,true);
+    else if (src_consec)
+      groups = a.Groups(true,true);
     else
-      groups = a.Groups_src(src_consec);
+      groups = a.Groups(true,false);
     size_t g=0;
     for (std::set<std::pair<std::set<size_t>, std::set<size_t> > >::iterator it=groups.begin(); it!=groups.end(); it++){
       std::cout << "Group " << g << ":";
