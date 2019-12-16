@@ -26,3 +26,8 @@ Align::Align(std::vector<std::string> A,size_t x, size_t y){
   return;
 }
 
+std::vector<std::pair<std::set<size_t>, std::set<size_t> > > Group(bool src_or_tgt){
+  std::vector<std::pair<std::set<size_t>, std::set<size_t> > > v;
+
+  return v;
+}
