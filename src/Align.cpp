@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <set>
+#include <cstdlib>
 #include "Align.h"
 
 ALI::ALI(std::vector<std::string> A,size_t x, size_t y){
