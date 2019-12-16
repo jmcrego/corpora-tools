@@ -9,7 +9,7 @@
 
 void related(std::vector<std::string> X, std::vector<std::string> S, std::vector<std::string> T, std::vector<std::string> A, std::vector<bool>& x_related, std::vector<bool>& t_related, bool verbose) {
   LCS lcs(X,S);
-  ALI ali(A,S.size(),T.size());
+  Align ali(A,S.size(),T.size());
   std::vector<std::set<size_t> > s2x = lcs.y2x;
   std::vector<std::set<size_t> > t2s = ali.y2x;
 
