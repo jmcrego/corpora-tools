@@ -6,9 +6,11 @@
 #include "Align.h"
 
 ALI::ALI(std::vector<std::string> A,size_t x, size_t y){
+  len_x = x;
+  len_y = y;
   std::set<size_t> myset;
-  for (size_t i=0; i<x; i++) x2y.push_back(myset);
-  for (size_t i=0; i<y; i++) y2x.push_back(myset);
+  for (size_t i=0; i<len_x; i++) x2y.push_back(myset);
+  for (size_t i=0; i<len_y; i++) y2x.push_back(myset);
 
   for (size_t i=0; i<A.size(); i++){
     size_t pos = A[i].find('-');
