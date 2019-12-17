@@ -263,7 +263,9 @@ int main(int argc, char** argv) {
 	std::vector<bool> x_related(X.size(),false);
 	std::vector<bool> t_related(T.size(),false);
 	if (tagC or tagU) related(X,S,T,A,x_related,t_related,verbose);
-	if (ratio_tmatch(t_related,T,R) >= tmatch) buildfactors(X,T,x_related,t_related,vf1,vf2,tagC,tagU,tagE,sepsents);
+	float ratio = ratio_tmatch(t_related,T,R);
+	if (verbose) std::cout << "ratio=" << ratio << std::endl;
+	if (ratio >= tmatch) buildfactors(X,T,x_related,t_related,vf1,vf2,tagC,tagU,tagE,sepsents);
       }
       else{
 	if (verbose) std::cout << "low match" << std::endl;
