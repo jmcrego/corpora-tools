@@ -208,6 +208,8 @@ int main(int argc, char** argv) {
     }
   }
 
+  std::cout << "vref.size=" << vref.size() << std::endl;"
+
   std::string tags=".tmatch"+str_tmatch+".S";
   if (tagE){ //tags: ".SE"
     tags += "E";
