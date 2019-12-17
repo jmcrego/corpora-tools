@@ -65,20 +65,21 @@ void buildfactors(std::vector<std::string> X, std::vector<std::string> T,std::ve
 
 void usage(std::string name){
   std::cerr << "usage: " << name << " -o FILE -s FILE -t FILE -a FILE -tst FILE -match FILE [-colI INT] [-colS INT] [-tagC] [-tagU] [-tagE] [-sep STRING] [-v]" << std::endl;
-  std::cerr << "   -o      FILE : output file (FILE.f1 and FILE.f2 are created)" << std::endl;
-  std::cerr << "   -s      FILE : train src file" << std::endl;
-  std::cerr << "   -t      FILE : train tgt file" << std::endl;
-  std::cerr << "   -a      FILE : train ali file" << std::endl;
-  std::cerr << "   -tst    FILE : test source file" << std::endl;
-  std::cerr << "   -match  FILE : test match file" << std::endl;
-  std::cerr << "   -colI    INT : column where match index is found (default 0)" << std::endl;
-  std::cerr << "   -colS    INT : column where match score is found (default -1:not used)" << std::endl;
-  std::cerr << "   -minS  FLOAT : minimu score to consider a match (default 0.0)" << std::endl;
-  std::cerr << "   -sep  STRING : token used to mark sentence boundary (default ‖)" << std::endl;
-  std::cerr << "   -tagC        : use tag C to mark source words appearing in match (copy)" << std::endl;
-  std::cerr << "   -tagU        : use tag U to mark target words not present in match (unrelated)" << std::endl;
-  std::cerr << "   -tagE        : use tag E to mark all target words from embedding match (embedding)" << std::endl;
-  std::cerr << "   -v           : verbose output" << std::endl;
+  std::cerr << "   -o       FILE : output file (FILE.f1 and FILE.f2 are created)" << std::endl;
+  std::cerr << "   -s       FILE : train src file" << std::endl;
+  std::cerr << "   -t       FILE : train tgt file" << std::endl;
+  std::cerr << "   -a       FILE : train ali file" << std::endl;
+  std::cerr << "   -tst     FILE : test source file" << std::endl;
+  std::cerr << "   -match   FILE : test match file" << std::endl;
+  std::cerr << "   -colI     INT : column where match index is found (default 0)" << std::endl;
+  std::cerr << "   -colS     INT : column where match score is found (default -1:not used)" << std::endl;
+  std::cerr << "   -minS   FLOAT : minimu score to consider a match (default 0.0)" << std::endl;
+  std::cerr << "   -sep   STRING : token used to mark sentence boundary (default ‖)" << std::endl;
+  std::cerr << "   -tagC         : use tag C to mark source words appearing in match (copy)" << std::endl;
+  std::cerr << "   -tagU         : use tag U to mark target words not present in match (unrelated)" << std::endl;
+  std::cerr << "   -tagE         : use tag E to mark all target words from embedding match (embedding)" << std::endl;
+  std::cerr << "   -tmatch FLOAT : keep match if the FLOAT fraction of tgt words appear in reference (default 0.0:not used)" << std::endl;
+  std::cerr << "   -v            : verbose output" << std::endl;
   std::cerr << std::endl;
   std::cerr << "Comments:" << std::endl;
   std::cerr << "when -tagE is used -tagC and -tagU are not used" << std::endl;
@@ -103,6 +104,7 @@ int main(int argc, char** argv) {
   size_t colI = 0;
   int colS = -1;
   float minS = 0.0;
+  std::string str_tmatch = "0.0";
   for (size_t i = 1; i < argc; i++){
     std::string tok = argv[i];
     if (tok == "-s" and i<argc) { i++; fsrc = argv[i]; }
@@ -118,6 +120,7 @@ int main(int argc, char** argv) {
     else if (tok == "-tagC") { tagC = true; }
     else if (tok == "-tagU") { tagU = true; }
     else if (tok == "-tagE") { tagE = true; }
+    else if (tok == "-tmatch" and i<argc) { i++; str_tmatch = argv[i]; }
     else if (tok == "-v") { verbose = true; }
     else if (tok == "-h") {
       usage(argv[0]);
@@ -144,7 +147,18 @@ int main(int argc, char** argv) {
       usage(argv[0]);
       return 1;    
   }
+  float tmatch = std::atof(str_tmatch.c_str()); 
+  if (tmatch > 1.0){
+      std::cerr << "error: -tmatch must be in range [0.0, 1.0]" << std::endl;
+      usage(argv[0]);
+      return 1;    
+  }
 
+  if (tagE){
+    tagC = false;
+    tagU = false;
+  }
+  
   std::vector<std::string> vsrc, vtgt, vali, vtst, vmatch;
   if (! load(fsrc,vsrc)) return 1;
   if (! load(ftgt,vtgt)) return 1;
@@ -160,12 +174,7 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  if (tagE){
-    tagC = false;
-    tagU = false;
-  }
-  
-  std::string tags=".S";
+  std::string tags=".tmatch"+str_tmatch+".S";
   if (tagE){ //tags: ".SE"
     tags += "E";
   }
