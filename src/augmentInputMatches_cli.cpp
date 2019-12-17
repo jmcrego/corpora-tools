@@ -63,14 +63,14 @@ void buildfactors(std::vector<std::string> X, std::vector<std::string> T,std::ve
   return;
 }
 
-float ratio_tmatch(std::vector<bool> t_related, std::vector<std::string> T, std::vector<std::string> R){
+float ratio_tmatch(std::vector<bool> t_related, std::vector<std::string> T, std::vector<std::string> R, bool tagU){
   if (R.size() == 0) return 0.0; //there are no R words (wont be filtered out)
   std::set<std::string> setR;
   for (size_t i=0; i<R.size(); i++) setR.insert(R[i]);
   size_t total = 0;
   size_t in_match = 0;
   for (size_t i=0; i<T.size(); i++){
-    if (t_related[i]){
+    if (!tagU or t_related[i]){ //if !tagU all words are considered related (marked with T)
       total += 1;
       if (setR.find(T[i]) != setR.end()) in_match += 1;
     }
@@ -99,8 +99,8 @@ void usage(std::string name){
   std::cerr << "   -v            : verbose output" << std::endl;
   std::cerr << std::endl;
   std::cerr << "Comments:" << std::endl;
-  std::cerr << "when -tagE is used -tagC and -tagU are not used" << std::endl;
-  std::cerr << "-ratio is only used with -tagU" << std::endl;
+  std::cerr << "When option -tagE is used -tagC and -tagU are deactivated" << std::endl;
+  std::cerr << "Option -ratio is not used with option -tagE" << std::endl;
   std::cerr << "All files must be lightly tokenised (split punctuation)" << std::endl;
 
   return;
@@ -178,8 +178,8 @@ int main(int argc, char** argv) {
       usage(argv[0]);
       return 1;    
   }
-  if (ratio > 0.0 && !tagU){
-      std::cerr << "error: -ratio must be used with -tagU option" << std::endl;
+  if (ratio > 0.0 && tagE){
+      std::cerr << "error: -ratio cannot be used with -tagE option" << std::endl;
       usage(argv[0]);
       return 1;    
   }
@@ -271,10 +271,8 @@ int main(int argc, char** argv) {
 	float r=1.0;
 	if (tagC or tagU){
 	  related(X,S,T,A,x_related,t_related,verbose);
-	  if (tagU){
-	    r = ratio_tmatch(t_related,T,R);
-	    if (verbose) std::cout << "ratio=" << r << std::endl;
-	  }
+	  r = ratio_tmatch(t_related,T,R,tagU);
+	  if (verbose) std::cout << "ratio=" << r << std::endl;
 	}
 	if (r >= ratio) buildfactors(X,T,x_related,t_related,vf1,vf2,tagC,tagU,tagE,sepsents);
       }
