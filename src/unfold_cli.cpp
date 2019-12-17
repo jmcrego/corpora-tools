@@ -18,6 +18,9 @@ void usage(std::string name){
 }
 
 int main(int argc, char** argv) {
+  std::string space="＿";
+  std::string idwrd="．";
+  std::string trad="‖";
   std::string sepwords = " ";
   bool verbose = false;
   bool src_consec = false;
@@ -84,11 +87,11 @@ int main(int argc, char** argv) {
 
     for (size_t g=0; g<groups.size(); g++){
       for (std::set<size_t>::iterator it_s=groups[g].first.begin(); it_s!=groups[g].first.end(); it_s++){
-	std::cout << (it_s!=groups[g].first.begin()?"＿":"") << *it_s << "：" << S[*it_s];
+	std::cout << (it_s!=groups[g].first.begin()?space:"") << *it_s << idwrd << S[*it_s];
       }
-      std::cout << "‖";
+      std::cout << trad;
       for (std::set<size_t>::iterator it_t=groups[g].second.begin(); it_t!=groups[g].second.end(); it_t++){
-	std::cout << (it_t!=groups[g].second.begin()?"＿":"") << *it_t << "：" << T[*it_t];
+	std::cout << (it_t!=groups[g].second.begin()?space:"") << *it_t << idwrd << T[*it_t];
       }
       if (g<groups.size()-1) std::cout << " ";
     }
