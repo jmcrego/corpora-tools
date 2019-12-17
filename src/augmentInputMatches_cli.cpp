@@ -39,15 +39,15 @@ void buildfactors(std::vector<std::string> X, std::vector<std::string> T,std::ve
   std::string strC = "S";
   std::string strU = "T";
   std::string strE = "E";
-  if (tagC) std::string strC = "C";
-  if (tagU) std::string strU = "U";
+  if (tagC) strC = "C";
+  if (tagU) strU = "U";
 
   for (size_t i=0; i<X.size(); i++){
     vf1.push_back(X[i]);
     if (tagE) vf2.push_back(strS);
     else{
-      if (x_related[i]) vf2.push_back(strC); 
-      else vf2.push_back(strS);
+      if (x_related[i]) vf2.push_back(strC); //copy
+      else vf2.push_back(strS); 
     }
   }
   vf1.push_back(sepsents);
