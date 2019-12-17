@@ -175,7 +175,7 @@ int main(int argc, char** argv) {
       usage(argv[0]);
       return 1;    
   }
-  if (tmatch > 0.0 & fref.size() == 0){
+  if (tmatch > 0.0 && fref.size() == 0){
       std::cerr << "error: -tmatch must be used with -ref option" << std::endl;
       usage(argv[0]);
       return 1;    
