@@ -76,7 +76,7 @@ float ratio_tmatch(std::vector<bool> t_related, std::vector<std::string> T, std:
     }
   }
   if (total == 0) return 0.0; //all T words are no related (wont be filtered out)
-  return (float)in_match/(float)total; //ratio is lower
+  return in_match/(float)total; //ratio is lower
 }
 
 void usage(std::string name){
