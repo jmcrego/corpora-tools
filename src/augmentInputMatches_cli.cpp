@@ -63,13 +63,30 @@ void buildfactors(std::vector<std::string> X, std::vector<std::string> T,std::ve
   return;
 }
 
+bool ratio_tmatch(std::vector<bool> t_related, std::vector<std::string> T, std::vector<std::string> R, float tmatch){
+  if (R.size() == 0) return true;
+  std::set<std::string> setR;
+  for (size_t i=0; i<R.size(); i++) setR.insert(R[i]);
+  size_t total = 0;
+  size_t in_match = 0;
+  for (size_t i=0; i<T.size(); i++){
+    if (t_related[i]){
+      total += 1;
+      if (setR.find(T[i]) != setR.end()) in_match += 1;
+    }
+  }
+  if (total == 0 or (float)in_match/(float)total < tmatch) return false; //either all T words are no related or ratio is lower
+  return true;
+}
+
 void usage(std::string name){
-  std::cerr << "usage: " << name << " -o FILE -s FILE -t FILE -a FILE -tst FILE -match FILE [-colI INT] [-colS INT] [-tagC] [-tagU] [-tagE] [-sep STRING] [-v]" << std::endl;
+  std::cerr << "usage: " << name << " -o FILE -s FILE -t FILE -a FILE -tst FILE [-ref FILE] -match FILE [-colI INT] [-colS INT] [-tagC] [-tagU] [-tagE] [-sep STRING] [-v]" << std::endl;
   std::cerr << "   -o       FILE : output file (FILE.f1 and FILE.f2 are created)" << std::endl;
   std::cerr << "   -s       FILE : train src file" << std::endl;
   std::cerr << "   -t       FILE : train tgt file" << std::endl;
   std::cerr << "   -a       FILE : train ali file" << std::endl;
   std::cerr << "   -tst     FILE : test source file" << std::endl;
+  std::cerr << "   -ref     FILE : test reference file" << std::endl;
   std::cerr << "   -match   FILE : test match file" << std::endl;
   std::cerr << "   -colI     INT : column where match index is found (default 0)" << std::endl;
   std::cerr << "   -colS     INT : column where match score is found (default -1:not used)" << std::endl;
@@ -94,6 +111,7 @@ int main(int argc, char** argv) {
   std::string ftgt = "";
   std::string fali = "";
   std::string ftst = "";
+  std::string fref = "";
   std::string fout = "";
   std::string fmatch = "";
   std::string sepwords = " ";
@@ -111,6 +129,7 @@ int main(int argc, char** argv) {
     else if (tok == "-t" and i<argc) { i++; ftgt = argv[i]; }
     else if (tok == "-a" and i<argc) { i++; fali = argv[i]; }
     else if (tok == "-tst" and i<argc) { i++; ftst = argv[i]; }
+    else if (tok == "-ref" and i<argc) { i++; fref = argv[i]; }
     else if (tok == "-match" and i<argc) { i++; fmatch = argv[i]; }
     else if (tok == "-colI" and i<argc) { i++; colI = std::atoi(argv[i]); }
     else if (tok == "-colS" and i<argc) { i++; colS = std::atoi(argv[i]); }
@@ -153,13 +172,18 @@ int main(int argc, char** argv) {
       usage(argv[0]);
       return 1;    
   }
+  if (tmatch > 0.0 & fref.size() == 0){
+      std::cerr << "error: -tmatch must be used with -ref option" << std::endl;
+      usage(argv[0]);
+      return 1;    
+  }
 
   if (tagE){
     tagC = false;
     tagU = false;
   }
   
-  std::vector<std::string> vsrc, vtgt, vali, vtst, vmatch;
+  std::vector<std::string> vsrc, vtgt, vali, vtst, vref, vmatch;
   if (! load(fsrc,vsrc)) return 1;
   if (! load(ftgt,vtgt)) return 1;
   if (! load(fali,vali)) return 1;
@@ -170,8 +194,15 @@ int main(int argc, char** argv) {
   if (! load(ftst,vtst)) return 1;
   if (! load(fmatch,vmatch)) return 1;
   if (vtst.size() != vmatch.size()){
-    std::cerr << "error: test/match files with different sizes!" << std::endl;
+    std::cerr << "error: tst/match files with different sizes!" << std::endl;
     return 1;
+  }
+  if (fref.size() > 0){
+    if (! load(fref,vref)) return 1;
+    if (vtst.size() != vref.size()){
+      std::cerr << "error: tst/ref files with different sizes!" << std::endl;
+      return 1;
+    }
   }
 
   std::string tags=".tmatch"+str_tmatch+".S";
@@ -218,16 +249,19 @@ int main(int argc, char** argv) {
 	std::vector<std::string> S = split(vsrc[j],sepwords,false);
 	std::vector<std::string> T = split(vtgt[j],sepwords,false);
 	std::vector<std::string> A = split(vali[j],sepwords,false);
+	std::vector<std::string> R;
+	if (vref.size()) R = split(vref[j],sepwords,false);
 	if (verbose) {
 	  std::cout << "match=" << j << std::endl;
 	  std::cout << "S: " << vsrc[j] << std::endl;
 	  std::cout << "T: " << vtgt[j] << std::endl;
+	  if (vref.size()) std::cout << "R: " << vref[j] << std::endl;
 	  std::cout << "A: " << vali[j] << std::endl;
 	}
 	std::vector<bool> x_related(X.size(),false);
 	std::vector<bool> t_related(T.size(),false);
 	if (tagC or tagU) related(X,S,T,A,x_related,t_related,verbose);
-	buildfactors(X,T,x_related,t_related,vf1,vf2,tagC,tagU,tagE,sepsents);
+	if (ratio_tmatch(t_related,T,R,tmatch)) buildfactors(X,T,x_related,t_related,vf1,vf2,tagC,tagU,tagE,sepsents);
       }
       else{
 	if (verbose) std::cout << "low match" << std::endl;
