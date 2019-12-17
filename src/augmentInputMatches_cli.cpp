@@ -71,7 +71,12 @@ float ratio_tmatch(std::vector<bool> t_related, std::vector<std::string> T, std:
   for (size_t i=0; i<T.size(); i++){
     if (!tagU or t_related[i]){ //if !tagU all words are considered related (marked with T)
       total += 1;
-      if (setR.find(T[i]) != setR.end()) in_match += 1;
+      std::cout << T[i];
+      if (setR.find(T[i]) != setR.end()){
+	in_match += 1;
+	std::cout << " appear!";
+      }
+      std::cout << std::endl;
     }
   }
   if (total == 0) return 0.0; //all T words are no related (wont be filtered out)
