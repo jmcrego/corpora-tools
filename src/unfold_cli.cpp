@@ -12,8 +12,8 @@ void usage(std::string name){
   std::cerr << "   -s      FILE : train src file" << std::endl;
   std::cerr << "   -t      FILE : train tgt file" << std::endl;
   std::cerr << "   -a      FILE : train tgt file" << std::endl;
-  std::cerr << "   -src_consec  : src unit words must be consecutive" << std::endl;
-  std::cerr << "   -tgt_consec  : tgt unit words must be consecutive" << std::endl;
+  std::cerr << "   -src_consec  : src words must be consecutive" << std::endl;
+  std::cerr << "   -tgt_consec  : tgt words must be consecutive" << std::endl;
   return;
 }
 
