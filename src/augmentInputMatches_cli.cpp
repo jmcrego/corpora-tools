@@ -256,13 +256,13 @@ int main(int argc, char** argv) {
 	std::vector<std::string> A = split(vali[j],sepwords,false);
 	std::vector<std::string> R;
 	std::cout << "A" << std::endl;
-	if (vref.size()) R = split(vref[j],sepwords,false);
+	if (vref.size()) R = split(vref[i],sepwords,false);
 	std::cout << "B" << std::endl;
 	if (verbose) {
 	  std::cout << "match=" << j << std::endl;
 	  std::cout << "S: " << vsrc[j] << std::endl;
 	  std::cout << "T: " << vtgt[j] << std::endl;
-	  if (vref.size()) std::cout << "R: " << vref[j] << std::endl;
+	  if (vref.size()) std::cout << "R: " << vref[i] << std::endl;
 	  std::cout << "A: " << vali[j] << std::endl;
 	}
 	std::vector<bool> x_related(X.size(),false);
