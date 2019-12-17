@@ -63,7 +63,7 @@ void buildfactors(std::vector<std::string> X, std::vector<std::string> T,std::ve
   return;
 }
 
-float ratio_tmatch(std::vector<bool> t_related, std::vector<std::string> T, std::vector<std::string> R, bool tagU){
+float ratio_tmatch(std::vector<bool> t_related, std::vector<std::string> T, std::vector<std::string> R, bool tagU, bool verbose){
   std::set<std::string> setR;
   for (size_t i=0; i<R.size(); i++) setR.insert(R[i]);
   size_t total = 0;
@@ -71,12 +71,8 @@ float ratio_tmatch(std::vector<bool> t_related, std::vector<std::string> T, std:
   for (size_t i=0; i<T.size(); i++){
     if (!tagU or t_related[i]){ //if !tagU all words are considered related (marked with T)
       total += 1;
-      std::cout << T[i];
-      if (setR.find(T[i]) != setR.end()){
-	in_match += 1;
-	std::cout << " appear!";
-      }
-      std::cout << std::endl;
+      if (setR.find(T[i]) != setR.end()) in_match += 1;
+      if (verbose) std::cout << T[i] << in_match << "/" << total << std::endl;
     }
   }
   if (total == 0) return 0.0; //all T words are no related (wont be filtered out)
@@ -278,7 +274,7 @@ int main(int argc, char** argv) {
 	}
 	float r=1.0;
 	if (!tagE && R.size()){
-	  r = ratio_tmatch(t_related,T,R,tagU);
+	  r = ratio_tmatch(t_related,T,R,tagU,verbose);
 	  if (verbose) std::cout << "ratio=" << r << std::endl;
 	}
 	if (r >= ratio) buildfactors(X,T,x_related,t_related,vf1,vf2,tagC,tagU,tagE,sepsents);
