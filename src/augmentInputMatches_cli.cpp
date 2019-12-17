@@ -64,7 +64,6 @@ void buildfactors(std::vector<std::string> X, std::vector<std::string> T,std::ve
 }
 
 bool ratio_tmatch(std::vector<bool> t_related, std::vector<std::string> T, std::vector<std::string> R, float tmatch){
-  std::cout << "begin reatio" << std::endl;
   if (R.size() == 0) return true;
   std::set<std::string> setR;
   for (size_t i=0; i<R.size(); i++) setR.insert(R[i]);
@@ -76,7 +75,6 @@ bool ratio_tmatch(std::vector<bool> t_related, std::vector<std::string> T, std::
       if (setR.find(T[i]) != setR.end()) in_match += 1;
     }
   }
-  std::cout << "end reatio" << std::endl;
   if (total == 0) return true; //all T words are no related
   if ((float)in_match/(float)total < tmatch) return false; //ratio is lower
   return true;
@@ -255,9 +253,7 @@ int main(int argc, char** argv) {
 	std::vector<std::string> T = split(vtgt[j],sepwords,false);
 	std::vector<std::string> A = split(vali[j],sepwords,false);
 	std::vector<std::string> R;
-	std::cout << "A" << std::endl;
 	if (vref.size()) R = split(vref[i],sepwords,false);
-	std::cout << "B" << std::endl;
 	if (verbose) {
 	  std::cout << "match=" << j << std::endl;
 	  std::cout << "S: " << vsrc[j] << std::endl;
