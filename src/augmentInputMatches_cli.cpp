@@ -33,30 +33,38 @@ void related(std::vector<std::string> X, std::vector<std::string> S, std::vector
   return;
 }
 
-void buildfactors(std::vector<std::string> X, std::vector<std::string> T,std::vector<bool> x_related, std::vector<bool> t_related, std::vector<std::string>& vf1, std::vector<std::string>& vf2, bool embedding, std::string tagS, std::string tagC, std::string tagT, std::string tagU, std::string tagE, std::string sepsents){
+void buildfactors(std::vector<std::string> X, std::vector<std::string> T,std::vector<bool> x_related, std::vector<bool> t_related, std::vector<std::string>& vf1, std::vector<std::string>& vf2, bool tagC, bool tagU, bool tagE, std::string sepsents){
+  std::string strS = "S";
+  std::string strT = "T";
+  std::string strC = "S";
+  std::string strU = "T";
+  std::string strE = "E";
+  if (tagC) std::string strC = "C";
+  if (tagU) std::string strU = "U";
+
   for (size_t i=0; i<X.size(); i++){
     vf1.push_back(X[i]);
-    if (embedding) vf2.push_back(tagS);
+    if (tagE) vf2.push_back(strS);
     else{
-      if (x_related[i]) vf2.push_back(tagC); 
-      else vf2.push_back(tagS);
+      if (x_related[i]) vf2.push_back(strC); 
+      else vf2.push_back(strS);
     }
   }
   vf1.push_back(sepsents);
   vf2.push_back(sepsents);
   for (size_t i=0; i<T.size(); i++){
     vf1.push_back(T[i]);
-    if (embedding) vf2.push_back(tagE);
+    if (tagE) vf2.push_back(strE);
     else{
-      if (t_related[i]) vf2.push_back(tagT); 
-      else vf2.push_back(tagU);
+      if (t_related[i]) vf2.push_back(strT); 
+      else vf2.push_back(strU);
     }
   }
   return;
 }
 
 void usage(std::string name){
-  std::cerr << "usage: " << name << " -o FILE -s FILE -t FILE -a FILE -tst FILE -match FILE [-colI INT] [-colS INT] [-sep STRING] [-v]" << std::endl;
+  std::cerr << "usage: " << name << " -o FILE -s FILE -t FILE -a FILE -tst FILE -match FILE [-colI INT] [-colS INT] [-tagC] [-tagU] [-tagE] [-sep STRING] [-v]" << std::endl;
   std::cerr << "   -o      FILE : output file (FILE.f1 and FILE.f2 are created)" << std::endl;
   std::cerr << "   -s      FILE : train src file" << std::endl;
   std::cerr << "   -t      FILE : train tgt file" << std::endl;
@@ -66,22 +74,14 @@ void usage(std::string name){
   std::cerr << "   -colI    INT : column where match index is found (default 0)" << std::endl;
   std::cerr << "   -colS    INT : column where match score is found (default -1:not used)" << std::endl;
   std::cerr << "   -minS  FLOAT : minimu score to consider a match (default 0.0)" << std::endl;
-  std::cerr << "   -embedding   : do not perform alignments (uses tag E)" << std::endl;
   std::cerr << "   -sep  STRING : token used to mark sentence boundary (default ‖)" << std::endl;
-  std::cerr << "   -tagS STRING : replace tag S by STRING" << std::endl;
-  std::cerr << "   -tagC STRING : replace tag C by STRING" << std::endl;
-  std::cerr << "   -tagT STRING : replace tag T by STRING" << std::endl;
-  std::cerr << "   -tagU STRING : replace tag U by STRING" << std::endl;
-  std::cerr << "   -tagE STRING : replace tag E by STRING" << std::endl;
+  std::cerr << "   -tagC        : use tag C to mark source words appearing in match (copy)" << std::endl;
+  std::cerr << "   -tagU        : use tag U to mark target words not present in match (unrelated)" << std::endl;
+  std::cerr << "   -tagE        : use tag E to mark all target words from embedding match (embedding)" << std::endl;
   std::cerr << "   -v           : verbose output" << std::endl;
   std::cerr << std::endl;
-  std::cerr << "Tags used:" << std::endl;
-  std::cerr << "S: source words without related target (to be freely translated)" << std::endl;
-  std::cerr << "C: source words with related target (to copy an augmented target word)" << std::endl;
-  std::cerr << "T: target words with related source (part of the match)" << std::endl;
-  std::cerr << "U: target words without related source (not in the match)" << std::endl;
-  std::cerr << "E: target words from similar sentence found using embeddings (no alignments performed)" << std::endl;
   std::cerr << "Comments:" << std::endl;
+  std::cerr << "when -tagE is used -tagC and -tagU are not used" << std::endl;
   std::cerr << "All files must be lightly tokenised (split punctuation)" << std::endl;
 
   return;
@@ -97,12 +97,9 @@ int main(int argc, char** argv) {
   std::string fmatch = "";
   std::string sepwords = " ";
   std::string sepsents = "‖";
-  bool embedding = false;
-  std::string tagS = "S";
-  std::string tagC = "C";
-  std::string tagT = "T";
-  std::string tagU = "U";
-  std::string tagE = "E";
+  bool tagC = false;
+  bool tagU = false;
+  bool tagE = false;
   size_t colI = 0;
   int colS = -1;
   float minS = 0.0;
@@ -118,12 +115,9 @@ int main(int argc, char** argv) {
     else if (tok == "-minS" and i<argc) { i++; minS = std::atof(argv[i]); }
     else if (tok == "-o" and i<argc) { i++; fout = argv[i]; }
     else if (tok == "-sep" and i<argc) { i++; sepsents = argv[i]; }
-    else if (tok == "-tagS" and i<argc) { i++; tagS = argv[i]; }
-    else if (tok == "-tagC" and i<argc) { i++; tagC = argv[i]; }
-    else if (tok == "-tagT" and i<argc) { i++; tagT = argv[i]; }
-    else if (tok == "-tagU" and i<argc) { i++; tagU = argv[i]; }
-    else if (tok == "-tagE" and i<argc) { i++; tagE = argv[i]; }
-    else if (tok == "-embedding") { embedding = true; }
+    else if (tok == "-tagC") { tagC = true; }
+    else if (tok == "-tagU") { tagU = true; }
+    else if (tok == "-tagE") { tagE = true; }
     else if (tok == "-v") { verbose = true; }
     else if (tok == "-h") {
       usage(argv[0]);
@@ -166,6 +160,22 @@ int main(int argc, char** argv) {
     return 1;
   }
 
+  if (tagE){
+    tagC = false;
+    tagU = false;
+  }
+  
+  std::string tags=".S";
+  if (tagE){ //tags: ".SE"
+    tags += "E";
+  }
+  else{ // tags: ".ST" or ".SCT" or ".STU" or ".SCTU"
+    if (tagC) tags += "C";
+    tags += "T";
+    if (tagU) tags += "U";
+  }
+  fout += tags;
+
   std::ofstream of1;
   of1.open((fout+".f1").c_str(), std::ofstream::out);
   std::ofstream of2;
@@ -207,8 +217,8 @@ int main(int argc, char** argv) {
 	}
 	std::vector<bool> x_related(X.size(),false);
 	std::vector<bool> t_related(T.size(),false);
-	if (! embedding) related(X,S,T,A,x_related,t_related,verbose);
-	buildfactors(X,T,x_related,t_related,vf1,vf2,embedding,tagS,tagC,tagT,tagU,tagE,sepsents);
+	if (tagC or tagU) related(X,S,T,A,x_related,t_related,verbose);
+	buildfactors(X,T,x_related,t_related,vf1,vf2,tagC,tagU,tagE,sepsents);
       }
       else{
 	if (verbose) std::cout << "low match" << std::endl;
