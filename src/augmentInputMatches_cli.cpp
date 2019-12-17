@@ -94,12 +94,12 @@ void usage(std::string name){
   std::cerr << "   -tagC         : use tag C to mark source words appearing in match (copy)" << std::endl;
   std::cerr << "   -tagU         : use tag U to mark target words not present in match (unrelated)" << std::endl;
   std::cerr << "   -tagE         : use tag E to mark all target words from embedding match (embedding)" << std::endl;
-  std::cerr << "   -ratio  FLOAT : keep match if the ratio of T words appearing in reference is higher thatn FLOAT (default 0.0:not used)" << std::endl;
+  std::cerr << "   -ratio  FLOAT : keep match if ratio of words marked T appearing in reference are at least FLOAT (default 0.0:not used)" << std::endl;
   std::cerr << "   -v            : verbose output" << std::endl;
   std::cerr << std::endl;
   std::cerr << "Comments:" << std::endl;
-  std::cerr << "When option -tagE is used -tagC and -tagU are deactivated" << std::endl;
-  std::cerr << "Option -ratio is not used with option -tagE" << std::endl;
+  std::cerr << "Option -tagE is used without options -tagC and -tagU" << std::endl;
+  std::cerr << "Option -ratio is used with -ref option and without -tagE option" << std::endl;
   std::cerr << "All files must be lightly tokenised (split punctuation)" << std::endl;
 
   return;
@@ -173,7 +173,7 @@ int main(int argc, char** argv) {
       return 1;    
   }
   if (ratio > 0.0 && fref.size() == 0){
-      std::cerr << "error: -ratio must be used with -ref option" << std::endl;
+      std::cerr << "error: -ratio cannot be used without -ref option" << std::endl;
       usage(argv[0]);
       return 1;    
   }
@@ -183,9 +183,10 @@ int main(int argc, char** argv) {
       return 1;    
   }
 
-  if (tagE){
-    tagC = false;
-    tagU = false;
+  if (tagE && (tagC || tagU)){
+      std::cerr << "error: -tagE cannot be used with options -tagC or -tagU" << std::endl;
+      usage(argv[0]);
+      return 1;    
   }
   
   std::vector<std::string> vsrc, vtgt, vali, vtst, vref, vmatch;
