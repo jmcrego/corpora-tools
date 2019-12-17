@@ -271,6 +271,8 @@ int main(int argc, char** argv) {
 	float r=1.0;
 	if (tagC or tagU){
 	  related(X,S,T,A,x_related,t_related,verbose);
+	}
+	if (!tagE){
 	  r = ratio_tmatch(t_related,T,R,tagU);
 	  if (verbose) std::cout << "ratio=" << r << std::endl;
 	}
