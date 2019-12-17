@@ -11,9 +11,9 @@ void usage(std::string name){
   std::cerr << "usage: " << name << " -s FILE -t FILE -a FILE [-v]" << std::endl;
   std::cerr << "   -s      FILE : train src file" << std::endl;
   std::cerr << "   -t      FILE : train tgt file" << std::endl;
-  std::cerr << "   -a      FILE : train tgt file" << std::endl;
-  std::cerr << "   -src_consec  : src words must be consecutive" << std::endl;
-  std::cerr << "   -tgt_consec  : tgt words must be consecutive" << std::endl;
+  std::cerr << "   -a      FILE : train s2t alignment file" << std::endl;
+  std::cerr << "   -src_consec  : src words does not contain holes" << std::endl;
+  std::cerr << "   -tgt_consec  : tgt words does not contain holes" << std::endl;
   return;
 }
 
