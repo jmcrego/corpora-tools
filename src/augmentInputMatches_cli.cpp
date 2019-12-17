@@ -253,7 +253,9 @@ int main(int argc, char** argv) {
 	std::vector<std::string> T = split(vtgt[j],sepwords,false);
 	std::vector<std::string> A = split(vali[j],sepwords,false);
 	std::vector<std::string> R;
+	std::cout << "A" << std::endl;
 	if (vref.size()) R = split(vref[j],sepwords,false);
+	std::cout << "B" << std::endl;
 	if (verbose) {
 	  std::cout << "match=" << j << std::endl;
 	  std::cout << "S: " << vsrc[j] << std::endl;
