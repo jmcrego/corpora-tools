@@ -64,7 +64,6 @@ void buildfactors(std::vector<std::string> X, std::vector<std::string> T,std::ve
 }
 
 float ratio_tmatch(std::vector<bool> t_related, std::vector<std::string> T, std::vector<std::string> R, bool tagU){
-  if (R.size() == 0) return 0.0; //there are no R words (wont be filtered out)
   std::set<std::string> setR;
   for (size_t i=0; i<R.size(); i++) setR.insert(R[i]);
   size_t total = 0;
@@ -268,11 +267,11 @@ int main(int argc, char** argv) {
 	}
 	std::vector<bool> x_related(X.size(),false);
 	std::vector<bool> t_related(T.size(),false);
-	float r=1.0;
 	if (tagC or tagU){
 	  related(X,S,T,A,x_related,t_related,verbose);
 	}
-	if (!tagE){
+	float r=1.0;
+	if (!tagE && R.size()){
 	  r = ratio_tmatch(t_related,T,R,tagU);
 	  if (verbose) std::cout << "ratio=" << r << std::endl;
 	}
