@@ -16,13 +16,14 @@ usage = """usage: {} [-l LANG] [-sep STRING] < stdin > stdout
    -sep STRING : use STRING as separator (default ￨)
    -tagdir DIR : treetagger dir absolute path (default /home/crego/progs/tree-tagger)
    -h               : this message
-
-A light tokenization is performed as first step (similar to (onmt) tokenize -m conservative
+Comments:
+- A light tokenization is performed as first step (similar to (onmt) tokenize -m conservative
+- Use python3
 """.format(sys.argv.pop(0))
 
 lang = 'en'
 sep = '￨'
-tagdir = '~/progs/tree-tagger'
+tagdir = '/home/crego/progs/tree-tagger'
 while len(sys.argv):
     tok = sys.argv.pop(0)
     if tok=="-l" and len(sys.argv):
