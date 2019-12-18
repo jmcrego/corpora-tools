@@ -34,14 +34,17 @@ while len(sys.argv):
         sys.stderr.write("{}".format(usage))
         sys.exit()
 
-#tagger = ttpw.TreeTagger(TAGLANG=lang) ### TAGDIR is not needed if accessed otherwise
-tagger = ttpw.TreeTagger(TAGLANG=lang, TAGDIR=tdir)
+tagger = ttpw.TreeTagger(TAGLANG=lang) ### TAGDIR is not needed if accessed otherwise
+#tagger = ttpw.TreeTagger(TAGLANG=lang, TAGDIR=tdir)
 
 for n,line in enumerate(sys.stdin):
     line = line.rstrip()
     #toks = ttpw.make_tags(tagger.tag_text(line))
     toks = tagger.tag_text(line,notagurl=True,notagemail=True,notagip=True,notagdns=True,nosgmlsplit=True)
     for t in range(len(toks)):
-        toks[t] = sep.join(toks[t].split('\t'))
+        tags = toks[t].split('\t')
+        if len(tags) != 3:
+            sys.stderr.write('warning: line={} tags={}\n'.format(n+1,' '.join(tags)))
+        toks[t] = sep.join(tags)
     print(' '.join(toks))
     #if (len(line.split(' ')) != len(toks)): sys.stderr.write('warning: diff num of tokens in line={}\n{}\n{}\n'.format(n+1,line,' '.join(toks)))
