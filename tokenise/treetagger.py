@@ -7,13 +7,13 @@ import treetaggerwrapper as ttpw
 usage = """usage: {} [-l LANG] [-sep STRING] < stdin > stdout
    -l     LANG : use: en, de, fr, es, ca (default en)
    -sep STRING : use STRING as separator (default ￨)
-   -dir    DIR : treetagger dir (default ~/progs/tree-tagger)
+   -tagdir DIR : treetagger absolute dir (default /home/crego/progs/tree-tagger)
    -h               : this message
 """.format(sys.argv.pop(0))
 
 lang = 'en'
 sep = '￨'
-tdir = '~/progs/tree-tagger'
+tagdir = '~/progs/tree-tagger'
 while len(sys.argv):
     tok = sys.argv.pop(0)
     if tok=="-l" and len(sys.argv):
@@ -22,8 +22,8 @@ while len(sys.argv):
     elif tok=="-sep" and len(sys.argv):
         sep = sys.argv.pop(0)
 
-    elif tok=="-dir" and len(sys.argv):
-        tdir = sys.argv.pop(0)
+    elif tok=="-tagdir" and len(sys.argv):
+        tagdir = sys.argv.pop(0)
 
     elif tok=="-h":
         sys.stderr.write("{}".format(usage))
@@ -34,9 +34,9 @@ while len(sys.argv):
         sys.stderr.write("{}".format(usage))
         sys.exit()
 
-sys.stderr.write('lang={} sep={} dir={}\n'.format(lang,sep,tdir))
+sys.stderr.write('lang={} sep={} tagdir={}\n'.format(lang,sep,tagdir))
 #tagger = ttpw.TreeTagger(TAGLANG=lang) ### TAGDIR is not needed if accessed otherwise
-tagger = ttpw.TreeTagger(TAGLANG = lang, TAGDIR = tdir)
+tagger = ttpw.TreeTagger(TAGLANG=lang, TAGDIR=tagdir)
 
 for n,line in enumerate(sys.stdin):
     line = line.rstrip()
