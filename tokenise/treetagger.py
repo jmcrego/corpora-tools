@@ -23,7 +23,7 @@ Comments:
 
 lang = 'en'
 sep = '￨'
-tagdir = '/home/crego/progs/tree-tagger'
+tagdir = None
 while len(sys.argv):
     tok = sys.argv.pop(0)
     if tok=="-l" and len(sys.argv):
@@ -45,8 +45,10 @@ while len(sys.argv):
         sys.exit()
 
 sys.stderr.write('lang={} sep={} tagdir={}\n'.format(lang,sep,tagdir))
-#tagger = ttpw.TreeTagger(TAGLANG=lang) ### TAGDIR is not needed if accessed otherwise
-tagger = ttpw.TreeTagger(TAGLANG=lang, TAGDIR=tagdir)
+if tagdir is None:
+    tagger = ttpw.TreeTagger(TAGLANG=lang) ### TAGDIR is not needed if accessible
+else:
+    tagger = ttpw.TreeTagger(TAGLANG=lang, TAGDIR=tagdir)
 
 for n,line in enumerate(sys.stdin):
     line = line.rstrip()
