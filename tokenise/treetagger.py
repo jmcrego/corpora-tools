@@ -19,6 +19,7 @@ usage = """usage: {} [-l LANG] [-sep STRING] < stdin > stdout
 Comments:
 - A light tokenization is performed as first step (similar to (onmt) tokenize -m conservative
 - Use python3
+- Needs treetaggerwrapper
 """.format(sys.argv.pop(0))
 
 lang = 'en'
