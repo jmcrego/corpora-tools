@@ -1,13 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#read documentation of treetaggerwrapper: https://treetaggerwrapper.readthedocs.io/en/latest/
+
+#treetagger: https://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/
+#download tagger package, tagging scripts, install-tagger.sh and parameters files in a single directory, the run $> sh install-tagger.sh
+
+#treetaggerwrapper: https://treetaggerwrapper.readthedocs.io/en/latest/
+#$> pip install --user treetaggerwrapper
+
 import sys
 import treetaggerwrapper as ttpw
 
 usage = """usage: {} [-l LANG] [-sep STRING] < stdin > stdout
    -l     LANG : use: en, de, fr, es, ca (default en)
    -sep STRING : use STRING as separator (default ￨)
-   -tagdir DIR : treetagger absolute dir (default /home/crego/progs/tree-tagger)
+   -tagdir DIR : treetagger dir absolute path (default /home/crego/progs/tree-tagger)
    -h               : this message
 """.format(sys.argv.pop(0))
 
