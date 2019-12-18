@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 #treetagger: https://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/
-#download tagger package, tagging scripts, install-tagger.sh and parameters files in a single directory, the run $> sh install-tagger.sh
+#download in a single dir: tagger package, tagging scripts, install-tagger.sh and parameters files
+#run $> sh install-tagger.sh
 
 #treetaggerwrapper: https://treetaggerwrapper.readthedocs.io/en/latest/
 #$> pip install --user treetaggerwrapper
@@ -15,6 +16,8 @@ usage = """usage: {} [-l LANG] [-sep STRING] < stdin > stdout
    -sep STRING : use STRING as separator (default ￨)
    -tagdir DIR : treetagger dir absolute path (default /home/crego/progs/tree-tagger)
    -h               : this message
+
+A light tokenization is performed as first step (similar to (onmt) tokenize -m conservative
 """.format(sys.argv.pop(0))
 
 lang = 'en'
