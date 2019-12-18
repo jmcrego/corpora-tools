@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 
 #treetagger: https://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/
-#download in a single dir: tagger package, tagging scripts, install-tagger.sh and parameters files
+#download in a single dir: tagger package, tagging scripts, install-tagger.sh and parameters files (as many as you want)
 #run $> sh install-tagger.sh
 
 #treetaggerwrapper: https://treetaggerwrapper.readthedocs.io/en/latest/
-#$> pip install --user treetaggerwrapper
+#$> pip3 install --user treetaggerwrapper
 
 import sys
 import treetaggerwrapper as ttpw
