@@ -13,7 +13,7 @@ usage = """usage: {} [-l LANG] [-sep STRING] < stdin > stdout
 
 lang = 'en'
 sep = '￨'
-tdir =  '~/progs/tree-tagger'
+tdir = '~/progs/tree-tagger'
 while len(sys.argv):
     tok = sys.argv.pop(0)
     if tok=="-l" and len(sys.argv):
@@ -34,8 +34,9 @@ while len(sys.argv):
         sys.stderr.write("{}".format(usage))
         sys.exit()
 
-tagger = ttpw.TreeTagger(TAGLANG=lang) ### TAGDIR is not needed if accessed otherwise
-#tagger = ttpw.TreeTagger(TAGLANG=lang, TAGDIR=tdir)
+sys.stderr.write('lang={} sep={} dir={}\n'.format(lang,sep,tdir))
+#tagger = ttpw.TreeTagger(TAGLANG=lang) ### TAGDIR is not needed if accessed otherwise
+tagger = ttpw.TreeTagger(TAGLANG = lang, TAGDIR = tdir)
 
 for n,line in enumerate(sys.stdin):
     line = line.rstrip()
