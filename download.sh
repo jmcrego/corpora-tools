@@ -2,6 +2,15 @@
 
 ODIR=$HOME/raw
 
+newscrawl_fr(){
+    DIR=$ODIR/newscrawl/fr
+    if [ -e $DIR ]; then echo "warning: directory $DIR already exists"; return; fi
+    for year in 2017 2016 2015 2014 2013 2012 2011 2010 2009 2008 2007; do
+	wget -P $DIR http://data.statmt.org/news-crawl/fr/news.$year.fr.shuffled.deduped.gz
+	gunzip $DIR/news.$year.fr.shuffled.deduped.gz
+    done
+}
+
 JRC_enfr(){
     DIR=$ODIR/JRC-Acquis/enfr
     if [ -e $DIR ]; then echo "warning: directory $DIR already exists"; return; fi
@@ -113,6 +122,7 @@ OpenSubtitles_enfr(){
     rm -f $DIR/README $DIR/OpenSubtitles.en-fr.ids $DIR/download.php?f=OpenSubtitles%2Fv2018%2Fmoses%2Fen-fr.txt.zip
 }
 
+#newscrawl_fr
 #jrc_enfr
 #emea_enfr
 #ecb_enfr
