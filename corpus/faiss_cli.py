@@ -3,10 +3,10 @@ import logging
 import sys
 import io
 import gzip
-import faiss
 import copy
 import numpy as np
-from faiss import normalize_L2
+import faiss
+#from faiss import normalize_L2
 #import torch
 #from torch import nn
 #from torch.nn import functional as F
