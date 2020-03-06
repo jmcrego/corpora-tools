@@ -4,12 +4,12 @@ import sys
 import io
 import gzip
 import faiss
-import torch
 import copy
 import numpy as np
-from torch import nn
-from torch.nn import functional as F
 from faiss import normalize_L2
+#import torch
+#from torch import nn
+#from torch.nn import functional as F
 
 class Infile:
 
@@ -113,32 +113,6 @@ class IndexFaiss:
         else:
             sys.stderr.write('Done over {} examples\n'.format(len(query)))
 
-
-
-
-
-'''
-class Index:
-
-    def __init__(self, file, d, file_str=None):
-        self.db = Infile(file, d, norm=True, file_str=file_str)
-        logging.info("read {} vectors".format(len(self.db)))
-
-
-    def Query(self,file,d,k,file_str,verbose):
-        #cos = nn.CosineSimilarity(dim=1, eps=1e-6)
-        query = Infile(file, d, norm=True, file_str=file_str)
-        db = torch.from_numpy(self.db.vec)
-        D = []
-        I = []
-        for i in range(len(query)):
-            q =  torch.from_numpy(query.vec[i]).unsqueeze(0)
-            dist = F.cosine_similarity(db,q)
-            dist_sorted, index_sorted = torch.sort(dist, descending=True)
-            D.append(dist_sorted[:k].numpy())
-            I.append(index_sorted[:k].numpy())
-        results(np.array(D),np.array(I),k,self.db,query,verbose)
-'''
 
 if __name__ == '__main__':
 
