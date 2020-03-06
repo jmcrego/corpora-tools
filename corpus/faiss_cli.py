@@ -6,10 +6,6 @@ import gzip
 import copy
 import numpy as np
 import faiss
-#from faiss import normalize_L2
-#import torch
-#from torch import nn
-#from torch.nn import functional as F
 
 class Infile:
 
@@ -72,7 +68,8 @@ class IndexFaiss:
 
     def Query(self,file,d,k,file_str,min_score,skip_same_id,skip_query):
         if file == self.file_db:
-            query = copy.deepcopy(self.db)
+#            query = copy.deepcopy(self.db)
+            query = self.db
         else:
             query = Infile(file, d, norm=True, file_str=file_str)
         D, I = self.index.search(query.vec, k)
