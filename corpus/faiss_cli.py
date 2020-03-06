@@ -29,7 +29,7 @@ class Infile:
                 self.d = len(l)
             self.vec.append(l)
 
-        sys.stderr.write('Read {} vectors in {}\n'.format(len(self.vec),file))
+        sys.stderr.write('Read {} vectors ({} cells) in {}\n'.format(len(self.vec),self.d,self.file))
         self.vec = np.array(self.vec).astype('float32')
 
         if norm:
