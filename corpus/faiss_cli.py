@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-import logging
-import sys
 import io
+import sys
 import gzip
-import copy
-import numpy as np
 import faiss
+import logging
+import numpy as np
 
 class Infile:
 
@@ -13,6 +12,7 @@ class Infile:
         self.file = file
         self.vec = []
         self.txt = []
+        self.d = d
 
         if file.endswith('.gz'): 
             f = gzip.open(file, 'rt')
@@ -21,9 +21,12 @@ class Infile:
 
         for l in f:
             l = l.rstrip().split(' ')
-            if len(l) != d:
-                logging.error('found {} floats instead of {}'.format(len(l),d))
-                sys.exit()
+            if self.d > 0:
+                if len(l) != self.d:
+                    logging.error('found {} floats instead of {}'.format(len(l),self.d))
+                    sys.exit()
+            else:
+                self.d = len(l)
             self.vec.append(l)
 
         sys.stderr.write('Read {} vectors in {}\n'.format(len(self.vec),file))
@@ -68,15 +71,13 @@ class IndexFaiss:
 
     def Query(self,file,d,k,file_str,min_score,skip_same_id,skip_query):
         if file == self.file_db:
-#            query = copy.deepcopy(self.db)
             query = self.db
         else:
             query = Infile(file, d, norm=True, file_str=file_str)
         D, I = self.index.search(query.vec, k)
-        assert len(D) == len(I)
-        assert len(D) == len(query)
-        #I[i,j] contains the index in db of the j-th closest sentence to the i-th sentence in query
-        #D[i,j] contains the corresponding score
+        assert len(D) == len(I)     #I[i,j] contains the index in db of the j-th closest sentence to the i-th sentence in query
+        assert len(D) == len(query) #D[i,j] contains the corresponding score
+
         if file == self.file_db:
             n_ok = [0.0] * k
 
@@ -117,7 +118,7 @@ if __name__ == '__main__':
     fquery = None
     fdb_str = None
     fquery_str = None
-    d = 512
+    d = 0
     k = 1
     min_score = 0.1
     skip_same_id = False
@@ -129,7 +130,6 @@ if __name__ == '__main__':
     -db_str     FILE : file to index 
     -query      FILE : file with queries
     -query_str  FILE : file with queries
-    -d           INT : vector size (default 512)
     -k           INT : k-best to retrieve (default 1)
     -min_score FLOAT : minimum distance to accept a match (default 0.1) 
     -skip_same_id    : do not consider matchs with query_id == db_id (k+1 matchs retrieved)
@@ -137,6 +137,8 @@ if __name__ == '__main__':
     -v               : verbose output (default False)
     -h               : this help
 '''.format(name)
+
+#    -d           INT : vector size (default 512)
 
     while len(sys.argv):
         tok = sys.argv.pop(0)
@@ -155,8 +157,8 @@ if __name__ == '__main__':
             fquery_str = sys.argv.pop(0)
         elif tok=="-k" and len(sys.argv):
             k = int(sys.argv.pop(0))
-        elif tok=="-d" and len(sys.argv):
-            d = int(sys.argv.pop(0))
+#        elif tok=="-d" and len(sys.argv):
+#            d = int(sys.argv.pop(0))
         elif tok=="-min_score" and len(sys.argv):
             min_score = float(sys.argv.pop(0))
         elif tok=="-skip_same_id":
@@ -168,15 +170,13 @@ if __name__ == '__main__':
             sys.stderr.write("{}".format(usage))
             sys.exit()
 
-
     if fdb is not None:
         indexdb = IndexFaiss(fdb,d,fdb_str)
-
 
     if fquery is not None:
         if skip_same_id:
             k += 1
-        indexdb.Query(fquery,d,k,fquery_str,min_score,skip_same_id,skip_query)
+        indexdb.Query(fquery,indexdb.d,k,fquery_str,min_score,skip_same_id,skip_query)
 
 
 
