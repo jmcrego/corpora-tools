@@ -69,11 +69,11 @@ class IndexFaiss:
         logging.info("read {} vectors".format(self.index.ntotal))
 
 
-    def Query(self,file,d,k,file_str,min_score,skip_same_id,skip_query):
+    def Query(self,file,file_str,k,min_score,skip_same_id,skip_query):
         if file == self.file_db:
             query = self.db
         else:
-            query = Infile(file, d, norm=True, file_str=file_str)
+            query = Infile(file, self.db.d, norm=True, file_str=file_str)
         D, I = self.index.search(query.vec, k)
         assert len(D) == len(I)     #I[i,j] contains the index in db of the j-th closest sentence to the i-th sentence in query
         assert len(D) == len(query) #D[i,j] contains the corresponding score
@@ -137,7 +137,6 @@ if __name__ == '__main__':
     -h               : this help
 '''.format(name)
 
-#    -d           INT : vector size (default 512)
 
     while len(sys.argv):
         tok = sys.argv.pop(0)
@@ -156,8 +155,6 @@ if __name__ == '__main__':
             fquery_str = sys.argv.pop(0)
         elif tok=="-k" and len(sys.argv):
             k = int(sys.argv.pop(0))
-#        elif tok=="-d" and len(sys.argv):
-#            d = int(sys.argv.pop(0))
         elif tok=="-min_score" and len(sys.argv):
             min_score = float(sys.argv.pop(0))
         elif tok=="-skip_same_id":
@@ -175,7 +172,7 @@ if __name__ == '__main__':
     if fquery is not None:
         if skip_same_id:
             k += 1
-        indexdb.Query(fquery,indexdb.d,k,fquery_str,min_score,skip_same_id,skip_query)
+        indexdb.Query(fquery,fquery_str,k,min_score,skip_same_id,skip_query)
 
 
 
