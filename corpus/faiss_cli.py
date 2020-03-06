@@ -61,10 +61,10 @@ class Infile:
 
 class IndexFaiss:
 
-    def __init__(self, file, d, file_str=None):
+    def __init__(self, file, file_str=None):
         self.file_db = file
-        self.db = Infile(file, d, norm=True, file_str=file_str)
-        self.index = faiss.IndexFlatIP(d) #inner product (needs L2 normalization over db and query vectors)
+        self.db = Infile(file, 0, norm=True, file_str=file_str)
+        self.index = faiss.IndexFlatIP(self.db.d) #inner product (needs L2 normalization over db and query vectors)
         self.index.add(self.db.vec) # add all normalized vectors to the index
         logging.info("read {} vectors".format(self.index.ntotal))
 
@@ -118,7 +118,6 @@ if __name__ == '__main__':
     fquery = None
     fdb_str = None
     fquery_str = None
-    d = 0
     k = 1
     min_score = 0.1
     skip_same_id = False
@@ -171,7 +170,7 @@ if __name__ == '__main__':
             sys.exit()
 
     if fdb is not None:
-        indexdb = IndexFaiss(fdb,d,fdb_str)
+        indexdb = IndexFaiss(fdb,fdb_str)
 
     if fquery is not None:
         if skip_same_id:
