@@ -8,7 +8,7 @@ import numpy as np
 
 class Infile:
 
-    def __init__(self, file, d, norm=True,file_str=None):
+    def __init__(self, file, d=0, norm=True,file_str=None):
         self.file = file
         self.vec = []
         self.txt = []
@@ -23,7 +23,7 @@ class Infile:
             l = l.rstrip().split(' ')
             if self.d > 0:
                 if len(l) != self.d:
-                    logging.error('found {} floats instead of {}'.format(len(l),self.d))
+                    logging.error('found a vector with {} cells instead of {}'.format(len(l),self.d))
                     sys.exit()
             else:
                 self.d = len(l)
@@ -63,7 +63,7 @@ class IndexFaiss:
 
     def __init__(self, file, file_str=None):
         self.file_db = file
-        self.db = Infile(file, 0, norm=True, file_str=file_str)
+        self.db = Infile(file, file_str=file_str)
         self.index = faiss.IndexFlatIP(self.db.d) #inner product (needs L2 normalization over db and query vectors)
         self.index.add(self.db.vec) # add all normalized vectors to the index
         logging.info("read {} vectors".format(self.index.ntotal))
@@ -73,7 +73,7 @@ class IndexFaiss:
         if file == self.file_db:
             query = self.db
         else:
-            query = Infile(file, self.db.d, norm=True, file_str=file_str)
+            query = Infile(file, d=self.db.d, file_str=file_str)
         D, I = self.index.search(query.vec, k)
         assert len(D) == len(I)     #I[i,j] contains the index in db of the j-th closest sentence to the i-th sentence in query
         assert len(D) == len(query) #D[i,j] contains the corresponding score
@@ -91,7 +91,7 @@ class IndexFaiss:
             out = []
             if not skip_query:
                 out.append(str(i_query+1))
-                if file_str is not None and query.txts():
+                if query.txts():
                     out.append(query.txt[i_query])
             for j in range(len(I[i_query])):
                 i_db = I[i_query,j]
@@ -119,7 +119,7 @@ if __name__ == '__main__':
     fdb_str = None
     fquery_str = None
     k = 1
-    min_score = 0.1
+    min_score = 0.5
     skip_same_id = False
     skip_query = False
     verbose = False
@@ -130,9 +130,9 @@ if __name__ == '__main__':
     -query      FILE : file with queries
     -query_str  FILE : file with queries
     -k           INT : k-best to retrieve (default 1)
-    -min_score FLOAT : minimum distance to accept a match (default 0.1) 
-    -skip_same_id    : do not consider matchs with query_id == db_id (k+1 matchs retrieved)
-    -skip_query      : do not output queries (initial columns)
+    -min_score FLOAT : minimum distance to accept a match (default 0.5) 
+    -skip_same_id    : do not consider matchs with db_id == query_id (k+1 matchs retrieved)
+    -skip_query      : do not output query columns (query_index [query_str])
     -v               : verbose output (default False)
     -h               : this help
 '''.format(name)
