@@ -318,10 +318,10 @@ class Args():
                 torch.cuda.manual_seed_all(self.seed)
             logging.debug('random seed set to {}'.format(self.seed))
 
-        if ',' in args.data:
-            args.data = args.data.split(',')
+        if ',' in self.data:
+            self.data = self.data.split(',')
         else:
-            args.data = glob.glob(args.data)
+            self.data = glob.glob(self.data)
 
 
 ####################################################################
