@@ -96,7 +96,7 @@ def do_train(args):
             losses.append(loss.data.cpu().detach().numpy())
             if n_steps % args.report_every_n_steps == 0:
                 accum_loss = np.mean(losses)
-                logging.info('n_epoch={} n_steps={} Loss={:.6f}'.format(n_epochs,n_steps,accum_loss))
+                logging.info('{} n_epoch={} n_steps={} Loss={:.6f}'.format(args.method, n_epochs,n_steps,accum_loss))
                 losses = []
             if n_steps % args.save_every_n_steps == 0:
                 save_model_optim(args.name, model, optimizer, n_steps, args.keep_last_n)
