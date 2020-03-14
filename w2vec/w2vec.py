@@ -71,7 +71,7 @@ def do_train(args):
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, betas=(args.beta1,args.beta2), eps=args.eps)
     n_steps, model, optimizer = load_model_optim(args.name, args.embedding_size, vocab, model, optimizer)
 
-    dataset = Dataset(args.data , token, vocab, args.batch_size, args.window, args.n_negs, args.skip_subsampling)
+    dataset = Dataset(args, token, vocab)
     n_epochs = 0
     losses = []
     while True:
