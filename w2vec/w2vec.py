@@ -188,7 +188,7 @@ class Args():
         self.seed = 12345
         self.cuda = False
         self.log_file = None
-        self.log_level = 'info'
+        self.log_level = 'debug'
         self.voc_minf = 5
         self.voc_maxs = 0
         self.tok_conf = None
@@ -219,7 +219,7 @@ class Args():
  Options:
    -seed            INT : seed value                                (12345)
    -log_file       FILE : log file (use stderr for STDERR)          ([name].log)
-   -log_level     LEVEL : debug, info, warning, critical, error     (info) 
+   -log_level     LEVEL : debug, info, warning, critical, error     (debug) 
    -cuda                : use CUDA                                  (False)
    -h                   : this help
  -------- When preprocessing -------------------------------------------------
@@ -268,7 +268,6 @@ class Args():
             elif (tok=="-voc_minf" and len(argv)): self.voc_minf = int(argv.pop(0))
             elif (tok=="-voc_maxs" and len(argv)): self.voc_maxs = int(argv.pop(0))
             elif (tok=="-toc_conf" and len(argv)): self.toc_conf = argv.pop(0)
-
             elif (tok=="-batch_size" and len(argv)): self.batch_size = int(argv.pop(0))
             elif (tok=="-max_epochs" and len(argv)): self.max_epochs = int(argv.pop(0))
             elif (tok=="-embedding_size" and len(argv)): self.embedding_size = int(argv.pop(0))
@@ -375,8 +374,8 @@ class Word2Vec(nn.Module):
             for b in range(emb.shape[0]):
                 for i in range(emb.shape[1]):
                     if torch.isnan(emb[b][i]).any():
-                        print(wrd[b][i])
-                        print(emb[b][i])
+                        logging.debug(wrd[b][i])
+                        logging.debug(emb[b][i])
             sys.exit()
         return emb
 
@@ -391,8 +390,8 @@ class Word2Vec(nn.Module):
             for b in range(emb.shape[0]):
                 for i in range(emb.shape[1]):
                     if torch.isnan(emb[b][i]).any():
-                        print(wrd[b][i])
-                        print(emb[b][i])
+                        logging.debug(wrd[b][i])
+                        logging.debug(emb[b][i])
             sys.exit()
         return emb
 
