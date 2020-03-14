@@ -330,11 +330,12 @@ class Args():
 class Word2Vec(nn.Module):
     def __init__(self, vs, ds, pad_idx, cuda):
         super(Word2Vec, self).__init__()
+        self.cuda = cuda
         self.vs = vs
         self.ds = ds
         self.pad_idx = pad_idx
-        self.iEmb = nn.Embedding(self.vs, self.ds, padding_idx=self.pad_idx, max_norm=float(ds), norm_type=2)
-        self.oEmb = nn.Embedding(self.vs, self.ds, padding_idx=self.pad_idx, max_norm=float(ds), norm_type=2)
+        self.iEmb = nn.Embedding(self.vs, self.ds, padding_idx=self.pad_idx)#, max_norm=float(ds), norm_type=2)
+        self.oEmb = nn.Embedding(self.vs, self.ds, padding_idx=self.pad_idx)#, max_norm=float(ds), norm_type=2)
         if cuda:
             self.cuda()
         #nn.init.xavier_uniform_(self.iEmb.weight)
@@ -346,7 +347,7 @@ class Word2Vec(nn.Module):
         #isnt [bs, lw] batch of sentences (list of list of words)
         #mask [bs, lw] contains 0.0 for masked words, 1.0 for unmaksed ones
         snt = torch.as_tensor(snt) ### [bs,lw] batch with sentence words
-        if self.iEmb.weight.is_cuda:
+        if self.cuda:
             snt = snt.cuda()
         emb = self.iEmb(snt) #[bs,lw,ds]
         if pooling == 'max':
@@ -366,7 +367,7 @@ class Word2Vec(nn.Module):
     def forward_wrd_iemb(self, wrd):
         #batch of words (list)
         wrd = torch.as_tensor(wrd) ### [bs] batch with single word/s
-        if self.iEmb.weight.is_cuda:
+        if self.cuda:
             wrd = wrd.cuda()
         emb = self.iEmb(wrd) #[bs,ds]
         if torch.isnan(emb).any():
@@ -382,7 +383,7 @@ class Word2Vec(nn.Module):
     def forward_wrd_oemb(self, wrd):
         #batch of words (list)
         wrd = torch.as_tensor(wrd) ### [bs] batch with single word/s
-        if self.oEmb.weight.is_cuda:
+        if self.cuda:
             wrd = wrd.cuda()
         emb = self.oEmb(wrd) #[bs,ds]
         if torch.isnan(emb).any():
