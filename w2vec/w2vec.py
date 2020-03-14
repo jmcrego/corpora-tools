@@ -71,11 +71,7 @@ def do_train(args):
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, betas=(args.beta1,args.beta2), eps=args.eps)
     n_steps, model, optimizer = load_model_optim(args.name, args.embedding_size, vocab, model, optimizer)
 
-    if ',' in args.data:
-        files = args.data.split(',')
-    else:
-        files = glob.glob(args.data)
-    dataset = Dataset(files , token, vocab, args.batch_size, args.window, args.n_negs, args.skip_subsampling)
+    dataset = Dataset(args.data , token, vocab, args.batch_size, args.window, args.n_negs, args.skip_subsampling)
     n_epochs = 0
     losses = []
     while True:
@@ -131,32 +127,33 @@ def do_test(args):
         logging.error('bad -sim option {}'.format(args.sim))
         sys.exit()
 
-    f, is_gzip = open_file_read(args.data)
     with torch.no_grad():
         model.eval()
         voc_i = [i for i in range(0,len(vocab))]
         voc_e = model.forward_wrd_iemb(voc_i)
-        for l in f:
-            if is_gzip:
-                l = l.decode('utf8')
-            toks = token.tokenize(l.strip(' \n'))
-            for wrd in toks:
-                i = vocab[wrd]
-                wrd_i = [i] * len(vocab)
-                wrd_e = model.forward_wrd_iemb(wrd_i)
+        for file in args.data:
+            f, is_gzip = open_file_read(file)
+            for l in f:
+                if is_gzip:
+                    l = l.decode('utf8')
+                toks = token.tokenize(l.strip(' \n'))
+                for wrd in toks:
+                    i = vocab[wrd]
+                    wrd_i = [i] * len(vocab)
+                    wrd_e = model.forward_wrd_iemb(wrd_i)
 
-                dist = distance(wrd_e,voc_e)
-                mininds = torch.argsort(dist,dim=0,descending=True)
-                out = []
-                out.append(wrd)
-                for j in range(1,len(mininds)):
-                    ind = mininds[j].item() #cpu().detach().numpy()
-                    if ind != i:
-                        out.append("{:.5f}:{}".format(dist[ind].item(),vocab[ind]))
-                        if len(out)-1 == args.k:
-                            break
-                print('\t'.join(out))
-    f.close()
+                    dist = distance(wrd_e,voc_e)
+                    mininds = torch.argsort(dist,dim=0,descending=True)
+                    out = []
+                    out.append(wrd)
+                    for j in range(1,len(mininds)):
+                        ind = mininds[j].item() #cpu().detach().numpy()
+                        if ind != i:
+                            out.append("{:.5f}:{}".format(dist[ind].item(),vocab[ind]))
+                            if len(out)-1 == args.k:
+                                break
+                    print('\t'.join(out))
+            f.close()
 
 def do_preprocess(args):
 
@@ -175,12 +172,7 @@ def do_preprocess(args):
 
     token = OpenNMTTokenizer(args.name + '.token')
     vocab = Vocab()
-
-    if ',' in args.data:
-        files = args.data.split(',')
-    else:
-        files = glob.glob(args.data)
-    vocab.build(files,token,min_freq=args.voc_minf,max_size=args.voc_maxs)
+    vocab.build(args.data,token,min_freq=args.voc_minf,max_size=args.voc_maxs)
     vocab.dump(args.name + '.vocab')
     logging.info('built vocab')
 
@@ -325,6 +317,12 @@ class Args():
             if torch.cuda.is_available():
                 torch.cuda.manual_seed_all(self.seed)
             logging.debug('random seed set to {}'.format(self.seed))
+
+        if ',' in args.data:
+            args.data = args.data.split(',')
+        else:
+            args.data = glob.glob(args.data)
+
 
 ####################################################################
 ### Word2Vec #######################################################
