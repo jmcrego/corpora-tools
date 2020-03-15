@@ -82,8 +82,6 @@ def do_train(args):
     while True:
         n_epochs += 1
         for batch in dataset:
-            logging.info('iEmb[8]={}'.format(model.Embed([8],'iEmb')))
-            logging.info('oEmb[8]={}'.format(model.Embed([8],'oEmb')))
             model.train()
             if args.method == 'sgram':
                 loss = model.forward_sgram(batch)
@@ -92,7 +90,6 @@ def do_train(args):
             else:
                 logging.error('bad -method option {}'.format(args.method))
                 sys.exit()
-            logging.info('loss={}'.format(loss))
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -426,7 +423,8 @@ class Word2Vec(nn.Module):
         nloss = neg_log_sigmoid.mean(1)                    #[bs] loss mean predicting all negative words
 
         loss = ploss.mean() + nloss.mean()
-        if torch.isnan(loss):
+        logging.info('loss={}'.format(loss))
+        if torch.isnan(loss).any():
             logging.error('nan detected in sgram_loss')
             sys.exit()        
             
