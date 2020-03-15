@@ -67,9 +67,11 @@ def do_train(args):
     token = OpenNMTTokenizer(args.name + '.token')
     vocab = Vocab()
     vocab.read(args.name + '.vocab')
-    model = Word2Vec(len(vocab), args.embedding_size, vocab.idx_unk, args.cuda)
+    model = Word2Vec(len(vocab), args.embedding_size, vocab.idx_unk)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, betas=(args.beta1,args.beta2), eps=args.eps)
     n_steps, model, optimizer = load_model_optim(args.name, args.embedding_size, vocab, model, optimizer)
+    if args.cuda:
+        model.cuda()
 
     dataset = Dataset(args, token, vocab)
     n_epochs = 0
@@ -115,9 +117,11 @@ def do_test(args):
     token = OpenNMTTokenizer(args.name + '.token')
     vocab = Vocab()
     vocab.read(args.name + '.vocab')
-    model = Word2Vec(len(vocab), args.embedding_size, vocab.idx_unk, args.cuda)
+    model = Word2Vec(len(vocab), args.embedding_size, vocab.idx_unk)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, betas=(args.beta1,args.beta2), eps=args.eps)
     n_steps, model, optimizer = load_model_optim(args.name, args.embedding_size, vocab, model, optimizer)
+    if args.cuda:
+        model.cuda()
 
     if args.sim == 'cos':
         distance = nn.CosineSimilarity(dim=1, eps=1e-6)
@@ -327,16 +331,13 @@ class Args():
 ### Word2Vec #######################################################
 ####################################################################
 class Word2Vec(nn.Module):
-    def __init__(self, vs, ds, pad_idx, cuda):
+    def __init__(self, vs, ds, pad_idx):
         super(Word2Vec, self).__init__()
-        self.cuda = cuda
         self.vs = vs
         self.ds = ds
         self.pad_idx = pad_idx
         self.iEmb = nn.Embedding(self.vs, self.ds, padding_idx=self.pad_idx)#, max_norm=float(ds), norm_type=2)
         self.oEmb = nn.Embedding(self.vs, self.ds, padding_idx=self.pad_idx)#, max_norm=float(ds), norm_type=2)
-        if cuda:
-            self.cuda()
         #nn.init.xavier_uniform_(self.iEmb.weight)
         #nn.init.xavier_uniform_(self.oEmb.weight)
         nn.init.uniform_(self.iEmb.weight, -0.1, 0.1)
@@ -346,7 +347,7 @@ class Word2Vec(nn.Module):
         #isnt [bs, lw] batch of sentences (list of list of words)
         #mask [bs, lw] contains 0.0 for masked words, 1.0 for unmaksed ones
         snt = torch.as_tensor(snt) ### [bs,lw] batch with sentence words
-        if self.cuda:
+        if self.iEmb.weight.is_cuda():
             snt = snt.cuda()
         emb = self.iEmb(snt) #[bs,lw,ds]
         if pooling == 'max':
@@ -365,7 +366,7 @@ class Word2Vec(nn.Module):
 
     def Embed(self, wrd, layer):
         wrd = torch.as_tensor(wrd) 
-        if self.cuda:
+         if self.iEmb.weight.is_cuda():
             wrd = wrd.cuda()
         if torch.isnan(wrd).any():
             logging.error('nan detected in inut wrds {}'.format(wrd))
