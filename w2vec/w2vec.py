@@ -381,7 +381,7 @@ class Word2Vec(nn.Module):
         wrd = torch.as_tensor(wrd) 
         if self.iEmb.weight.is_cuda:
             wrd = wrd.cuda()
-        if torch.isnan(wrd).any():
+        if torch.isnan(wrd).any() or torch.isinf(wrd).any():
             logging.error('NaN detected in input wrd {}'.format(wrd))
             sys.exit()            
         if layer == 'iEmb':
@@ -391,7 +391,7 @@ class Word2Vec(nn.Module):
         else:
             logging.error('bad layer {}'.format(layer))
             sys.exit()
-        if torch.isnan(emb).any():
+        if torch.isnan(emb).any() or torch.isinf(emb).any():
             logging.error('NaN detected in {} layer emb.shape={}\nwrds {}'.format(layer,emb.shape,wrd))
             self.NaN(wrd,emb)
             sys.exit()
@@ -415,17 +415,18 @@ class Word2Vec(nn.Module):
         out = torch.bmm(cemb, emb.unsqueeze(2)).squeeze() #[bs,2*window,ds] x [bs,ds,1] = [bs,2*window,1] => [bs,2*window]
         neg_log_sigmoid = out.sigmoid().log().neg()       #[bs,2*window]
         ploss = neg_log_sigmoid.mean(1)                   #[bs] loss mean predicting all positive words
+        logging.info('ploss = {}'.format(ploss))
         # for negative words, the probability should be 0.0, then
         # if prob=1.0 => neg(log(-prob+1))=Inf
         # if prob=0.0 => neg(log(-prob+1))=0.0
         out = torch.bmm(nemb, emb.unsqueeze(2)).squeeze()  #[bs,n_negs]
         neg_log_sigmoid = (-out.sigmoid()+1.0).log().neg() #[bs,2*window]
         nloss = neg_log_sigmoid.mean(1)                    #[bs] loss mean predicting all negative words
+        logging.info('nloss = {}'.format(nloss))
 
         loss = ploss.mean() + nloss.mean()
-        logging.info('loss = {} + {}'.format(ploss.mean(),nloss.mean()))
-        if torch.isnan(loss).any():
-            logging.error('nan detected in sgram_loss')
+        if torch.isnan(loss).any() or torch.isinf(loss).any():
+            logging.error('nan detected in sgram_loss for words {}, {}, {}'.format(batch[0],batch[1],batch[2]))
             sys.exit()        
             
         return loss
