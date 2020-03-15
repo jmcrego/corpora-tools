@@ -82,6 +82,8 @@ def do_train(args):
     while True:
         n_epochs += 1
         for batch in dataset:
+            logging.info('iEmb[8]={}'.format(model.Embed([8],'iEmb')))
+            logging.info('oEmb[8]={}'.format(model.Embed([8],'oEmb')))
             model.train()
             if args.method == 'sgram':
                 loss = model.forward_sgram(batch)
@@ -90,8 +92,7 @@ def do_train(args):
             else:
                 logging.error('bad -method option {}'.format(args.method))
                 sys.exit()
-            logging.info('iEmb[8]={}'.format(model.Embed([8],'iEmb')))
-            logging.info('oEmb[8]={}'.format(model.Embed([8],'oEmb')))
+            logging.info('loss={}'.format(loss))
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
