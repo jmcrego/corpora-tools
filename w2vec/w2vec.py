@@ -367,8 +367,15 @@ class Word2Vec(nn.Module):
             sys.exit()
         return semb
 
-#    def nan_2D(self, wrd, emb):
-#        for b in range wrd:
+
+    def NaN(self, wrd, emb):
+        if len(wrd.shape) == 1:
+            for i in range(len(wrd)):
+                if torch.isnan(emb[i]):
+                    logging.error('NaN detected in inut\nwrd {}\nemb {}'.format(wrd[i],emb[i]))
+        else:
+            for i in range(len(wrd)):
+                self.NaN(wrd[i],emb[i])
 
     def Embed(self, wrd, layer):
         wrd = torch.as_tensor(wrd) 
@@ -385,18 +392,8 @@ class Word2Vec(nn.Module):
             logging.error('bad layer {}'.format(layer))
             sys.exit()
         if torch.isnan(emb).any():
-            logging.error('nan detected in {} layer.shape is {}\n{}'.format(layer,emb.shape,emb))
-            for b in range(len(wrd)):
-                if len(wrd[b].shape)>1:
-                    for i in range(len(wrd[b])):
-                        if len(wrd[b][i].shape)>1:
-                            for j in range(len(wrd[b])):
-                                if torch.isnan(wrd[b][i][j]):
-                                    logging.error('wrd {} emb {}'.format(wrd[b][i][j],emb[b][i][j]))
-                        elif torch.isnan(emb[b][i]).any():
-                            logging.error('wrd {} emb {}'.format(wrd[b][i],emb[b][i]))
-                elif torch.isnan(emb[b]).any():
-                    logging.error('wrd {} emb {}'.format(wrd[b],emb[b]))
+            logging.error('nan detected in {} layer emb.shape={}'.format(layer,emb.shape))
+            self.NaN(wrd,emb)
             sys.exit()
         return emb
 
