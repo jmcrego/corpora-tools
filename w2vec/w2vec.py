@@ -56,19 +56,6 @@ def save_model_optim(pattern, model, optimizer, n_steps, keep_last_n):
         os.remove(f) ### first is the oldest
         logging.debug('removed checkpoint {}'.format(f))
 
-def add_weight_decay(net, value, skip_list=()):
-    decay, no_decay = [], []
-    for name, param in net.named_parameters():
-        #print(name,param.shape)
-        if not param.requires_grad: 
-            continue # frozen weights                 
-        if len(param.shape) == 1 or skip_list: 
-            no_decay.append(param)
-        else: 
-            decay.append(param)
-    sys.exit()
-    return [{'params': no_decay, 'weight_decay': 0.}, {'params': decay, 'weight_decay': value}]
-
 def do_train(args):
     if not os.path.exists(args.name + '.token'):
         logging.error('missing {} file (run preprocess mode)'.format(args.name + '.token'))
@@ -81,14 +68,12 @@ def do_train(args):
     vocab = Vocab()
     vocab.read(args.name + '.vocab')
     model = Word2Vec(len(vocab), args.embedding_size, vocab.idx_unk)
-#    params = add_weight_decay(model, 2e-5, ['iEmb.weight', 'oEmb.weight'])
-
+    if args.cuda:
+        model.cuda()
     optimizer = torch.optim.SGD(model.parameters(), lr=0.05)
 #    optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, betas=(args.beta1,args.beta2), eps=args.eps)
 
     n_steps, model, optimizer = load_model_optim(args.name, args.embedding_size, vocab, model, optimizer)
-    if args.cuda:
-        model.cuda()
 
     dataset = Dataset(args, token, vocab)
     n_epochs = 0
