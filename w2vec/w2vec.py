@@ -379,7 +379,15 @@ class Word2Vec(nn.Module):
             logging.error('bad layer {}'.format(layer))
             sys.exit()
         if torch.isnan(emb).any():
-            logging.error('nan detected in {} layer {}'.format(layer,emb))
+            logging.error('nan detected in {} layer\n{}'.format(layer,emb))
+            for b in range(len(wrd)):
+                for i in range(len(wrd[b])):
+                    if len(wrd[b].shape)>1:
+                        for j in range(len(wrd[b])):
+                            if torch.isnan(wrd[b][i]):
+                                logging.error('wrd {} emb {}'.format(wrd[b][i],emb[b][i]))
+                    elif torch.isnan(wrd[b]):
+                            logging.error('wrd {} emb {}'.format(wrd[b],emb[b]))
             sys.exit()
         return emb
 
