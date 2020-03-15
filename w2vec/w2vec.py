@@ -423,7 +423,7 @@ class Word2Vec(nn.Module):
         nloss = neg_log_sigmoid.mean(1)                    #[bs] loss mean predicting all negative words
 
         loss = ploss.mean() + nloss.mean()
-        logging.info('loss={}'.format(loss))
+        logging.info('loss = {} + {}'.format(ploss.mean(),nloss.mean()))
         if torch.isnan(loss).any():
             logging.error('nan detected in sgram_loss')
             sys.exit()        
