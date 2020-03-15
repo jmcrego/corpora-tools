@@ -130,7 +130,7 @@ def do_test(args):
     with torch.no_grad():
         model.eval()
         voc_i = [i for i in range(0,len(vocab))]
-        voc_e = model.forward_wrd_iemb(voc_i)
+        voc_e = model.Embed(voc_i,'iEmb')
         for file in args.data:
             f, is_gzip = open_file_read(file)
             for l in f:
@@ -140,7 +140,7 @@ def do_test(args):
                 for wrd in toks:
                     i = vocab[wrd]
                     wrd_i = [i] * len(vocab)
-                    wrd_e = model.forward_wrd_iemb(wrd_i)
+                    wrd_e = model.Embed(wrd_i,'iEmb')
 
                     dist = distance(wrd_e,voc_e)
                     mininds = torch.argsort(dist,dim=0,descending=True)
@@ -363,35 +363,22 @@ class Word2Vec(nn.Module):
             sys.exit()
         return semb
 
-    def forward_wrd_iemb(self, wrd):
-        #batch of words (list)
-        wrd = torch.as_tensor(wrd) ### [bs] batch with single word/s
+    def Embed(self, wrd, layer):
+        wrd = torch.as_tensor(wrd) 
         if self.cuda:
             wrd = wrd.cuda()
-        emb = self.iEmb(wrd) #[bs,ds]
-        if torch.isnan(emb).any():
-            logging.error('nan detected in wrd_iemb')
-            for b in range(emb.shape[0]):
-                for i in range(emb.shape[1]):
-                    if torch.isnan(emb[b][i]).any():
-                        logging.debug(wrd[b][i])
-                        logging.debug(emb[b][i])
+        if torch.isnan(wrd).any():
+            logging.error('nan detected in inut wrds {}'.format(wrd))
+            sys.exit()            
+        if layer == 'iEmb':
+            emb = self.iEmb(wrd) #[bs,ds]
+        elif layer == 'oEmb':
+            emb = self.oEmb(wrd) #[bs,ds]
+        else:
+            logging.error('bad layer {}'.format(layer))
             sys.exit()
-        return emb
-
-    def forward_wrd_oemb(self, wrd):
-        #batch of words (list)
-        wrd = torch.as_tensor(wrd) ### [bs] batch with single word/s
-        if self.cuda:
-            wrd = wrd.cuda()
-        emb = self.oEmb(wrd) #[bs,ds]
         if torch.isnan(emb).any():
-            logging.error('nan detected in wrd_oemb')
-            for b in range(emb.shape[0]):
-                for i in range(emb.shape[1]):
-                    if torch.isnan(emb[b][i]).any():
-                        logging.debug(wrd[b][i])
-                        logging.debug(emb[b][i])
+            logging.error('nan detected in {} layer'.format(layer))
             sys.exit()
         return emb
 
@@ -399,9 +386,9 @@ class Word2Vec(nn.Module):
         #batch[0] : batch of words (list)
         #batch[1] : batch of context words (list of list)
         #batch[2] : batch of negative words (list of list)
-        emb  = self.forward_wrd_iemb(batch[0]) #[bs,ds,1]
-        cemb = self.forward_wrd_oemb(batch[1]) #[bs,2*window,ds]
-        nemb = self.forward_wrd_oemb(batch[2]) #[bs,n_negs,ds]
+        emb  = self.Embed(batch[0],'iEmb') #[bs,ds,1]
+        cemb = self.Embed(batch[1],'oEmb') #[bs,2*window,ds]
+        nemb = self.Embed(batch[2],'oEmb') #[bs,n_negs,ds]
         # the output layer generates probabilities for each vocabulary item (using a softmax)
         # in our case, probabilities are generated only for selected context/negative words
         # for which probabilities are simulated following the sigmoid
@@ -411,17 +398,18 @@ class Word2Vec(nn.Module):
         # if prob=1.0 => neg(log(prob))=0.0
         # if prob=0.0 => neg(log(prob))=Inf
         out = torch.bmm(cemb, emb.unsqueeze(2)).squeeze() #[bs,2*window,ds] x [bs,ds,1] = [bs,2*window,1] => [bs,2*window]
-        neg_log_sigmoid = out.sigmoid().log().neg() #[bs,2*window]
-        ploss = neg_log_sigmoid.mean(1) #[bs] loss mean predicting all positive words
+        neg_log_sigmoid = out.sigmoid().log().neg()       #[bs,2*window]
+        ploss = neg_log_sigmoid.mean(1)                   #[bs] loss mean predicting all positive words
         # for negative words, the probability should be 0.0, then
         # if prob=1.0 => neg(log(-prob+1))=Inf
         # if prob=0.0 => neg(log(-prob+1))=0.0
-        out = torch.bmm(nemb, emb.unsqueeze(2)).squeeze() #[bs,n_negs]
+        out = torch.bmm(nemb, emb.unsqueeze(2)).squeeze()  #[bs,n_negs]
         neg_log_sigmoid = (-out.sigmoid()+1.0).log().neg() #[bs,2*window]
-        nloss = neg_log_sigmoid.mean(1) #[bs] mean predicting all negative words
+        nloss = neg_log_sigmoid.mean(1)                    #[bs] loss mean predicting all negative words
+
         loss = ploss.mean() + nloss.mean()
         if torch.isnan(loss):
-            logging.error('nan detected in loss')
+            logging.error('nan detected in sgram_loss')
             sys.exit()        
             
         return loss
@@ -430,9 +418,9 @@ class Word2Vec(nn.Module):
         #batch[0] : batch of words (list)
         #batch[1] : batch of context words (list of list)
         #batch[2] : batch of negative words (list of list)
-        emb = self.forward_wrd_oemb(batch[0]) #[bs,ds,1]
-        cemb = self.forward_wrd_iemb(batch[1]) #[bs,2*window,ds]
-        nemb = self.forward_wrd_iemb(batch[2]) #[bs,n_negs,ds]
+        emb  = self.Embed(batch[0],'oEmb') #[bs,ds,1]
+        cemb = self.Embed(batch[1],'iEmb') #[bs,2*window,ds]
+        nemb = self.Embed(batch[2],'iEmb') #[bs,n_negs,ds]
         cemb_mean = torch.mean(cemb, dim=1) #[bs,ds] #mean of context words
         nemb_mean = torch.mean(nemb, dim=1) #[bs,ds] #mean of negative words
         # for context words, the probability should be 1.0, then
@@ -447,9 +435,10 @@ class Word2Vec(nn.Module):
         out = torch.bmm(nemb_mean.unsqueeze(1), emb.unsqueeze(-1)).squeeze() #[bs]
         neg_log_sigmoid = (-out.sigmoid()+1.0).log().neg() #[bs]
         nloss = neg_log_sigmoid.mean() #[bs]
+
         loss = ploss + nloss
         if torch.isnan(loss):
-            logging.error('nan detected in loss')
+            logging.error('nan detected in cbow_loss')
             sys.exit()
 
         return loss
