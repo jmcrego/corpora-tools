@@ -347,7 +347,7 @@ class Word2Vec(nn.Module):
         #isnt [bs, lw] batch of sentences (list of list of words)
         #mask [bs, lw] contains 0.0 for masked words, 1.0 for unmaksed ones
         snt = torch.as_tensor(snt) ### [bs,lw] batch with sentence words
-        if self.iEmb.weight.is_cuda():
+        if self.iEmb.weight.is_cuda:
             snt = snt.cuda()
         emb = self.iEmb(snt) #[bs,lw,ds]
         if pooling == 'max':
@@ -366,7 +366,7 @@ class Word2Vec(nn.Module):
 
     def Embed(self, wrd, layer):
         wrd = torch.as_tensor(wrd) 
-        if self.iEmb.weight.is_cuda():
+        if self.iEmb.weight.is_cuda:
             wrd = wrd.cuda()
         if torch.isnan(wrd).any():
             logging.error('nan detected in inut wrds {}'.format(wrd))
