@@ -90,7 +90,8 @@ def do_train(args):
             else:
                 logging.error('bad -method option {}'.format(args.method))
                 sys.exit()
-            logging.info('emb[8]={}'.format(model.Embed([8],'iEmb')))
+            logging.info('iEmb[8]={}'.format(model.Embed([8],'iEmb')))
+            logging.info('oEmb[8]={}'.format(model.Embed([8],'oEmb')))
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
