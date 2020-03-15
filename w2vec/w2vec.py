@@ -381,7 +381,7 @@ class Word2Vec(nn.Module):
         if torch.isnan(emb).any():
             logging.error('nan detected in {} layer\n{}'.format(layer,emb))
             for b in range(len(wrd)):
-                if len(range(wrd[b].shape))>1:
+                if len(wrd[b].shape)>1:
                     for i in range(len(wrd[b])):
                         if len(wrd[b][i].shape)>1:
                             for j in range(len(wrd[b])):
