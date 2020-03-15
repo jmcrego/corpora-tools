@@ -371,8 +371,8 @@ class Word2Vec(nn.Module):
     def NaN(self, wrd, emb):
         if len(wrd.shape) == 1:
             for i in range(len(wrd)):
-                if torch.isnan(emb[i]).any():
-                    logging.error('NaN detected\nwrd {}\nemb {}'.format(wrd[i],emb[i]))
+                if torch.isnan(emb[i]).any() or torch.isinf(emb[i]).any():
+                    logging.error('NaN/Inf detected\nwrd {}\nemb {}'.format(wrd[i],emb[i]))
         else:
             for i in range(len(wrd)):
                 self.NaN(wrd[i],emb[i])
@@ -382,7 +382,7 @@ class Word2Vec(nn.Module):
         if self.iEmb.weight.is_cuda:
             wrd = wrd.cuda()
         if torch.isnan(wrd).any() or torch.isinf(wrd).any():
-            logging.error('NaN detected in input wrd {}'.format(wrd))
+            logging.error('NaN/Inf detected in input wrd {}'.format(wrd))
             sys.exit()            
         if layer == 'iEmb':
             emb = self.iEmb(wrd) #[bs,ds]
@@ -392,7 +392,7 @@ class Word2Vec(nn.Module):
             logging.error('bad layer {}'.format(layer))
             sys.exit()
         if torch.isnan(emb).any() or torch.isinf(emb).any():
-            logging.error('NaN detected in {} layer emb.shape={}\nwrds {}'.format(layer,emb.shape,wrd))
+            logging.error('NaN/Inf detected in {} layer emb.shape={}\nwrds {}'.format(layer,emb.shape,wrd))
             self.NaN(wrd,emb)
             sys.exit()
         return emb
@@ -413,26 +413,22 @@ class Word2Vec(nn.Module):
         # if prob=1.0 => neg(log(prob))=0.0
         # if prob=0.0 => neg(log(prob))=Inf
         out = torch.bmm(cemb, emb.unsqueeze(2)).squeeze() #[bs,2*window,ds] x [bs,ds,1] = [bs,2*window,1] => [bs,2*window]
-        neg_log_sigmoid = out.sigmoid().log().neg()       #[bs,2*window]
+        sigmoid = out.sigmoid().clamp(0.000001,1.0)
+        neg_log_sigmoid = sigmoid.log().neg()       #[bs,2*window]
         ploss = neg_log_sigmoid.mean(1)                   #[bs] loss mean predicting all positive words
 #        logging.info('ploss = {}'.format(ploss))
         # for negative words, the probability should be 0.0, then
         # if prob=1.0 => neg(log(-prob+1))=Inf
         # if prob=0.0 => neg(log(-prob+1))=0.0
         out = torch.bmm(nemb, emb.unsqueeze(2)).squeeze()  #[bs,n_negs]
-        neg_log_sigmoid = (-out.sigmoid()+1.0).log().neg() #[bs,2*window]
+        sigmoid = out.sigmoid().clamp(0.000001,1.0)
+        neg_log_sigmoid = (-sigmoid+1.0).log().neg() #[bs,2*window]
         nloss = neg_log_sigmoid.mean(1)                    #[bs] loss mean predicting all negative words
 #        logging.info('nloss = {}'.format(nloss))
 
         loss = ploss.mean() + nloss.mean()
-        if torch.isnan(loss).any():
-            logging.warning('nan detected')
-            loss += 0.01
-        if torch.isinf(loss).any():
-            logging.warning('inf detected')
-            loss = torch.ones([1]) * 0.01
         if torch.isnan(loss).any() or torch.isinf(loss).any():
-            logging.error('nan detected in sgram_loss for words {}, {}, {}'.format(batch[0],batch[1],batch[2]))
+            logging.error('NaN/Inf detected in sgram_loss for words {}, {}, {}'.format(batch[0],batch[1],batch[2]))
             sys.exit()        
             
         return loss
