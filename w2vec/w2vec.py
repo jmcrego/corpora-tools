@@ -367,6 +367,9 @@ class Word2Vec(nn.Module):
             sys.exit()
         return semb
 
+    def nan_2D(self, wrd, emb):
+        for b in range wrd:
+
     def Embed(self, wrd, layer):
         wrd = torch.as_tensor(wrd) 
         if self.iEmb.weight.is_cuda:
@@ -390,9 +393,9 @@ class Word2Vec(nn.Module):
                             for j in range(len(wrd[b])):
                                 if torch.isnan(wrd[b][i][j]):
                                     logging.error('wrd {} emb {}'.format(wrd[b][i][j],emb[b][i][j]))
-                        elif torch.isnan(emb[b][i].any()):
+                        elif torch.isnan(emb[b][i]).any():
                             logging.error('wrd {} emb {}'.format(wrd[b][i],emb[b][i]))
-                elif torch.isnan(emb[b].any()):
+                elif torch.isnan(emb[b]).any():
                     logging.error('wrd {} emb {}'.format(wrd[b],emb[b]))
             sys.exit()
         return emb
