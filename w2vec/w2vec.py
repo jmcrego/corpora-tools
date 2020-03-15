@@ -366,7 +366,7 @@ class Word2Vec(nn.Module):
 
     def Embed(self, wrd, layer):
         wrd = torch.as_tensor(wrd) 
-         if self.iEmb.weight.is_cuda():
+        if self.iEmb.weight.is_cuda():
             wrd = wrd.cuda()
         if torch.isnan(wrd).any():
             logging.error('nan detected in inut wrds {}'.format(wrd))
