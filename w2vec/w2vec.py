@@ -421,7 +421,7 @@ class Word2Vec(nn.Module):
         # if prob=1.0 => neg(log(-prob+1))=Inf
         # if prob=0.0 => neg(log(-prob+1))=0.0
         out = torch.bmm(nemb, emb.unsqueeze(2)).squeeze()  #[bs,n_negs]
-        sigmoid = out.sigmoid().clamp(0.000001,1.0)
+        sigmoid = out.sigmoid().clamp(0.0,0.999)
         neg_log_sigmoid = (-sigmoid+1.0).log().neg() #[bs,2*window]
         nloss = neg_log_sigmoid.mean(1)                    #[bs] loss mean predicting all negative words
 #        logging.info('nloss = {}'.format(nloss))
