@@ -137,17 +137,18 @@ class Vocab():
 ####################################################################
 class Dataset():
 
-    def __init__(self, files, token, vocab, batch_size=128, window=5, n_negs=10, skip_subsampling=True):
-        self.batch_size = batch_size
+    def __init__(self, args, token, vocab):
+        self.batch_size = args.batch_size
         self.vocab_size = len(vocab)
-        self.window = window
-        self.n_negs = n_negs
         self.idx_pad = vocab.idx_unk ### no need for additional token in vocab
+        self.window = args.window
+        self.n_negs = args.n_negs
+        self.skip_subsampling = args.skip_subsampling
         self.corpus = []
         self.wrd2n = defaultdict(int)
         ntokens = 0
         nOOV = 0
-        for file in files:
+        for file in args.data:
             f, is_gzip = open_file_read(file)
             for l in f:
                 if is_gzip:
@@ -163,9 +164,9 @@ class Dataset():
                 ntokens += len(toks)
             f.close()
         pOOV = 100.0 * nOOV / ntokens
-        logging.info('read {} sentences with {} tokens (%OOV={:.2f}) [batch_size={}, window={}, n_negs={}, skip_subsampling={}]'.format(len(self.corpus),ntokens,pOOV,batch_size,window,n_negs,skip_subsampling))
+        logging.info('read {} sentences with {} tokens (%OOV={:.2f}) [batch_size={}, window={}, n_negs={}, skip_subsampling={}]'.format(len(self.corpus),ntokens,pOOV,self.batch_size,self.window,self.n_negs,self.skip_subsampling))
         ### subsample
-        if not skip_subsampling:
+        if not self.skip_subsampling:
             ntokens = self.SubSample(ntokens)
             logging.info('subsampled to {} tokens'.format(ntokens))
 
