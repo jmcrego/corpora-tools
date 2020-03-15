@@ -378,7 +378,7 @@ class Word2Vec(nn.Module):
             logging.error('bad layer {}'.format(layer))
             sys.exit()
         if torch.isnan(emb).any():
-            logging.error('nan detected in {} layer'.format(layer))
+            logging.error('nan detected in {} layer {}'.format(layer,emb))
             sys.exit()
         return emb
 
