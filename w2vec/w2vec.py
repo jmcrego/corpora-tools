@@ -70,8 +70,9 @@ def do_train(args):
     model = Word2Vec(len(vocab), args.embedding_size, vocab.idx_unk)
     if args.cuda:
         model.cuda()
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.05)
 #    optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, betas=(args.beta1,args.beta2), eps=args.eps)
+#    optimizer = torch.optim.SGD(model.parameters(), lr=0.05)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=args.learning_rate, betas=(args.beta1, args.beta2), eps=args.eps, weight_decay=0.0, amsgrad=False)
 
     n_steps, model, optimizer = load_model_optim(args.name, args.embedding_size, vocab, model, optimizer)
 
