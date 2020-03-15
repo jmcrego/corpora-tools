@@ -430,7 +430,7 @@ class Word2Vec(nn.Module):
             loss += 0.01
         if torch.isinf(loss).any():
             logging.warning('inf detected')
-            loss *= 0.01
+            loss = torch.ones([1]) * 0.01
         if torch.isnan(loss).any() or torch.isinf(loss).any():
             logging.error('nan detected in sgram_loss for words {}, {}, {}'.format(batch[0],batch[1],batch[2]))
             sys.exit()        
