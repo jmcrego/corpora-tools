@@ -367,8 +367,8 @@ class Word2Vec(nn.Module):
             sys.exit()
         return semb
 
-    def nan_2D(self, wrd, emb):
-        for b in range wrd:
+#    def nan_2D(self, wrd, emb):
+#        for b in range wrd:
 
     def Embed(self, wrd, layer):
         wrd = torch.as_tensor(wrd) 
