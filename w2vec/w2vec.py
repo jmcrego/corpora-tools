@@ -148,7 +148,6 @@ def do_test(args):
                     i = vocab[wrd]
                     wrd_i = [i] * len(vocab)
                     wrd_e = model.Embed(wrd_i,'iEmb')
-
                     dist = distance(wrd_e,voc_e)
                     mininds = torch.argsort(dist,dim=0,descending=True)
                     out = []
@@ -398,6 +397,8 @@ class Word2Vec(nn.Module):
         return emb
 
     def forward_sgram(self, batch):
+        min_ = 1e-06
+        max_ = 1.0 - 1e-06
         #batch[0] : batch of words (list)
         #batch[1] : batch of context words (list of list)
         #batch[2] : batch of negative words (list of list)
@@ -413,7 +414,7 @@ class Word2Vec(nn.Module):
         # if prob=1.0 => neg(log(prob))=0.0
         # if prob=0.0 => neg(log(prob))=Inf
         out = torch.bmm(cemb, emb.unsqueeze(2)).squeeze() #[bs,2*window,ds] x [bs,ds,1] = [bs,2*window,1] => [bs,2*window]
-        sigmoid = out.sigmoid().clamp(0.000001,1.0)
+        sigmoid = out.sigmoid().clamp(min_, max_)
         neg_log_sigmoid = sigmoid.log().neg()       #[bs,2*window]
         ploss = neg_log_sigmoid.mean(1)                   #[bs] loss mean predicting all positive words
 #        logging.info('ploss = {}'.format(ploss))
@@ -421,19 +422,21 @@ class Word2Vec(nn.Module):
         # if prob=1.0 => neg(log(-prob+1))=Inf
         # if prob=0.0 => neg(log(-prob+1))=0.0
         out = torch.bmm(nemb, emb.unsqueeze(2)).squeeze()  #[bs,n_negs]
-        sigmoid = out.sigmoid().clamp(0.0,0.999)
-        neg_log_sigmoid = (-sigmoid+1.0).log().neg() #[bs,2*window]
+        sigmoid = (-out.sigmoid()+1.0).clamp(min_, max_)
+        neg_log_sigmoid = sigmoid.log().neg() #[bs,2*window]
         nloss = neg_log_sigmoid.mean(1)                    #[bs] loss mean predicting all negative words
 #        logging.info('nloss = {}'.format(nloss))
 
         loss = ploss.mean() + nloss.mean()
         if torch.isnan(loss).any() or torch.isinf(loss).any():
-            logging.error('NaN/Inf detected in sgram_loss for words {}, {}, {}'.format(batch[0],batch[1],batch[2]))
+            logging.error('NaN/Inf detected in sgram_loss for batch {}'.format(batch))
             sys.exit()        
             
         return loss
 
     def forward_cbow(self, batch):
+        min_ = 1e-06
+        max_ = 1.0 - 1e-06
         #batch[0] : batch of words (list)
         #batch[1] : batch of context words (list of list)
         #batch[2] : batch of negative words (list of list)
@@ -446,18 +449,20 @@ class Word2Vec(nn.Module):
         # if prob=1.0 => neg(log(prob))=0.0
         # if prob=0.0 => neg(log(prob))=Inf
         out = torch.bmm(cemb_mean.unsqueeze(1), emb.unsqueeze(-1)).squeeze() #[bs,1,ds] x [bs,ds,1] = [bs,1,1] => [bs]
-        neg_log_sigmoid = out.sigmoid().log().neg() #[bs] 
-        ploss = neg_log_sigmoid.mean() #[bs]
+        sigmoid = out.sigmoid().clamp(min_, max_)
+        neg_log_sigmoid = sigmoid.log().neg() #[bs] 
+        ploss = neg_log_sigmoid.mean() #[1] mean loss predicting batch positive words
         # for negative words, the probability should be 0.0, then
         # if prob=1.0 => neg(log(-prob+1))=Inf
         # if prob=0.0 => neg(log(-prob+1))=0.0
         out = torch.bmm(nemb_mean.unsqueeze(1), emb.unsqueeze(-1)).squeeze() #[bs]
-        neg_log_sigmoid = (-out.sigmoid()+1.0).log().neg() #[bs]
-        nloss = neg_log_sigmoid.mean() #[bs]
+        sigmoid = (-out.sigmoid()+1.0).clamp(min_, max_)
+        neg_log_sigmoid = sigmoid.log().neg() #[bs]
+        nloss = neg_log_sigmoid.mean() #[1] mean loss predicting batch negative words
 
         loss = ploss + nloss
-        if torch.isnan(loss):
-            logging.error('nan detected in cbow_loss')
+        if torch.isnan(loss).any() or torch.isinf(loss).any():
+            logging.error('NaN/Inf detected in cbow_loss for batch {}'.format(batch))
             sys.exit()
 
         return loss
