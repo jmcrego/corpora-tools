@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 import torch
 import logging
 import yaml
@@ -72,7 +72,7 @@ def do_train(args):
         model.cuda()
 #    optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, betas=(args.beta1,args.beta2), eps=args.eps)
 #    optimizer = torch.optim.SGD(model.parameters(), lr=0.05)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=args.learning_rate, betas=(args.beta1, args.beta2), eps=args.eps, weight_decay=0.0, amsgrad=False)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=args.learning_rate, betas=(args.beta1, args.beta2), eps=args.eps, weight_decay=0.01, amsgrad=False)
 
     n_steps, model, optimizer = load_model_optim(args.name, args.embedding_size, vocab, model, optimizer)
 
