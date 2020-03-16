@@ -442,21 +442,20 @@ class Word2Vec(nn.Module):
         #batch[2] : batch of negative words (list of list)
         emb  = self.Embed(batch[0],'oEmb') #[bs,ds,1]
         cemb = self.Embed(batch[1],'iEmb') #[bs,2*window,ds]
-        nemb = self.Embed(batch[2],'iEmb') #[bs,n_negs,ds]
+        nemb = self.Embed(batch[2][0],'oEmb') #[bs,ds] (i take the first negative word)
         cemb_mean = torch.mean(cemb, dim=1) #[bs,ds] #mean of context words
-        nemb_mean = torch.mean(nemb, dim=1) #[bs,ds] #mean of negative words
         # for context words, the probability should be 1.0, then
         # if prob=1.0 => neg(log(prob))=0.0
         # if prob=0.0 => neg(log(prob))=Inf
         out = torch.bmm(cemb_mean.unsqueeze(1), emb.unsqueeze(-1)).squeeze() #[bs,1,ds] x [bs,ds,1] = [bs,1,1] => [bs]
-        sigmoid = out.sigmoid().clamp(min_, max_)
+        sigmoid = out.sigmoid().clamp(min_, max_) #[bs]
         neg_log_sigmoid = sigmoid.log().neg() #[bs] 
         ploss = neg_log_sigmoid.mean() #[1] mean loss predicting batch positive words
         # for negative words, the probability should be 0.0, then
         # if prob=1.0 => neg(log(-prob+1))=Inf
         # if prob=0.0 => neg(log(-prob+1))=0.0
-        out = torch.bmm(nemb_mean.unsqueeze(1), emb.unsqueeze(-1)).squeeze() #[bs]
-        sigmoid = (-out.sigmoid()+1.0).clamp(min_, max_)
+        out = torch.bmm(cemb_mean.unsqueeze(1), nemb.unsqueeze(-1)).squeeze() #[bs,1,ds] x [bs, ds, 1] = [bs,1,1] => [bs]
+        sigmoid = (-out.sigmoid()+1.0).clamp(min_, max_) #[bs]
         neg_log_sigmoid = sigmoid.log().neg() #[bs]
         nloss = neg_log_sigmoid.mean() #[1] mean loss predicting batch negative words
 
