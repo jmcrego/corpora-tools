@@ -106,7 +106,7 @@ def do_train(args):
             break
     save_model_optim(args.name, model, optimizer, n_steps, args.keep_last_n)
 
-def do_test(args):
+def do_infer(args):
     if not os.path.exists(args.name + '.token'):
         logging.error('missing {} file (run preprocess mode)'.format(args.name + '.token'))
         sys.exit()
@@ -219,7 +219,7 @@ class Args():
         self.prog = argv.pop(0)
         self.usage = '''usage: {} -name STRING -mode STRING -data FILES [Options]
    -name         STRING : experiment name
-   -mode         STRING : train, test, preprocess
+   -mode         STRING : train, infer, preprocess
    -data          FILES : comma-separated OR with scaped wildcards
 
  Options:
@@ -480,8 +480,8 @@ if __name__ == "__main__":
     elif args.mode == 'train':
         do_train(args)
 
-    elif args.mode == 'test':
-        do_test(args)
+    elif args.mode == 'infer':
+        do_infer(args)
 
     else:
         logging.error('bad -mode option {}'.format(args.mode))
