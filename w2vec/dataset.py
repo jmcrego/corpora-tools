@@ -143,6 +143,7 @@ class Dataset():
         self.idx_pad = vocab.idx_unk ### no need for additional token in vocab
         self.window = args.window
         self.n_negs = args.n_negs
+        self.method = args.method
         self.skip_subsampling = args.skip_subsampling
         self.corpus = []
         self.wrd2n = defaultdict(int)
@@ -154,33 +155,57 @@ class Dataset():
                 if is_gzip:
                     l = l.decode('utf8')
                 toks = token.tokenize(l.strip(' \n'))
-                self.corpus.append([])
+                if len(toks) < 2:
+                    continue
+                idxs = []
                 for tok in toks:
                     idx = vocab[tok]
                     if idx == vocab.idx_unk:
                         nOOV += 1
-                    self.corpus[-1].append(idx)
+                    idxs.append(idx)
                     self.wrd2n[idx] += 1
-                ntokens += len(toks)
+                self.corpus.append(idxs)
+                ntokens += len(idxs)
             f.close()
         pOOV = 100.0 * nOOV / ntokens
-        logging.info('read {} sentences with {} tokens (%OOV={:.2f}) [batch_size={}, window={}, n_negs={}, skip_subsampling={}]'.format(len(self.corpus),ntokens,pOOV,self.batch_size,self.window,self.n_negs,self.skip_subsampling))
+        logging.info('read {} sentences with {} tokens (%OOV={:.2f}) [batch_size={}, window={}, n_negs={}, skip_subsampling={}, method={}]'.format(len(self.corpus),ntokens,pOOV,self.batch_size,self.window,self.n_negs,self.skip_subsampling,self.method))
+
         ### subsample
         if not self.skip_subsampling:
             ntokens = self.SubSample(ntokens)
             logging.info('subsampled to {} tokens'.format(ntokens))
 
-    def __iter__(self):
-#        NS = self.NegativeSamples()
-        indexs = [i for i in range(len(self.corpus))]
-        random.shuffle(indexs)
+        ### build batchs
+        length = [len(self.corpus[i]) for i in range(len(self.corpus))]
+        indexs = np.argsort(np.array(length))
+        self.batchs = []
         batch_wrd = []
         batch_ctx = []
         batch_neg = []
+        batch_snt = []
+        batch_len = []
         for index in indexs:
             toks = self.corpus[index]
-            for i in range(len(toks)):
+            if len(toks) < 2: ### may be subsampled
+                continue
+
+#            print('toks',toks)
+            for i in range(len(toks)): #for each word in toks. Ex: 'a monster lives in my head'
+                ### i=2 wrd=lives
                 wrd = toks[i]
+                batch_wrd.append(wrd)
+
+                ### snt=[a, monster, in, my, head]
+                snt = list(toks)
+                del snt[i]
+                batch_snt.append(snt)
+                batch_len.append(len(snt))
+                if len(batch_snt) > 1 and len(snt) > len(batch_snt[0]): ### add padding
+                    for k in range(len(batch_snt)-1):
+                        addn = len(batch_snt[-1]) - len(batch_snt[k])
+                        batch_snt[k] += [self.idx_pad]*addn
+
+                ### window=2, ctx=[a, monster, in, my]
                 ctx = []
                 for j in range(i-self.window,i+self.window+1):
                     if j<0:
@@ -189,25 +214,45 @@ class Dataset():
                         ctx.append(self.idx_pad)
                     elif j!=i:
                         ctx.append(toks[j])
-#                neg = next(NS)
-#                neg = [random.randint(1, len(self.wrd2n)) for _ in range(self.neg_samples)]
+                batch_ctx.append(ctx)
+
+                ### n_negs=4 neg=[over, last, today, virus]
                 neg = []
                 for _ in range(self.n_negs):
-                    idx = wrd
+                    idx = random.randint(1, self.vocab_size-1)
                     while idx in ctx or idx == wrd:
                         idx = random.randint(1, self.vocab_size-1)
                     neg.append(idx)
-
-                batch_wrd.append(wrd)
-                batch_ctx.append(ctx)
                 batch_neg.append(neg)
+
+#                print('\ti={}'.format(i))
+#                print('\tbatch_wrd', batch_wrd)
+#                print('\tbatch_ctx', batch_ctx)
+#                print('\tbatch_neg', batch_neg)
+#                print('\tbatch_snt', batch_snt)
+#                print('\tbatch_len', batch_len)
+
                 if len(batch_wrd) == self.batch_size:
-                    yield [batch_wrd, batch_ctx, batch_neg]
+                    self.batchs.append([batch_wrd, batch_ctx, batch_neg, batch_snt, batch_len])
                     batch_wrd = []
                     batch_ctx = []
                     batch_neg = []
+                    batch_snt = []
+                    batch_len = []
+
         if len(batch_wrd):
-            yield [batch_wrd, batch_ctx, batch_neg]
+            self.batchs.append([batch_wrd, batch_ctx, batch_neg, batch_snt, batch_len])
+
+        logging.info('built {} batchs'.format(len(self.batchs)))
+        del self.corpus
+        del self.wrd2n
+
+    def __iter__(self):
+        indexs = [i for i in range(len(self.batchs))]
+        random.shuffle(indexs)
+        for index in indexs:
+            yield self.batchs[index]
+
 
     def SubSample(self, sum_counts):
 #        wrd2n = dict(Counter(list(itertools.chain.from_iterable(self.corpus))))

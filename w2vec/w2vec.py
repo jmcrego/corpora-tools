@@ -15,6 +15,14 @@ import torch.nn as nn
 from collections import Counter
 from dataset import Dataset, Vocab, OpenNMTTokenizer, open_file_read
 
+def sequence_mask(lengths):
+    lengths = np.array(lengths)
+    bs = len(lengths)
+    l = lengths.max()
+    msk = np.cumsum(np.ones([bs,l],dtype=int), axis=1).T #[l,bs] (transpose to allow combine with lenghts)
+    mask = (msk <= lengths) ### i use lenghts-1 because the last unpadded word is <eos> and i want it masked too
+    return mask.T #[bs,l]
+
 def create_logger(logfile, loglevel):
     numeric_level = getattr(logging, loglevel.upper(), None)
     if not isinstance(numeric_level, int):
@@ -87,6 +95,8 @@ def do_train(args):
                 loss = model.forward_sgram(batch)
             elif args.method == 'cbow':
                 loss = model.forward_cbow(batch)
+            elif args.method == 's2vec':
+                loss = model.forward_s2vec(batch)
             else:
                 logging.error('bad -method option {}'.format(args.method))
                 sys.exit()
@@ -345,22 +355,47 @@ class Word2Vec(nn.Module):
         nn.init.uniform_(self.iEmb.weight, -0.1, 0.1)
         nn.init.uniform_(self.oEmb.weight, -0.1, 0.1)
 
-    def forward_snt_iemb(self, snt, mask, pooling):
-        #isnt [bs, lw] batch of sentences (list of list of words)
+    def SentEmbed(self, snt, lens, layer, pooling):
+        #snt [bs, lw] batch of sentences (list of list of words)
+        #lns [bs] length of each sentence in batch
         #mask [bs, lw] contains 0.0 for masked words, 1.0 for unmaksed ones
+#        print('lens',lens)
         snt = torch.as_tensor(snt) ### [bs,lw] batch with sentence words
+#        print('snt.shape',snt.shape)
+        mask = torch.as_tensor(sequence_mask(lens))
+#        print('mask.shape',mask.shape)
         if self.iEmb.weight.is_cuda:
             snt = snt.cuda()
-        emb = self.iEmb(snt) #[bs,lw,ds]
+            mask = mask.cuda()
+
+        if layer == 'iEmb':
+            semb = self.iEmb(snt)       
+        elif layer == 'oEmb':
+            semb = self.oEmb(snt)       
+        else:
+            logging.error('bad layer value {}'.format(pooling))
+            sys.exit()
+
+#        print('semb.shape',semb.shape)
+
+
+        mask = mask.unsqueeze(-1) #[bs, lw, 1]
         if pooling == 'max':
             #torch.max returns the maximum value of each row of the input tensor in the given dimension dim.
             #since masked tokens after iemb*mask are 0.0 we need to make sure that 0.0 is not the max
             #so all these masked tokens are added -999.9
-            semb, _ = torch.max(emb*mask + (1.0-mask)*-999.9, dim=1) #-999.9 should be -Inf but it produces a nan when multiplied by 0.0            
+            semb, _ = torch.max(semb*mask + (1.0-mask)*-999.9, dim=1) #-999.9 should be -Inf but it produces a nan when multiplied by 0.0            
         elif pooling == 'avg':
-            semb = torch.sum(emb*mask, dim=1) / torch.sum(mask, dim=1) 
+            semb = semb*mask
+#            print('semb2.shape',semb.shape)
+            semb = torch.sum(semb, dim=1)
+#            print('semb3.shape',semb.shape)
+            semb = semb / torch.sum(mask, dim=1) 
+#            print('semb4.shape',semb.shape)
+#            sys.exit()
         else:
             logging.error('bad -pooling option {}'.format(pooling))
+            sys.exit()
         if torch.isnan(semb).any():
             logging.error('nan detected in snt_iemb')
             sys.exit()
@@ -460,6 +495,39 @@ class Word2Vec(nn.Module):
         loss = ploss + nloss.mean()
         if torch.isnan(loss).any() or torch.isinf(loss).any():
             logging.error('NaN/Inf detected in cbow_loss for batch {}'.format(batch))
+            sys.exit()
+
+        return loss
+
+    def forward_s2vec(self, batch):
+        min_ = 1e-06
+        max_ = 1.0 - 1e-06
+        #batch[0] : batch of words (list)
+        #batch[1] : batch of context words (list of list)
+        #batch[2] : batch of negative words (list of list)
+        #batch[3] : batch of sentences (list of list)
+        #batch[4] : batch of length of sentences (list of ints)
+        emb  = self.Embed(batch[0],'oEmb') #[bs,ds]
+        nemb = self.Embed(batch[2],'oEmb') #[bs,n_negs,ds]
+        semb = self.SentEmbed(batch[3], batch[4], 'iEmb', 'avg') #[bs,ds] #mean of sentences considering their lens
+        # for sentence, the probability should be 1.0, then
+        # if prob=1.0 => neg(log(prob))=0.0
+        # if prob=0.0 => neg(log(prob))=Inf
+        out = torch.bmm(semb.unsqueeze(1), emb.unsqueeze(-1)).squeeze() #[bs,1,ds] x [bs,ds,1] = [bs,1,1] => [bs]
+        sigmoid = out.sigmoid().clamp(min_, max_) #[bs]
+        neg_log_sigmoid = sigmoid.log().neg() #[bs] 
+        ploss = neg_log_sigmoid.mean() #[1] mean loss predicting batch positive words
+        # for negative words, the probability should be 0.0, then
+        # if prob=1.0 => neg(log(-prob+1))=Inf
+        # if prob=0.0 => neg(log(-prob+1))=0.0
+        out = torch.bmm(emb.unsqueeze(1), nemb.transpose(1,2)).squeeze(1) #[bs,1,ds] x [bs, ds, n_negs] = [bs,1,n_negs] => [bs,n_negs]
+        sigmoid = (-out.sigmoid()+1.0).clamp(min_, max_) #[bs,n_negs]
+        neg_log_sigmoid = sigmoid.log().neg() #[bs,n_negs]
+        nloss = neg_log_sigmoid.mean(1) #[bs] for each batch, mean of the negative words loss
+
+        loss = ploss + nloss.mean()
+        if torch.isnan(loss).any() or torch.isinf(loss).any():
+            logging.error('NaN/Inf detected in s2vec_loss for batch {}'.format(batch))
             sys.exit()
 
         return loss
