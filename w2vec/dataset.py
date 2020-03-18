@@ -248,9 +248,14 @@ class Dataset():
         batch_len = []
         batch_ind = []
         for index in indexs:
-            batch_snt.append(self.corpus[index])
-            batch_len.append(batch_snt[-1])
+            snt = self.corpus[index]
+            batch_snt.append(snt)
+            batch_len.append(len(snt))
             batch_ind.append(index)
+            if len(batch_snt) > 1 and len(snt) > len(batch_snt[0]): ### add padding
+                for k in range(len(batch_snt)-1):
+                    addn = len(batch_snt[-1]) - len(batch_snt[k])
+                    batch_snt[k] += [self.idx_pad]*addn
 
             if len(batch_snt) == self.batch_size:
                 self.batchs.append([batch_snt, batch_len, batch_ind])
