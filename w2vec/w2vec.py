@@ -192,14 +192,15 @@ def do_infer_sent(args):
     if args.cuda:
         model.cuda()
 
+    np.set_printoptions(precision=6)
     dataset = Dataset(args, token, vocab, skip_subsampling=True)
     dataset.build_batchs_infer_sent()
     with torch.no_grad():
         model.eval()
         for batch in dataset:
-            snts = map(str, model.SentEmbed(batch[0], batch[1], 'iEmb', args.pooling).cpu().detach().numpy())
+            snts = model.SentEmbed(batch[0], batch[1], 'iEmb', args.pooling).cpu().detach().numpy()
             for i in range(len(snts)):
-                print('{}\t{}'.format(batch[2][i], ' '.join(snts[i])))
+                print('{}\t{}'.format(batch[2][i], snts[i]))
 
 
 def do_preprocess(args):
