@@ -260,7 +260,7 @@ class Args():
         self.prog = argv.pop(0)
         self.usage = '''usage: {} -name STRING -mode STRING -data FILES [Options]
    -name         STRING : experiment name
-   -mode         STRING : train, infer, preprocess
+   -mode         STRING : train, infer_sent, infer_word, preprocess
    -data          FILES : comma-separated OR with scaped wildcards
 
  Options:
@@ -577,8 +577,11 @@ if __name__ == "__main__":
     elif args.mode == 'train':
         do_train(args)
 
-    elif args.mode == 'infer':
-        do_infer(args)
+    elif args.mode == 'infer_sent':
+        do_infer_sent(args)
+
+    elif args.mode == 'infer_word':
+        do_infer_word(args)
 
     else:
         logging.error('bad -mode option {}'.format(args.mode))
