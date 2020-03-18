@@ -153,8 +153,6 @@ class Dataset():
                 if is_gzip:
                     l = l.decode('utf8')
                 toks = token.tokenize(l.strip(' \n'))
-                if len(toks) < 2:
-                    continue
                 idxs = []
                 for tok in toks:
                     idx = vocab[tok]
@@ -166,7 +164,7 @@ class Dataset():
                 ntokens += len(idxs)
             f.close()
         pOOV = 100.0 * nOOV / ntokens
-        logging.info('read {} sentences with {} tokens (%OOV={:.2f})'.format(ntokens, pOOV))
+        logging.info('read {} sentences with {} tokens (%OOV={:.2f})'.format(len(self.corpus), ntokens, pOOV))
         ### subsample
         if not skip_subsampling:
             ntokens = self.SubSample(ntokens)
