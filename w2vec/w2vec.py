@@ -138,7 +138,7 @@ def do_infer_word(args):
         model.cuda()
 
     if args.sim == 'cos':
-        distance = nn.CosineSimilarity(dim=1, eps=1e-6)
+        distance = nn.CosineSimilarity(dim=0, eps=1e-6)
     elif args.sim == 'pairwise':
         distance = nn.PairwiseDistance(eps=1e-6)
     else:
