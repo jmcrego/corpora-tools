@@ -200,7 +200,8 @@ def do_infer_sent(args):
         for batch in dataset:
             snts = model.SentEmbed(batch[0], batch[1], 'iEmb', args.pooling).cpu().detach().numpy().tolist()
             for i in range(len(snts)):
-                print('{}\t{}'.format(batch[2][i], map(str, snts[i]) ))
+                sentence = [str(w) for w in snts[i]]
+                print('{}\t{}'.format(batch[2][i], ' '.join(sentence) ))
 
 
 def do_preprocess(args):
