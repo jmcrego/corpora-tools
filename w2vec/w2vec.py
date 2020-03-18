@@ -85,6 +85,7 @@ def do_train(args):
     n_steps, model, optimizer = load_model_optim(args.name, args.embedding_size, vocab, model, optimizer)
 
     dataset = Dataset(args, token, vocab)
+    dataset.build_batchs()
     n_epochs = 0
     losses = []
     while True:
@@ -116,7 +117,7 @@ def do_train(args):
             break
     save_model_optim(args.name, model, optimizer, n_steps, args.keep_last_n)
 
-def do_infer(args):
+def do_infer_word(args):
     if not os.path.exists(args.name + '.token'):
         logging.error('missing {} file (run preprocess mode)'.format(args.name + '.token'))
         sys.exit()
@@ -170,6 +171,36 @@ def do_infer(args):
                                 break
                     print('\t'.join(out))
             f.close()
+
+def do_infer_sent(args):
+    if not os.path.exists(args.name + '.token'):
+        logging.error('missing {} file (run preprocess mode)'.format(args.name + '.token'))
+        sys.exit()
+    if not os.path.exists(args.name + '.vocab'):
+        logging.error('missing {} file (run preprocess mode)'.format(args.name + '.vocab'))
+        sys.exit()
+    if len(glob.glob(args.name + '.model.?????????.pth')) == 0:
+        logging.error('no model available: {}'.format(args.name + '.model.?????????.pth'))
+        sys.exit()
+
+    token = OpenNMTTokenizer(args.name + '.token')
+    vocab = Vocab()
+    vocab.read(args.name + '.vocab')
+    model = Word2Vec(len(vocab), args.embedding_size, vocab.idx_unk)
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, betas=(args.beta1,args.beta2), eps=args.eps)
+    n_steps, model, optimizer = load_model_optim(args.name, args.embedding_size, vocab, model, optimizer)
+    if args.cuda:
+        model.cuda()
+
+    dataset = Dataset(args, token, vocab, skip_subsampling=True)
+    dataset.build_batchs_infer_sent()
+    with torch.no_grad():
+        model.eval()
+        for batch in dataset:
+            snts = model.SentEmbed(self, batch[0], batch[1], 'iEmb', args.pooling):
+            for i in range(len(snts)):
+                print('{}\t{}'.format(inds[i], snts[i]))
+
 
 def do_preprocess(args):
 
@@ -261,6 +292,7 @@ class Args():
  -------- When inference -----------------------------------------------------
    -k               INT : find k closest words to each word in file (5)
    -sim          STRING : cos, pairwise                             (cos)
+   -pooling      STRING : max, avg                                  (avg)
 
 *** The script needs:
   + pytorch:   conda install pytorch torchvision cudatoolkit=10.1 -c pytorch
@@ -506,7 +538,7 @@ class Word2Vec(nn.Module):
         #batch[1] : batch of context words (list of list)
         #batch[2] : batch of negative words (list of list)
         #batch[3] : batch of sentences (list of list)
-        #batch[4] : batch of length of sentences (list of ints)
+        #batch[4] : batch of lengths (list)
         emb  = self.Embed(batch[0],'oEmb') #[bs,ds]
         nemb = self.Embed(batch[2],'oEmb') #[bs,n_negs,ds]
         semb = self.SentEmbed(batch[3], batch[4], 'iEmb', 'avg') #[bs,ds] #mean of sentences considering their lens

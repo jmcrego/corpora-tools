@@ -137,14 +137,12 @@ class Vocab():
 ####################################################################
 class Dataset():
 
-    def __init__(self, args, token, vocab):
+    def __init__(self, args, token, vocab, skip_subsampling=False):
         self.batch_size = args.batch_size
-        self.vocab_size = len(vocab)
-        self.idx_pad = vocab.idx_unk ### no need for additional token in vocab
         self.window = args.window
         self.n_negs = args.n_negs
-        self.method = args.method
-        self.skip_subsampling = args.skip_subsampling
+        self.vocab_size = len(vocab)
+        self.idx_pad = vocab.idx_unk ### no need for additional token in vocab
         self.corpus = []
         self.wrd2n = defaultdict(int)
         ntokens = 0
@@ -168,14 +166,17 @@ class Dataset():
                 ntokens += len(idxs)
             f.close()
         pOOV = 100.0 * nOOV / ntokens
-        logging.info('read {} sentences with {} tokens (%OOV={:.2f}) [batch_size={}, window={}, n_negs={}, skip_subsampling={}, method={}]'.format(len(self.corpus),ntokens,pOOV,self.batch_size,self.window,self.n_negs,self.skip_subsampling,self.method))
-
+        logging.info('read {} sentences with {} tokens (%OOV={:.2f})')
         ### subsample
-        if not self.skip_subsampling:
+        if not skip_subsampling:
             ntokens = self.SubSample(ntokens)
             logging.info('subsampled to {} tokens'.format(ntokens))
 
-        ### build batchs
+
+        #'[batch_size={}, window={}, n_negs={}, skip_subsampling={}]'.format(self.batch_size,self.window,self.n_negs,self.skip_subsampling)
+
+
+    def build_batchs(self):
         length = [len(self.corpus[i]) for i in range(len(self.corpus))]
         indexs = np.argsort(np.array(length))
         self.batchs = []
@@ -225,13 +226,6 @@ class Dataset():
                     neg.append(idx)
                 batch_neg.append(neg)
 
-#                print('\ti={}'.format(i))
-#                print('\tbatch_wrd', batch_wrd)
-#                print('\tbatch_ctx', batch_ctx)
-#                print('\tbatch_neg', batch_neg)
-#                print('\tbatch_snt', batch_snt)
-#                print('\tbatch_len', batch_len)
-
                 if len(batch_wrd) == self.batch_size:
                     self.batchs.append([batch_wrd, batch_ctx, batch_neg, batch_snt, batch_len])
                     batch_wrd = []
@@ -246,6 +240,34 @@ class Dataset():
         logging.info('built {} batchs'.format(len(self.batchs)))
         del self.corpus
         del self.wrd2n
+
+
+    def build_batchs_infer_sent(self)
+        length = [len(self.corpus[i]) for i in range(len(self.corpus))]
+        indexs = np.argsort(np.array(length))
+        self.batchs = []
+        batch_snt = []
+        batch_len = []
+        batch_ind = []
+        for index in indexs:
+            toks = self.corpus[index]
+            batch_snt.append(self.append(self.corpus[index]))
+            batch_len.append(len(toks))
+            batch_ind.append(index)
+
+            if len(batch_snt) == self.batch_size:
+                self.batchs.append([batch_snt, batch_len, batch_ind])
+                batch_snt = []
+                batch_len = []
+                batch_ind = []
+
+        if len(batch_snt):
+            self.batchs.append([batch_snt, batch_len, batch_ind])
+
+        logging.info('built {} batchs'.format(len(self.batchs)))
+        del self.corpus
+        del self.wrd2n
+
 
     def __iter__(self):
         indexs = [i for i in range(len(self.batchs))]
