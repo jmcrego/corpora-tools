@@ -166,7 +166,7 @@ def do_infer_word(args):
                     for j in range(1,len(mininds)):
                         ind = mininds[j].item() #cpu().detach().numpy()
                         if ind != i:
-                            out.append("{:.5f}:{}".format(dist[ind].item(),vocab[ind]))
+                            out.append("{:.6f}:{}".format(dist[ind].item(),vocab[ind]))
                             if len(out)-1 == args.k:
                                 break
                     print('\t'.join(out))
@@ -200,7 +200,7 @@ def do_infer_sent(args):
         for batch in dataset:
             snts = model.SentEmbed(batch[0], batch[1], 'iEmb', args.pooling).cpu().detach().numpy().tolist()
             for i in range(len(snts)):
-                sentence = [str(w) for w in snts[i]]
+                sentence = ["{:.6f}".format(w) for w in snts[i]]
                 print('{}\t{}'.format(batch[2][i]+1, ' '.join(sentence) ))
 
 
