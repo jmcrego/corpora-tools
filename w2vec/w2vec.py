@@ -138,7 +138,7 @@ def do_infer_word(args):
         model.cuda()
 
     if args.sim == 'cos':
-        distance = nn.CosineSimilarity(dim=0, eps=1e-6)
+        distance = nn.CosineSimilarity(dim=1, eps=1e-6)
     elif args.sim == 'pairwise':
         distance = nn.PairwiseDistance(eps=1e-6)
     else:
@@ -159,19 +159,16 @@ def do_infer_word(args):
             wrd_e = model.Embed(wrd_i, 'iEmb') #.cpu().detach().numpy().tolist()
 
             for i in range(len(wrd_i)): ### words to find their closest
-                for j in range(len(voc_i)): ### words in vocab
-                    print('wrd_e.shape',wrd_e[i].shape)
-                    print('voc_e.shape',voc_e[i].shape)
-                    dist = distance(wrd_e[i],voc_e[j])
-                    mininds = torch.argsort(dist,dim=0,descending=True)
-                    out = []
-                    out.append(batch[1],batch[2],vocab[wrd_i])
-                    for k in range(1,len(mininds)):
-                        ind = mininds[k].item() #cpu().detach().numpy()
-                        if i != ind:
-                            out.append("{:.6f}:{}".format(dist[i].item(),vocab[ind]))
-                            if len(out)-1 == args.k:
-                                break
+                dist = distance(wrd_e[i].unsqueeze(0),voc_e[j])
+                mininds = torch.argsort(dist,dim=0,descending=True)
+                out = []
+                out.append(batch[1],batch[2],vocab[wrd_i[i]])
+                for k in range(1,len(mininds)):
+                    ind = mininds[k].item() #cpu().detach().numpy()
+                    if i != ind:
+                        out.append("{:.6f}:{}".format(dist[i].item(),vocab[ind]))
+                        if len(out)-1 == args.k:
+                            break
                 print('\t'.join(out))
 
 
