@@ -201,7 +201,7 @@ def do_infer_sent(args):
             snts = model.SentEmbed(batch[0], batch[1], 'iEmb', args.pooling).cpu().detach().numpy().tolist()
             for i in range(len(snts)):
                 sentence = [str(w) for w in snts[i]]
-                print('{}\t{}'.format(batch[2][i], ' '.join(sentence) ))
+                print('{}\t{}'.format(batch[2][i]+1, ' '.join(sentence) ))
 
 
 def do_preprocess(args):
