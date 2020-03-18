@@ -165,7 +165,7 @@ def do_infer_word(args):
                     dist = distance(wrd_e[i],voc_e[j])
                     mininds = torch.argsort(dist,dim=0,descending=True)
                     out = []
-                    out.append(batch[1],batch[2],vocab(wrd_i))
+                    out.append(batch[1],batch[2],vocab[wrd_i])
                     for k in range(1,len(mininds)):
                         ind = mininds[k].item() #cpu().detach().numpy()
                         if i != ind:
