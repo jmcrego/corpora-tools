@@ -160,6 +160,8 @@ def do_infer_word(args):
 
             for i in range(len(wrd_i)): ### words to find their closest
                 for j in range(len(voc_i)): ### words in vocab
+                    print('wrd_e.shape',wrd_e[i].shape)
+                    print('voc_e.shape',voc_e[i].shape)
                     dist = distance(wrd_e[i],voc_e[j])
                     mininds = torch.argsort(dist,dim=0,descending=True)
                     out = []
