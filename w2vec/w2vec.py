@@ -171,7 +171,9 @@ def do_infer_word(args):
                 for k in range(1,len(mininds)):
                     ind = mininds[k].item() #cpu().detach().numpy()
                     if i != ind:
-                        out.append("{:.6f}:{}".format(dist[i].item(),vocab[ind]))
+                        dis = dist[ind].item()
+                        wrd = vocab[ind]
+                        out.append("{:.6f}:{}".format(dis,wrd))
                         if len(out)-1 == args.k:
                             break
                 print('\t'.join(out))
