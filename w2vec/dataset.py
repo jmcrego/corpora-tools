@@ -166,7 +166,7 @@ class Dataset():
                 ntokens += len(idxs)
             f.close()
         pOOV = 100.0 * nOOV / ntokens
-        logging.info('read {} sentences with {} tokens (%OOV={:.2f})'.format(pOOV))
+        logging.info('read {} sentences with {} tokens (%OOV={:.2f})'.format(ntokens, pOOV))
         ### subsample
         if not skip_subsampling:
             ntokens = self.SubSample(ntokens)
