@@ -156,14 +156,14 @@ def do_infer_word(args):
             #batch[1] batch_isnt
             #batch[2] batch_iwrd
             wrd_i = batch[0]
-            wrd_e = model.Embed(wrd_i, 'iEmb').cpu().detach().numpy().tolist()
+            wrd_e = model.Embed(wrd_i, 'iEmb') #.cpu().detach().numpy().tolist()
 
             for i in range(len(wrd_i)): ### words to find their closest
                 for j in range(len(voc_i)): ### words in vocab
                     dist = distance(wrd_e[i],voc_e[j])
                     mininds = torch.argsort(dist,dim=0,descending=True)
                     out = []
-                    out.append(batch[1],batch[2],wrd)
+                    out.append(batch[1],batch[2],vocab(wrd_i))
                     for k in range(1,len(mininds)):
                         ind = mininds[k].item() #cpu().detach().numpy()
                         if i != ind:
