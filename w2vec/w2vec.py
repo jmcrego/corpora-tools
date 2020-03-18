@@ -199,9 +199,8 @@ def do_infer_sent(args):
         model.eval()
         for batch in dataset:
             snts = model.SentEmbed(batch[0], batch[1], 'iEmb', args.pooling).cpu().detach().numpy().tolist()
-            snts = map(str,snts)
             for i in range(len(snts)):
-                print('{}\t{}'.format(batch[2][i], snts[i]))
+                print('{}\t{}'.format(batch[2][i], map(str, snts[i]) ))
 
 
 def do_preprocess(args):
