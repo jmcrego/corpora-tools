@@ -248,9 +248,8 @@ class Dataset():
         batch_len = []
         batch_ind = []
         for index in indexs:
-            toks = self.corpus[index]
-            batch_snt.append(self.append(self.corpus[index]))
-            batch_len.append(len(toks))
+            batch_snt.append(self.corpus[index])
+            batch_len.append(batch_snt[-1])
             batch_ind.append(index)
 
             if len(batch_snt) == self.batch_size:
