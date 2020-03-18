@@ -242,7 +242,7 @@ class Dataset():
         del self.wrd2n
 
 
-    def build_batchs_infer_sent(self)
+    def build_batchs_infer_sent(self):
         length = [len(self.corpus[i]) for i in range(len(self.corpus))]
         indexs = np.argsort(np.array(length))
         self.batchs = []
