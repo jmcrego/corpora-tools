@@ -117,7 +117,7 @@ def do_train(args):
             break
     save_model_optim(args.name, model, optimizer, n_steps, args.keep_last_n)
 
-def do_infer_word(self, args):
+def do_infer_word(args):
     if not os.path.exists(args.name + '.token'):
         logging.error('missing {} file (run preprocess mode)'.format(args.name + '.token'))
         sys.exit()
@@ -172,7 +172,7 @@ def do_infer_word(self, args):
                     print('\t'.join(out))
             f.close()
 
-def do_infer_sent(self, args):
+def do_infer_sent(args):
     if not os.path.exists(args.name + '.token'):
         logging.error('missing {} file (run preprocess mode)'.format(args.name + '.token'))
         sys.exit()
