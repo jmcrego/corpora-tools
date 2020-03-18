@@ -145,32 +145,33 @@ def do_infer_word(args):
         logging.error('bad -sim option {}'.format(args.sim))
         sys.exit()
 
+    dataset = Dataset(args, token, vocab, skip_subsampling=True)
+    dataset.build_batchs_infer_word()
     with torch.no_grad():
         model.eval()
         voc_i = [i for i in range(0,len(vocab))]
         voc_e = model.Embed(voc_i,'iEmb')
-        for file in args.data:
-            f, is_gzip = open_file_read(file)
-            for l in f:
-                if is_gzip:
-                    l = l.decode('utf8')
-                toks = token.tokenize(l.strip(' \n'))
-                for wrd in toks:
-                    i = vocab[wrd]
-                    wrd_i = [i] * len(vocab)
-                    wrd_e = model.Embed(wrd_i,'iEmb')
-                    dist = distance(wrd_e,voc_e)
+        for batch in dataset:
+            #batch[0] batch_wrd
+            #batch[1] batch_isnt
+            #batch[2] batch_iwrd
+            wrd_i = batch_wrd[0]
+            wrd_e = model.Embed(wrd_i, 'iEmb').cpu().detach().numpy().tolist()
+
+            for i in range(len(wrd_i)): ### words to find their closest
+                for j in range(len(voc_i)): ### words in vocab
+                    dist = distance(wrd_e[i],voc_e[j])
                     mininds = torch.argsort(dist,dim=0,descending=True)
                     out = []
                     out.append(wrd)
-                    for j in range(1,len(mininds)):
-                        ind = mininds[j].item() #cpu().detach().numpy()
-                        if ind != i:
-                            out.append("{:.6f}:{}".format(dist[ind].item(),vocab[ind]))
+                    for k in range(1,len(mininds)):
+                        ind = mininds[k].item() #cpu().detach().numpy()
+                        if i != ind:
+                            out.append("{:.6f}:{}".format(dist[i].item(),vocab[ind]))
                             if len(out)-1 == args.k:
                                 break
-                    print('\t'.join(out))
-            f.close()
+                print('\t'.join(out))
+
 
 def do_infer_sent(args):
     if not os.path.exists(args.name + '.token'):
@@ -192,7 +193,6 @@ def do_infer_sent(args):
     if args.cuda:
         model.cuda()
 
-    np.set_printoptions(precision=6)
     dataset = Dataset(args, token, vocab, skip_subsampling=True)
     dataset.build_batchs_infer_sent()
     with torch.no_grad():

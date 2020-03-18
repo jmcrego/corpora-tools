@@ -271,6 +271,31 @@ class Dataset():
         del self.wrd2n
 
 
+    def build_batchs_infer_word(self):
+        self.batchs = []
+        batch_wrd = []
+        batch_isnt = []
+        batch_iwrd = []
+        for index in range(len(self.corpus)):
+            for iwrd in range(len(self.corpus[index])):
+                batch_wrd.append(self.corpus[index][iwrd])
+                batch_isnt.append(index)
+                batch_iwrd.append(iwrd)
+
+                if len(batch_wrd) == self.batch_size:
+                    self.batchs.append([batch_wrd,batch_isnt,batch_iwrd])
+                    batch_wrd = []
+                    batch_isnt = []
+                    batch_iwrd = []
+
+        if len(batch_wrd):
+            self.batchs.append([batch_wrd,batch_isnt,batch_iwrd])
+
+        logging.info('built {} batchs'.format(len(self.batchs)))
+        del self.corpus
+        del self.wrd2n
+
+
     def __iter__(self):
         indexs = [i for i in range(len(self.batchs))]
         random.shuffle(indexs)
