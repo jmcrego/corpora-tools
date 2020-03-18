@@ -197,9 +197,9 @@ def do_infer_sent(args):
     with torch.no_grad():
         model.eval()
         for batch in dataset:
-            snts = model.SentEmbed(batch[0], batch[1], 'iEmb', args.pooling)
+            snts = model.SentEmbed(batch[0], batch[1], 'iEmb', args.pooling).cpu().detach().numpy()
             for i in range(len(snts)):
-                print('{}\t{}'.format(batch[2][i], snts[i].cpu().detach().numpy() ))
+                print('{}\t{}'.format(batch[2][i], ' '.join(snts[i])))
 
 
 def do_preprocess(args):
