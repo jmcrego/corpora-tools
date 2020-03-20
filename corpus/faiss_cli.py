@@ -41,12 +41,12 @@ class Infile:
                 self.d = len(l)
             self.vec.append(l)
 
-        logging.info('Read {} vectors ({} cells) in {}\n'.format(len(self.vec),self.d,self.file))
+        logging.info('Read {} vectors ({} cells) in {}'.format(len(self.vec),self.d,self.file))
         self.vec = np.array(self.vec).astype('float32')
 
         if norm:
             faiss.normalize_L2(self.vec)
-            logging.info('Vectors normalized\n')
+            logging.info('Vectors normalized')
 
         if file_str is None:
             return
@@ -58,7 +58,7 @@ class Infile:
 
         for l in f:
             self.txt.append(l.rstrip())
-        logging.info('Read {} strings in {}\n'.format(len(self.txt),file_str))
+        logging.info('Read {} strings in {}'.format(len(self.txt),file_str))
 
         if len(self.txt) != len(self.vec):
             logging.error('diff num of entries {} <> {} in files {} and {}'.format(len(self.vec),len(self.txt),file, file_str))
@@ -119,9 +119,9 @@ class IndexFaiss:
 
         if file == self.file_db:
             n_ok = ["{:.3f}".format(n/len(query)) for n in n_ok]
-            logging.info('Done k-best Acc = [{}] over {} examples\n'.format(', '.join(n_ok),len(query)))
+            logging.info('Done k-best Acc = [{}] over {} examples'.format(', '.join(n_ok),len(query)))
         else:
-            logging.info('Done over {} examples\n'.format(len(query)))
+            logging.info('Done over {} examples'.format(len(query)))
 
 
 if __name__ == '__main__':
