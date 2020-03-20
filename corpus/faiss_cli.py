@@ -6,6 +6,18 @@ import faiss
 import logging
 import numpy as np
 
+def create_logger(logfile, loglevel):
+    numeric_level = getattr(logging, loglevel.upper(), None)
+    if not isinstance(numeric_level, int):
+        sys.stderr.write("Invalid log level={}\n".format(loglevel))
+        sys.exit()
+    if logfile is None or logfile == 'stderr':
+        logging.basicConfig(format='[%(asctime)s.%(msecs)03d] %(levelname)s %(message)s', datefmt='%Y-%m-%d_%H:%M:%S', level=numeric_level)
+        logging.info('Created Logger level={}'.format(loglevel))
+    else:
+        logging.basicConfig(filename=logfile, format='[%(asctime)s.%(msecs)03d] %(levelname)s %(message)s', datefmt='%Y-%m-%d_%H:%M:%S', level=numeric_level)
+        logging.info('Created Logger level={} file={}'.format(loglevel, logfile))
+
 class Infile:
 
     def __init__(self, file, d=0, norm=True,file_str=None):
@@ -29,12 +41,12 @@ class Infile:
                 self.d = len(l)
             self.vec.append(l)
 
-        sys.stderr.write('Read {} vectors ({} cells) in {}\n'.format(len(self.vec),self.d,self.file))
+        logging.info('Read {} vectors ({} cells) in {}\n'.format(len(self.vec),self.d,self.file))
         self.vec = np.array(self.vec).astype('float32')
 
         if norm:
             faiss.normalize_L2(self.vec)
-            sys.stderr.write('Vectors normalized\n')
+            logging.info('Vectors normalized\n')
 
         if file_str is None:
             return
@@ -46,7 +58,7 @@ class Infile:
 
         for l in f:
             self.txt.append(l.rstrip())
-        sys.stderr.write('Read {} strings in {}\n'.format(len(self.txt),file_str))
+        logging.info('Read {} strings in {}\n'.format(len(self.txt),file_str))
 
         if len(self.txt) != len(self.vec):
             logging.error('diff num of entries {} <> {} in files {} and {}'.format(len(self.vec),len(self.txt),file, file_str))
@@ -107,9 +119,9 @@ class IndexFaiss:
 
         if file == self.file_db:
             n_ok = ["{:.3f}".format(n/len(query)) for n in n_ok]
-            sys.stderr.write('Done k-best Acc = [{}] over {} examples\n'.format(', '.join(n_ok),len(query)))
+            logging.info('Done k-best Acc = [{}] over {} examples\n'.format(', '.join(n_ok),len(query)))
         else:
-            sys.stderr.write('Done over {} examples\n'.format(len(query)))
+            logging.info('Done over {} examples\n'.format(len(query)))
 
 
 if __name__ == '__main__':
@@ -123,18 +135,21 @@ if __name__ == '__main__':
     skip_same_id = False
     skip_query = False
     verbose = False
+    log_file = None
+    log_level = 'debug'
     name = sys.argv.pop(0)
-    usage = '''usage: {} -db FILE -query FILE [-db_str FILE] [-query_str FILE] [-d INT] [-k INT] [-skip_same_id] [-skip_query] [-v]
-    -db         FILE : file to index 
-    -db_str     FILE : file to index 
-    -query      FILE : file with queries
-    -query_str  FILE : file with queries
-    -k           INT : k-best to retrieve (default 1)
-    -min_score FLOAT : minimum distance to accept a match (default 0.5) 
-    -skip_same_id    : do not consider matchs with db_id == query_id (k+1 matchs retrieved)
-    -skip_query      : do not output query columns (query_index [query_str])
-    -v               : verbose output (default False)
-    -h               : this help
+    usage = '''usage: {} -db FILE -query FILE [-db_str FILE] [-query_str FILE] [-d INT] [-k INT] [-skip_same_id] [-skip_query] [-log_file FILE] [-log_level STRING]
+    -db          FILE : file to index 
+    -db_str      FILE : file to index 
+    -query       FILE : file with queries
+    -query_str   FILE : file with queries
+    -k            INT : k-best to retrieve (default 1)
+    -min_score  FLOAT : minimum distance to accept a match (default 0.5) 
+    -skip_same_id     : do not consider matchs with db_id == query_id (k+1 matchs retrieved)
+    -skip_query       : do not output query columns (query_index [query_str])
+    -log_file    FILE : verbose output (default False)
+    -log_level STRING : verbose output (default False)
+    -h                : this help
 '''.format(name)
 
 
@@ -157,6 +172,10 @@ if __name__ == '__main__':
             k = int(sys.argv.pop(0))
         elif tok=="-min_score" and len(sys.argv):
             min_score = float(sys.argv.pop(0))
+        elif tok=="-log_file" and len(sys.argv):
+            log_file = sys.argv.pop(0)
+        elif tok=="-log_level" and len(sys.argv):
+            log_level = sys.argv.pop(0)
         elif tok=="-skip_same_id":
             skip_same_id = True
         elif tok=="-skip_query":
@@ -165,6 +184,8 @@ if __name__ == '__main__':
             sys.stderr.write('error: unparsed {} option\n'.format(tok))
             sys.stderr.write("{}".format(usage))
             sys.exit()
+
+    create_logger(log_file,log_level)
 
     if fdb is not None:
         indexdb = IndexFaiss(fdb,fdb_str)
