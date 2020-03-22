@@ -176,7 +176,7 @@ class Dataset():
 
     def build_batchs(self):
         length = [len(self.corpus[i]) for i in range(len(self.corpus))]
-        indexs = np.argsort(np.array(length))
+        indexs = np.argsort(np.array(length)) ### from smaller to largest sentences
         self.batchs = []
         batch_wrd = []
         batch_ctx = []
@@ -196,7 +196,7 @@ class Dataset():
 
                 ### snt=[a, monster, in, my, head]
                 snt = list(toks)
-                del snt[i]
+#jmcrego                del snt[i]
                 batch_snt.append(snt)
                 batch_len.append(len(snt))
                 if len(batch_snt) > 1 and len(snt) > len(batch_snt[0]): ### add padding
