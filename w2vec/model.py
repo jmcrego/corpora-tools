@@ -165,7 +165,7 @@ class Word2Vec(nn.Module):
 #        out = torch.bmm(ctx_emb, wrd_emb.unsqueeze(2)).squeeze() #[bs,2*window,ds] x [bs,ds,1] = [bs,2*window,1] => [bs,2*window]
         sigmoid = out.sigmoid().clamp(min_, max_)
         neg_log_sigmoid = sigmoid.log().neg()       #[bs,2*window]
-        ploss = neg_log_sigmoid.mean(1) #[bs] mean loss predicting all positive words on each batch
+        ploss = neg_log_sigmoid.sum(1) #[bs] sum of losses when predicting all positive words on each batch
         ploss = ploss.mean() #[1] batches mean loss
 
         neg_emb = self.Embed(batch[2],'oEmb') #[bs,n_negs,ds]
@@ -181,7 +181,7 @@ class Word2Vec(nn.Module):
 #        out = torch.bmm(neg_emb, wrd_emb.unsqueeze(2)).squeeze()  #[bs,n_negs]
         sigmoid = (-out.sigmoid()+1.0).clamp(min_, max_) #[bs,n_negs]
         neg_log_sigmoid = sigmoid.log().neg() #[bs,n_negs]
-        nloss = neg_log_sigmoid.mean(1) #[bs] mean loss predicting all negative words on each batch
+        nloss = neg_log_sigmoid.sum(1) #[bs] sum of losses predicting all negative words on each batch
         nloss = nloss.mean() #[1] batches mean loss
 
         loss = ploss + nloss
