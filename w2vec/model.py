@@ -162,7 +162,7 @@ class Word2Vec(nn.Module):
         # if prob=0.0 => neg(log(prob))=Inf
         out = torch.bmm(wrd_emb.unsqueeze(1), ctx_emb.unsqueeze(-1)).squeeze() #[bs,1,ds] x [bs,ds,1] = [bs,1,1] = > [bs]
         neg_log_sigmoid = out.sigmoid().clamp(min_, max_).log().neg() #[bs]
-        ploss = ploss.mean() #[1] batches mean loss
+        ploss = neg_log_sigmoid.mean() #[1] batches mean loss
 
         #Negative words are embedded using the output embeddings (oEmb)
         neg_emb = self.Embed(batch[2],'oEmb').neg() #[bs,n_negs,ds]

@@ -67,20 +67,8 @@ def do_train(args):
 #    optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, betas=(args.beta1,args.beta2), eps=args.eps)
 #    optimizer = torch.optim.SGD(model.parameters(), lr=0.05)
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.learning_rate, betas=(args.beta1, args.beta2), eps=args.eps, weight_decay=0.01, amsgrad=False)
-
     n_steps, model, optimizer = load_model_optim(args.name, args.embedding_size, vocab, model, optimizer)
-
-    dataset = Dataset(args, token, vocab)
-    #dataset.build_batchs()
-    if args.method == 'sgram':
-        dataset.build_batchs_sgram()
-    elif args.method == 'cbow':
-        dataset.build_batchs_cbow()
-    elif args.method == 's2vec':
-        dataset.build_batchs_s2vec()
-    else:
-        logging.error('bad -method option {}'.format(args.method))
-        sys.exit()
+    dataset = Dataset(args, token, vocab, args.method)
 
     n_epochs = 0
     losses = []
@@ -138,8 +126,7 @@ def do_infer_word(args):
         logging.error('bad -sim option {}'.format(args.sim))
         sys.exit()
 
-    dataset = Dataset(args, token, vocab, skip_subsampling=True)
-    dataset.build_batchs_infer_word()
+    dataset = Dataset(args, token, vocab, 'infer_word', skip_subsampling=True)
     with torch.no_grad():
         model.eval()
         voc_i = [i for i in range(0,len(vocab))]
@@ -191,8 +178,7 @@ def do_infer_sent(args):
     if args.cuda:
         model.cuda()
 
-    dataset = Dataset(args, token, vocab, skip_subsampling=True)
-    dataset.build_batchs_infer_sent()
+    dataset = Dataset(args, token, vocab, 'infer_sent', skip_subsampling=True)
     with torch.no_grad():
         model.eval()
         for batch in dataset:

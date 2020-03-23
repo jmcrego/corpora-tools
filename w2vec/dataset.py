@@ -137,12 +137,13 @@ class Vocab():
 ####################################################################
 class Dataset():
 
-    def __init__(self, args, token, vocab, skip_subsampling=False):
+    def __init__(self, args, token, vocab, method, skip_subsampling=False):
         self.batch_size = args.batch_size
         self.window = args.window
         self.n_negs = args.n_negs
         self.vocab_size = len(vocab)
         self.idx_pad = vocab.idx_unk ### no need for additional token in vocab
+        self.method = method
         self.corpus = []
         self.wrd2n = defaultdict(int)
         ntokens = 0
@@ -169,9 +170,6 @@ class Dataset():
         if not skip_subsampling:
             ntokens = self.SubSample(ntokens)
             logging.info('subsampled to {} tokens'.format(ntokens))
-
-
-        #'[batch_size={}, window={}, n_negs={}, skip_subsampling={}]'.format(self.batch_size,self.window,self.n_negs,self.skip_subsampling)
 
 
     def build_batchs(self):
@@ -239,160 +237,150 @@ class Dataset():
         del self.wrd2n
 
 
-    def build_batchs_cbow(self):
-        indexs = [i for i in range(len(self.corpus))]
-        random.shuffle(indexs) 
-        self.batchs = []
-        batch_wrd = []
-        batch_ctx = []
-        batch_neg = []
-        for index in indexs:
-            toks = self.corpus[index]
-            if len(toks) < 2: ### may be subsampled
-                continue
-            for i in range(len(toks)): #for each word in toks. Ex: 'a monster lives in my head'
-                ### i=2 wrd=lives
-                wrd = toks[i]
-                batch_wrd.append(wrd)
-                ### window=2, ctx=[a, monster, in, my]
-                ctx = []
-                for j in range(i-self.window,i+self.window+1):
-                    if j<0:
-                        ctx.append(self.idx_pad)
-                    elif j>=len(toks):
-                        ctx.append(self.idx_pad)
-                    elif j!=i:
-                        ctx.append(toks[j])
-                batch_ctx.append(ctx)
-                ### n_negs=4 neg=[over, last, today, virus]
-                neg = []
-                for _ in range(self.n_negs):
-                    idx = random.randint(1, self.vocab_size-1)
-                    while idx in ctx or idx == wrd:
-                        idx = random.randint(1, self.vocab_size-1)
-                    neg.append(idx)
-                batch_neg.append(neg)
-
-                if len(batch_wrd) == self.batch_size:
-                    self.batchs.append([batch_wrd, batch_ctx, batch_neg])
-                    batch_wrd = []
-                    batch_ctx = []
-                    batch_neg = []
-
-        if len(batch_wrd):
-            self.batchs.append([batch_wrd, batch_ctx, batch_neg])
-
-        logging.info('built {} cbow batchs'.format(len(self.batchs)))
-        del self.corpus
-        del self.wrd2n
-
-
-    def build_batchs_sgram(self):
-        indexs = [i for i in range(len(self.corpus))]
-        random.shuffle(indexs) 
-        self.batchs = []
-        batch_wrd = []
-        batch_ctx = []
-        batch_neg = []
-        for index in indexs:
-            toks = self.corpus[index]
-            if len(toks) < 2: ### may be subsampled
-                continue
-
-            for i in range(len(toks)): #for each word in toks. Ex: 'a monster lives in my head'
-                ### window=2, ctx=[a, monster, in, my]
-                min_j = max(0, i-self.window)
-                max_j = min(len(toks)-1,i+self.window)
-                ctx = toks[min_j:max_j+1]
-                for j in range(min_j,max_j+1):
-                    if j!=i:
-                        #wrd i=1 'monster'
-                        batch_wrd.append(toks[i])
-                        #ctx j=0 'a'
-                        batch_ctx.append(toks[j])
-                        #neg n_negs=4 neg=[over, last, today, virus]
-                        neg = []
-                        for _ in range(self.n_negs):
-                            idx = random.randint(1, self.vocab_size-1)
-                            while idx in ctx:
-                                idx = random.randint(1, self.vocab_size-1)
-                            neg.append(idx)
-                        batch_neg.append(neg)
-                        if len(batch_wrd) == self.batch_size:
-                            self.batchs.append([batch_wrd, batch_ctx, batch_neg])
-                            batch_wrd = []
-                            batch_ctx = []
-                            batch_neg = []
-
-        if len(batch_wrd):
-            self.batchs.append([batch_wrd, batch_ctx, batch_neg])
-
-        logging.info('built {} batchs'.format(len(self.batchs)))
-        del self.corpus
-        del self.wrd2n
-
-
-    def build_batchs_infer_sent(self):
-        length = [len(self.corpus[i]) for i in range(len(self.corpus))]
-        indexs = np.argsort(np.array(length))
-        self.batchs = []
-        batch_snt = []
-        batch_len = []
-        batch_ind = []
-        for index in indexs:
-            snt = self.corpus[index]
-            batch_snt.append(snt)
-            batch_len.append(len(snt))
-            batch_ind.append(index)
-            if len(batch_snt) > 1 and len(snt) > len(batch_snt[0]): ### add padding
-                for k in range(len(batch_snt)-1):
-                    addn = len(batch_snt[-1]) - len(batch_snt[k])
-                    batch_snt[k] += [self.idx_pad]*addn
-
-            if len(batch_snt) == self.batch_size:
-                self.batchs.append([batch_snt, batch_len, batch_ind])
-                batch_snt = []
-                batch_len = []
-                batch_ind = []
-
-        if len(batch_snt):
-            self.batchs.append([batch_snt, batch_len, batch_ind])
-
-        logging.info('built {} batchs'.format(len(self.batchs)))
-        del self.corpus
-        del self.wrd2n
-
-
-    def build_batchs_infer_word(self):
-        self.batchs = []
-        batch_wrd = []
-        batch_isnt = []
-        batch_iwrd = []
-        for index in range(len(self.corpus)):
-            for iwrd in range(len(self.corpus[index])):
-                batch_wrd.append(self.corpus[index][iwrd])
-                batch_isnt.append(index)
-                batch_iwrd.append(iwrd)
-
-                if len(batch_wrd) == self.batch_size:
-                    self.batchs.append([batch_wrd,batch_isnt,batch_iwrd])
-                    batch_wrd = []
-                    batch_isnt = []
-                    batch_iwrd = []
-
-        if len(batch_wrd):
-            self.batchs.append([batch_wrd,batch_isnt,batch_iwrd])
-
-        logging.info('built {} batchs'.format(len(self.batchs)))
-        del self.corpus
-        del self.wrd2n
-
 
     def __iter__(self):
-        indexs = [i for i in range(len(self.batchs))]
-        random.shuffle(indexs)
-        for index in indexs:
-            yield self.batchs[index]
+        ######################################################
+        ### infer_sent #######################################
+        ######################################################
+        if self.method == 'infer_sent':
+            length = [len(self.corpus[i]) for i in range(len(self.corpus))]
+            indexs = np.argsort(np.array(length))
+            batch_snt = []
+            batch_len = []
+            batch_ind = []
+            for index in indexs:
+                snt = self.corpus[index]
+                batch_snt.append(snt)
+                batch_len.append(len(snt))
+                batch_ind.append(index)
+                if len(batch_snt) > 1 and len(snt) > len(batch_snt[0]): ### add padding
+                    for k in range(len(batch_snt)-1):
+                        addn = len(batch_snt[-1]) - len(batch_snt[k])
+                        batch_snt[k] += [self.idx_pad]*addn
+                if len(batch_snt) == self.batch_size:
+                    yield [batch_snt, batch_len, batch_ind]
+                    batch_snt = []
+                    batch_len = []
+                    batch_ind = []
+            if len(batch_snt):
+                yield [batch_snt, batch_len, batch_ind]
+
+        ######################################################
+        ### infer_word #######################################
+        ######################################################
+        elif self.method == 'infer_word':
+            batch_wrd = []
+            batch_isnt = []
+            batch_iwrd = []
+            for index in range(len(self.corpus)):
+                for iwrd in range(len(self.corpus[index])):
+                    batch_wrd.append(self.corpus[index][iwrd])
+                    batch_isnt.append(index)
+                    batch_iwrd.append(iwrd)
+                    if len(batch_wrd) == self.batch_size:
+                        yield [batch_wrd,batch_isnt,batch_iwrd]
+                        batch_wrd = []
+                        batch_isnt = []
+                        batch_iwrd = []
+            if len(batch_wrd):
+                yield [batch_wrd,batch_isnt,batch_iwrd]
+
+
+        ######################################################
+        ### s2vec ############################################
+        ######################################################
+        elif self.method == 's2vec':
+            length = [len(self.corpus[i]) for i in range(len(self.corpus))]
+            indexs = np.argsort(np.array(length)) ### from smaller to largest sentences
+
+        ######################################################
+        ### cbow #############################################
+        ######################################################
+        elif self.method == 'cbow':
+            indexs = [i for i in range(len(self.corpus))]
+            random.shuffle(indexs)
+            batch_wrd = []
+            batch_ctx = []
+            batch_neg = []
+            for index in indexs:
+                toks = self.corpus[index]
+                if len(toks) < 2: ### may be subsampled
+                    continue
+                for i in range(len(toks)): #for each word in toks. Ex: 'a monster lives in my head'
+                    ### i=2 wrd=lives
+                    wrd = toks[i]
+                    batch_wrd.append(wrd)
+                    ### window=2, ctx=[a, monster, in, my]
+                    ctx = []
+                    for j in range(i-self.window,i+self.window+1):
+                        if j<0:
+                            ctx.append(self.idx_pad)
+                        elif j>=len(toks):
+                            ctx.append(self.idx_pad)
+                        elif j!=i:
+                            ctx.append(toks[j])
+                    batch_ctx.append(ctx)
+                    ### n_negs=4 neg=[over, last, today, virus]
+                    neg = []
+                    for _ in range(self.n_negs):
+                        idx = random.randint(1, self.vocab_size-1)
+                        while idx in ctx or idx == wrd:
+                            idx = random.randint(1, self.vocab_size-1)
+                        neg.append(idx)
+                    batch_neg.append(neg)
+                    ### batch filled
+                    if len(batch_wrd) == self.batch_size:
+                        yield [batch_wrd, batch_ctx, batch_neg]
+                        batch_wrd = []
+                        batch_ctx = []
+                        batch_neg = []
+            ### last batch
+            if len(batch_wrd):
+                yield [batch_wrd, batch_ctx, batch_neg]
+
+        ######################################################
+        ### sgram ############################################
+        ######################################################
+        elif self.method == 'sgram':
+            indexs = [i for i in range(len(self.corpus))]
+            random.shuffle(indexs) 
+            batch_wrd = []
+            batch_ctx = []
+            batch_neg = []
+            for index in indexs:
+                toks = self.corpus[index]
+                if len(toks) < 2: ### may be subsampled
+                    continue
+                for i in range(len(toks)): #for each word in toks. Ex: 'a monster lives in my head'
+                    ### window=2, ctx=[a, monster, in, my]
+                    min_j = max(0, i-self.window)
+                    max_j = min(len(toks)-1,i+self.window)
+                    center_and_ctx = toks[min_j:max_j+1]
+                    for j in range(min_j,max_j+1):
+                        if j!=i:
+                            #wrd i=1 'monster'
+                            batch_wrd.append(toks[i])
+                            #ctx j=0 'a'
+                            batch_ctx.append(toks[j])
+                            #neg n_negs=4 neg=[over, last, today, virus]
+                            negs = []
+                            for _ in range(self.n_negs):
+                                idx = random.randint(1, self.vocab_size-1)
+                                while idx in center_and_ctx:
+                                    idx = random.randint(1, self.vocab_size-1)
+                                negs.append(idx)
+                            batch_neg.append(negs)
+                            if len(batch_wrd) == self.batch_size:
+                                yield [batch_wrd, batch_ctx, batch_neg]
+                                batch_wrd = []
+                                batch_ctx = []
+                                batch_neg = []
+            if len(batch_wrd):
+                yield [batch_wrd, batch_ctx, batch_neg]
+
+        else:
+            logging.error('bad -method option {}'.format(self.method))
+            sys.exit()
 
 
     def SubSample(self, sum_counts):
