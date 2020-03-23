@@ -53,6 +53,9 @@ def sequence_mask(lengths):
     return mask.T #[bs,l]
 
 
+####################################################################
+### Word2Vec #######################################################
+####################################################################
 class Word2Vec(nn.Module):
     def __init__(self, vs, ds, pad_idx):
         super(Word2Vec, self).__init__()
@@ -184,21 +187,24 @@ class Word2Vec(nn.Module):
         #batch[0] : batch of words (list)
         #batch[1] : batch of context words (list of list)
         #batch[2] : batch of negative words (list of list)
-        emb  = self.Embed(batch[0],'oEmb') #[bs,ds]
-        cemb = self.Embed(batch[1],'iEmb') #[bs,2*window,ds]
-        nemb = self.Embed(batch[2],'oEmb') #[bs,n_negs,ds]
-        cemb_mean = torch.mean(cemb, dim=1) #[bs,ds] #mean of context words
+#        ctx_emb_avg = self.Embed(batch[1],'iEmb').mean(ctx_emb, dim=1) #[bs,2*window,ds] => [bs,ds] #mean of h's corresponding to context words
+        ctx_emb_sum = self.Embed(batch[1],'iEmb').sum(ctx_emb, dim=1) #[bs,2*window,ds] => [bs,ds] #sum of h's corresponding to context words
+#        ctx_emb = self.Embed(batch[1],'iEmb') #[bs,2*window,ds]
+#        ctx_emb_avg = torch.avg(ctx_emb, dim=1) #[bs,ds] #mean of context words
+
+        wrd_emb  = self.Embed(batch[0],'oEmb') #[bs,ds]
+        neg_emb = self.Embed(batch[2],'oEmb') #[bs,n_negs,ds]
         # for context words, the probability should be 1.0, then
         # if prob=1.0 => neg(log(prob))=0.0
         # if prob=0.0 => neg(log(prob))=Inf
-        out = torch.bmm(cemb_mean.unsqueeze(1), emb.unsqueeze(-1)).squeeze() #[bs,1,ds] x [bs,ds,1] = [bs,1,1] => [bs]
+        out = torch.bmm(ctx_emb_avg.unsqueeze(1), wrd_emb.unsqueeze(-1)).squeeze() #[bs,1,ds] x [bs,ds,1] = [bs,1,1] => [bs]
         sigmoid = out.sigmoid().clamp(min_, max_) #[bs]
         neg_log_sigmoid = sigmoid.log().neg() #[bs] 
         ploss = neg_log_sigmoid.mean() #[1] mean loss predicting batch positive words
         # for negative words, the probability should be 0.0, then
         # if prob=1.0 => neg(log(-prob+1))=Inf
         # if prob=0.0 => neg(log(-prob+1))=0.0
-        out = torch.bmm(cemb_mean.unsqueeze(1), nemb.transpose(1,2)).squeeze(1) #[bs,1,ds] x [bs, ds, n_negs] = [bs,1,n_negs] => [bs,n_negs]
+        out = torch.bmm(ctx_emb_avg.unsqueeze(1), neg_emb.transpose(1,2)).squeeze(1) #[bs,1,ds] x [bs, ds, n_negs] = [bs,1,n_negs] => [bs,n_negs]
         sigmoid = (-out.sigmoid()+1.0).clamp(min_, max_) #[bs,n_negs]
         neg_log_sigmoid = sigmoid.log().neg() #[bs,n_negs]
         nloss = neg_log_sigmoid.mean(1) #[bs] for each batch, mean of the negative words loss
