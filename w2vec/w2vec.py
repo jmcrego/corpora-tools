@@ -71,7 +71,17 @@ def do_train(args):
     n_steps, model, optimizer = load_model_optim(args.name, args.embedding_size, vocab, model, optimizer)
 
     dataset = Dataset(args, token, vocab)
-    dataset.build_batchs()
+    #dataset.build_batchs()
+    if args.method == 'sgram':
+        dataset.build_batchs_sgram()
+    elif args.method == 'cbow':
+        dataset.build_batchs_cbow()
+    elif args.method == 's2vec':
+        dataset.build_batchs_s2vec()
+    else:
+        logging.error('bad -method option {}'.format(args.method))
+        sys.exit()
+
     n_epochs = 0
     losses = []
     while True:
@@ -84,9 +94,6 @@ def do_train(args):
                 loss = model.forward_cbow(batch)
             elif args.method == 's2vec':
                 loss = model.forward_s2vec(batch)
-            else:
-                logging.error('bad -method option {}'.format(args.method))
-                sys.exit()
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()

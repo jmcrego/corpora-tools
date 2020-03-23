@@ -188,7 +188,6 @@ class Dataset():
             if len(toks) < 2: ### may be subsampled
                 continue
 
-#            print('toks',toks)
             for i in range(len(toks)): #for each word in toks. Ex: 'a monster lives in my head'
                 ### i=2 wrd=lives
                 wrd = toks[i]
@@ -196,7 +195,7 @@ class Dataset():
 
                 ### snt=[a, monster, in, my, head]
                 snt = list(toks)
-#jmcrego                del snt[i]
+                del snt[i]
                 batch_snt.append(snt)
                 batch_len.append(len(snt))
                 if len(batch_snt) > 1 and len(snt) > len(batch_snt[0]): ### add padding
@@ -234,6 +233,98 @@ class Dataset():
 
         if len(batch_wrd):
             self.batchs.append([batch_wrd, batch_ctx, batch_neg, batch_snt, batch_len])
+
+        logging.info('built {} batchs'.format(len(self.batchs)))
+        del self.corpus
+        del self.wrd2n
+
+
+    def build_batchs_cbow(self):
+        indexs = [i for i in range(len(self.corpus))]
+        random.shuffle(indexs) 
+        self.batchs = []
+        batch_wrd = []
+        batch_ctx = []
+        batch_neg = []
+        for index in indexs:
+            toks = self.corpus[index]
+            if len(toks) < 2: ### may be subsampled
+                continue
+            for i in range(len(toks)): #for each word in toks. Ex: 'a monster lives in my head'
+                ### i=2 wrd=lives
+                wrd = toks[i]
+                batch_wrd.append(wrd)
+                ### window=2, ctx=[a, monster, in, my]
+                ctx = []
+                for j in range(i-self.window,i+self.window+1):
+                    if j<0:
+                        ctx.append(self.idx_pad)
+                    elif j>=len(toks):
+                        ctx.append(self.idx_pad)
+                    elif j!=i:
+                        ctx.append(toks[j])
+                batch_ctx.append(ctx)
+                ### n_negs=4 neg=[over, last, today, virus]
+                neg = []
+                for _ in range(self.n_negs):
+                    idx = random.randint(1, self.vocab_size-1)
+                    while idx in ctx or idx == wrd:
+                        idx = random.randint(1, self.vocab_size-1)
+                    neg.append(idx)
+                batch_neg.append(neg)
+
+                if len(batch_wrd) == self.batch_size:
+                    self.batchs.append([batch_wrd, batch_ctx, batch_neg])
+                    batch_wrd = []
+                    batch_ctx = []
+                    batch_neg = []
+
+        if len(batch_wrd):
+            self.batchs.append([batch_wrd, batch_ctx, batch_neg])
+
+        logging.info('built {} cbow batchs'.format(len(self.batchs)))
+        del self.corpus
+        del self.wrd2n
+
+
+    def build_batchs_sgram(self):
+        indexs = [i for i in range(len(self.corpus))]
+        random.shuffle(indexs) 
+        self.batchs = []
+        batch_wrd = []
+        batch_ctx = []
+        batch_neg = []
+        for index in indexs:
+            toks = self.corpus[index]
+            if len(toks) < 2: ### may be subsampled
+                continue
+
+            for i in range(len(toks)): #for each word in toks. Ex: 'a monster lives in my head'
+                ### window=2, ctx=[a, monster, in, my]
+                min_j = max(0, i-self.window)
+                max_j = min(len(toks)-1,i+self.window)
+                for j in range(min_j,max_j+1):
+                    if j!=i:
+                        #wrd i=1 'monster'
+                        batch_wrd.append(toks[i])
+                        #ctx j=0 'a'
+                        batch_ctx.append(toks[j])
+                        #neg n_negs=4 neg=[over, last, today, virus]
+                        neg = []
+                        for _ in range(self.n_negs):
+                            idx = random.randint(1, self.vocab_size-1)
+                            while idx in ctx or idx == wrd:
+                                idx = random.randint(1, self.vocab_size-1)
+                            neg.append(idx)
+                        batch_neg.append(neg)
+                        if len(batch_wrd) == self.batch_size:
+                            self.batchs.append([batch_wrd, batch_ctx, batch_neg])
+                            batch_wrd = []
+                            batch_ctx = []
+                            batch_neg = []
+
+        if len(batch_wrd):
+            self.batchs.append([batch_wrd, batch_ctx, batch_neg])
 
         logging.info('built {} batchs'.format(len(self.batchs)))
         del self.corpus

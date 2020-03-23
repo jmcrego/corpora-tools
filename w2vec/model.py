@@ -148,26 +148,20 @@ class Word2Vec(nn.Module):
     def forward_sgram(self, batch):
         min_ = 1e-06
         max_ = 1.0 - 1e-06
-        #batch[0] : batch of words (list)
-        #batch[1] : batch of context words (list of list)
-        #batch[2] : batch of negative words (list of list)
+        #batch[0] : batch of center words (list)
+        #batch[1] : batch of context words (list)
+        #batch[2] : batch of n_sample negative words (list of list)
 
         #the center word is embedded using the input embeddings (iEmb)
-        wrd_emb  = self.Embed(batch[0],'iEmb') #[bs,ds]
-        print('wrd_emb',wrd_emb.shape)
+        wrd_emb = self.Embed(batch[0],'iEmb') #[bs,ds]
 
         #Context words are embedded using the output embeddings (oEmb)
-        #the 2xwindow embeddings [bs,2*window,ds] are summed up into a single vector representing context words [bs,ds]
-        ctx_emb = self.Embed(batch[1],'oEmb') #[bs,2*window,ds]
-        print('ctx_emb',ctx_emb.shape)
+        ctx_emb = self.Embed(batch[1],'oEmb') #[bs,ds]
         # for context words, the probability should be 1.0, then
         # if prob=1.0 => neg(log(prob))=0.0
         # if prob=0.0 => neg(log(prob))=Inf
-        out = torch.bmm(wrd_emb.unsqueeze(1),ctx_emb.transpose(2,1)).squeeze() #[bs,1,ds] x [bs,ds,2*window] = [bs,1,2*window] => [bs,2*window]
-#        out = torch.bmm(ctx_emb, wrd_emb.unsqueeze(2)).squeeze() #[bs,2*window,ds] x [bs,ds,1] = [bs,2*window,1] => [bs,2*window]
-        sigmoid = out.sigmoid().clamp(min_, max_)
-        neg_log_sigmoid = sigmoid.log().neg()       #[bs,2*window]
-        ploss = neg_log_sigmoid.sum(1) #[bs] sum of losses when predicting all positive words on each batch
+        out = torch.bmm(wrd_emb.unsqueeze(1), ctx_emb.unsqueeze(-1)).squeeze() #[bs,1,ds] x [bs,ds,1] = [bs,1,1] = > [bs]
+        neg_log_sigmoid = out.sigmoid().clamp(min_, max_).log().neg() #[bs]
         ploss = ploss.mean() #[1] batches mean loss
 
         neg_emb = self.Embed(batch[2],'oEmb') #[bs,n_negs,ds]
@@ -179,10 +173,8 @@ class Word2Vec(nn.Module):
         # for negative words, the probability should be 0.0, then
         # if prob=1.0 => neg(log(-prob+1))=Inf
         # if prob=0.0 => neg(log(-prob+1))=0.0
-        out = torch.bmm(wrd_emb.transpose(2,1), neg_emb.transpose(2,1)).squeeze()  #[bs,1,ds] x [bs,ds,n_negs] = [bs,1,n_negs] => [bs,n_negs]
-#        out = torch.bmm(neg_emb, wrd_emb.unsqueeze(2)).squeeze()  #[bs,n_negs]
-        sigmoid = (-out.sigmoid()+1.0).clamp(min_, max_) #[bs,n_negs]
-        neg_log_sigmoid = sigmoid.log().neg() #[bs,n_negs]
+        out = torch.bmm(wrd_emb.unsqueeze(1), neg_emb.transpose(2,1)).squeeze()  #[bs,1,ds] x [bs,ds,n_negs] = [bs,1,n_negs] => [bs,n_negs]
+        neg_log_sigmoid = (-out.sigmoid()+1.0).clamp(min_, max_).log().neg() #[bs,n_negs]
         nloss = neg_log_sigmoid.sum(1) #[bs] sum of losses predicting all negative words on each batch
         nloss = nloss.mean() #[1] batches mean loss
 
@@ -206,24 +198,24 @@ class Word2Vec(nn.Module):
         ctx_emb = self.Embed(batch[1],'iEmb').sum(1) #[bs,2*window,ds] => [bs,ds] #sum of h's corresponding to context words
 
         #the center word is embedded using the output embeddings (oEmb)        
-        wrd_emb  = self.Embed(batch[0],'oEmb') #[bs,ds]
         # p(wrd|ctx) the probability of the input word given the context words should be 1.0, then
+        wrd_emb  = self.Embed(batch[0],'oEmb') #[bs,ds]
         # if prob=1.0 => neg(log(prob))=0.0
         # if prob=0.0 => neg(log(prob))=Inf
         out = torch.bmm(ctx_emb.unsqueeze(1), wrd_emb.unsqueeze(-1)).squeeze() #[bs,1,ds] x [bs,ds,1] = [bs,1,1] => [bs]
         neg_log_sigmoid = out.sigmoid().clamp(min_, max_).log().neg() #[bs]
-        ploss = neg_log_sigmoid.mean() #[1] batch mean loss
+        ploss = neg_log_sigmoid.mean() #[1] batches mean loss
 
 
         #the n_negs negative words are embedded using the output embeddings (oEmb)
-        neg_emb = self.Embed(batch[2],'oEmb') #[bs,n_negs,ds]
         # p(neg|ctx) for each negative word, the probability should be 0.0, then
+        neg_emb = self.Embed(batch[2],'oEmb') #[bs,n_negs,ds]
         # if prob=1.0 => neg(log(-prob+1))=Inf
         # if prob=0.0 => neg(log(-prob+1))=0.0
         out = torch.bmm(ctx_emb.unsqueeze(1), neg_emb.transpose(1,2)).squeeze(1) #[bs,1,ds] x [bs, ds, n_negs] = [bs,1,n_negs] => [bs,n_negs]
         neg_log_sigmoid = (-out.sigmoid()+1.0).clamp(min_, max_).log().neg() #[bs,n_negs]
         nloss = neg_log_sigmoid.mean(1) #[bs] for each batch, mean of the n_negs negative words loss
-        nloss = nloss.mean() #batch mean loss
+        nloss = nloss.mean() #batches mean loss
 
         loss = ploss + nloss
         if torch.isnan(loss).any() or torch.isinf(loss).any():
@@ -240,25 +232,26 @@ class Word2Vec(nn.Module):
         #batch[2] : batch of negative words (list of list)
         #batch[3] : batch of sentences (list of list)
         #batch[4] : batch of lengths (list)
-        emb  = self.Embed(batch[0],'oEmb') #[bs,ds]
-        nemb = self.Embed(batch[2],'oEmb') #[bs,n_negs,ds]
-        semb = self.SentEmbed(batch[3], batch[4], 'iEmb', 'avg') #[bs,ds] #mean of sentences considering their lens
-        # for sentence, the probability should be 1.0, then
-        # if prob=1.0 => neg(log(prob))=0.0
-        # if prob=0.0 => neg(log(prob))=Inf
-        out = torch.bmm(semb.unsqueeze(1), emb.unsqueeze(-1)).squeeze() #[bs,1,ds] x [bs,ds,1] = [bs,1,1] => [bs]
-        sigmoid = out.sigmoid().clamp(min_, max_) #[bs]
-        neg_log_sigmoid = sigmoid.log().neg() #[bs] 
-        ploss = neg_log_sigmoid.mean() #[1] mean loss predicting batch positive words
+        snt_emb = self.SentEmbed(batch[3], batch[4], 'iEmb', 'avg') #[bs,ds] #mean of sentences considering their lens
+
+        wrd_emb  = self.Embed(batch[0],'oEmb') #[bs,ds]
+        #p(wrd|snt)
+        out = torch.bmm(snt_emb.unsqueeze(1), wrd_emb.unsqueeze(-1)).squeeze() #[bs,1,ds] x [bs,ds,1] = [bs,1,1] => [bs]
+        neg_log_sigmoid = out.sigmoid().clamp(min_, max_).log().neg() #[bs]
+        ploss = neg_log_sigmoid.mean() #[1] batches mean loss
+
+        #p(neg|snt)
+        neg_emb = self.Embed(batch[2],'oEmb') #[bs,n_negs,ds]
+        #p(neg|snt)
         # for negative words, the probability should be 0.0, then
         # if prob=1.0 => neg(log(-prob+1))=Inf
         # if prob=0.0 => neg(log(-prob+1))=0.0
-        out = torch.bmm(emb.unsqueeze(1), nemb.transpose(1,2)).squeeze(1) #[bs,1,ds] x [bs, ds, n_negs] = [bs,1,n_negs] => [bs,n_negs]
-        sigmoid = (-out.sigmoid()+1.0).clamp(min_, max_) #[bs,n_negs]
-        neg_log_sigmoid = sigmoid.log().neg() #[bs,n_negs]
+        out = torch.bmm(snt_emb.unsqueeze(1), neg_emb.transpose(1,2)).squeeze(1) #[bs,1,ds] x [bs, ds, n_negs] = [bs,1,n_negs] => [bs,n_negs]
+        neg_log_sigmoid = (-out.sigmoid()+1.0).clamp(min_, max_).log().neg() #[bs,n_negs]
         nloss = neg_log_sigmoid.mean(1) #[bs] for each batch, mean of the negative words loss
+        nloss = nloss.mean()
 
-        loss = ploss + nloss.mean()
+        loss = ploss + nloss
         if torch.isnan(loss).any() or torch.isinf(loss).any():
             logging.error('NaN/Inf detected in s2vec_loss for batch {}'.format(batch))
             sys.exit()
