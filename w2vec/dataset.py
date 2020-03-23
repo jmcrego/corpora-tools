@@ -303,6 +303,7 @@ class Dataset():
                 ### window=2, ctx=[a, monster, in, my]
                 min_j = max(0, i-self.window)
                 max_j = min(len(toks)-1,i+self.window)
+                ctx = toks[min_j:max_j+1]
                 for j in range(min_j,max_j+1):
                     if j!=i:
                         #wrd i=1 'monster'
@@ -313,7 +314,7 @@ class Dataset():
                         neg = []
                         for _ in range(self.n_negs):
                             idx = random.randint(1, self.vocab_size-1)
-                            while idx in ctx or idx == wrd:
+                            while idx in ctx:
                                 idx = random.randint(1, self.vocab_size-1)
                             neg.append(idx)
                         batch_neg.append(neg)

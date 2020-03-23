@@ -152,7 +152,7 @@ class Word2Vec(nn.Module):
         #batch[1] : batch of context words (list)
         #batch[2] : batch of n_sample negative words (list of list)
 
-        #the center word is embedded using the input embeddings (iEmb)
+        #Center word is embedded using the input embeddings (iEmb)
         wrd_emb = self.Embed(batch[0],'iEmb') #[bs,ds]
 
         #Context words are embedded using the output embeddings (oEmb)
@@ -164,12 +164,8 @@ class Word2Vec(nn.Module):
         neg_log_sigmoid = out.sigmoid().clamp(min_, max_).log().neg() #[bs]
         ploss = ploss.mean() #[1] batches mean loss
 
+        #Negative words are embedded using the output embeddings (oEmb)
         neg_emb = self.Embed(batch[2],'oEmb') #[bs,n_negs,ds]
-        # the output layer generates probabilities for each vocabulary item (using a softmax)
-        # in our case, probabilities are generated only for selected context/negative words
-        # for which probabilities are simulated following the sigmoid
-        # the negative logarithm of these probabilities (sigmoid) is then used as loss function
-
         # for negative words, the probability should be 0.0, then
         # if prob=1.0 => neg(log(-prob+1))=Inf
         # if prob=0.0 => neg(log(-prob+1))=0.0
@@ -194,8 +190,7 @@ class Word2Vec(nn.Module):
 
         #Context words are embedded using the input embeddings (iEmb)
         #the 2xwindow embeddings [bs,2*window,ds] are summed up into a single vector representing context words [bs,ds]
-#       ctx_emb = self.Embed(batch[1],'iEmb').mean(ctx_emb, dim=1) #[bs,2*window,ds] => [bs,ds] #mean of h's corresponding to context words
-        ctx_emb = self.Embed(batch[1],'iEmb').sum(1) #[bs,2*window,ds] => [bs,ds] #sum of h's corresponding to context words
+        ctx_emb = self.Embed(batch[1],'iEmb').sum(1) #[bs,2*window,ds] => [bs,ds] #sum of h's of the corresponding (2*window) context words
 
         #the center word is embedded using the output embeddings (oEmb)        
         # p(wrd|ctx) the probability of the input word given the context words should be 1.0, then
@@ -214,7 +209,7 @@ class Word2Vec(nn.Module):
         # if prob=0.0 => neg(log(-prob+1))=0.0
         out = torch.bmm(ctx_emb.unsqueeze(1), neg_emb.transpose(1,2)).squeeze(1) #[bs,1,ds] x [bs, ds, n_negs] = [bs,1,n_negs] => [bs,n_negs]
         neg_log_sigmoid = (-out.sigmoid()+1.0).clamp(min_, max_).log().neg() #[bs,n_negs]
-        nloss = neg_log_sigmoid.mean(1) #[bs] for each batch, mean of the n_negs negative words loss
+        nloss = neg_log_sigmoid.sum(1) #[bs] for each batch, sum of the n_negs negative words loss
         nloss = nloss.mean() #batches mean loss
 
         loss = ploss + nloss
