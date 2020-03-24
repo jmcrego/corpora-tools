@@ -76,12 +76,12 @@ def do_train(args):
         n_epochs += 1
         for batch in dataset:
             model.train()
-            if args.method == 'sgram':
-                loss = model.forward_sgram(batch)
+            if args.method == 'skipgram':
+                loss = model.forward_skipgram(batch)
             elif args.method == 'cbow':
                 loss = model.forward_cbow(batch)
-            elif args.method == 's2vec':
-                loss = model.forward_s2vec(batch)
+            elif args.method == 'sbow':
+                loss = model.forward_sbow(batch)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -205,7 +205,7 @@ class Args():
         self.voc_maxs = 0
         self.tok_conf = None
         self.train = None
-        self.method = 'sgram'
+        self.method = 'cbow'
         self.pooling = 'avg'
         self.batch_size = 2048
         self.max_epochs = 100
@@ -239,7 +239,7 @@ class Args():
    -voc_maxs        INT : max size of vocabulary (0 for unlimitted) (0)
    -tok_conf       FILE : YAML file with onmt tokenization options  (space)
  -------- When learning ------------------------------------------------------
-   -method       STRING : sgram, cbow, dbow, s2vec                  (sgram)
+   -method       STRING : skipgram, cbow, sbow                      (cbow)
    -pooling      STRING : max, avg                                  (avg)
    -embedding_size  INT : embedding dimension                       (300)
    -window          INT : window size for skip-gram algorithm       (5)

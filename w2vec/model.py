@@ -145,7 +145,7 @@ class Word2Vec(nn.Module):
             sys.exit()
         return emb
 
-    def forward_sgram(self, batch):
+    def forward_skipgram(self, batch):
         min_ = 1e-06
         max_ = 1.0 - 1e-06
         #batch[0] : batch of center words (list)
@@ -219,7 +219,7 @@ class Word2Vec(nn.Module):
 
         return loss
 
-    def forward_s2vec(self, batch):
+    def forward_sbow(self, batch):
         min_ = 1e-06
         max_ = 1.0 - 1e-06
         #batch[0] : batch of words (list)
@@ -248,7 +248,7 @@ class Word2Vec(nn.Module):
 
         loss = ploss + nloss
         if torch.isnan(loss).any() or torch.isinf(loss).any():
-            logging.error('NaN/Inf detected in s2vec_loss for batch {}'.format(batch))
+            logging.error('NaN/Inf detected in sbow_loss for batch {}'.format(batch))
             sys.exit()
 
         return loss
