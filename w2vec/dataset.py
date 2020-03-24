@@ -392,7 +392,6 @@ class Dataset():
             length = [len(self.corpus[i]) for i in range(len(self.corpus))]
             indexs = np.argsort(np.array(length)) ### from smaller to largest sentences
             batch_wrd = []
-            batch_ctx = []
             batch_neg = []
             batch_snt = []
             batch_len = []
@@ -415,22 +414,18 @@ class Dataset():
                         for k in range(len(batch_snt)-1):
                             addn = len(batch_snt[-1]) - len(batch_snt[k])
                             batch_snt[k] += [self.idx_pad]*addn
-                    ### window=2, ctx=[a, monster, in, my]
-                    ctx, beg, end = self.get_window(toks,i,self.window,with_pad=True)
-                    batch_ctx.append(ctx)
                     ### n_negs=4 neg=[over, last, today, virus]
-                    neg = self.get_n_negs(self.n_negs,ctx,wrd)
+                    neg = self.get_n_negs(self.n_negs,snt,wrd)
                     batch_neg.append(neg)
                     ### batch filled
                     if len(batch_wrd) == self.batch_size:
-                        yield [batch_wrd, batch_ctx, batch_neg, batch_snt, batch_len]
+                        yield [batch_wrd, batch_snt, batch_len, batch_neg]
                         batch_wrd = []
-                        batch_ctx = []
                         batch_neg = []
                         batch_snt = []
                         batch_len = []
             if len(batch_wrd):
-                yield [batch_wrd, batch_ctx, batch_neg, batch_snt, batch_len]
+                yield [batch_wrd, batch_ctx, batch_snt, batch_len, batch_neg]
 
         ######################################################
         ### error ############################################
