@@ -207,9 +207,9 @@ class Args():
         self.train = None
         self.method = 'sgram'
         self.pooling = 'avg'
-        self.batch_size = 1024
+        self.batch_size = 2048
         self.max_epochs = 100
-        self.embedding_size = 100
+        self.embedding_size = 300
         self.window = 5
         self.n_negs = 10
         self.learning_rate = 0.001
@@ -241,7 +241,7 @@ class Args():
  -------- When learning ------------------------------------------------------
    -method       STRING : sgram, cbow, dbow, s2vec                  (sgram)
    -pooling      STRING : max, avg                                  (avg)
-   -embedding_size  INT : embedding dimension                       (100)
+   -embedding_size  INT : embedding dimension                       (300)
    -window          INT : window size for skip-gram algorithm       (5)
    -n_negs          INT : number of negative samples generated      (10)
    -skip_subsampling    : do not subsample corpora                  (False)
