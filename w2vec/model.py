@@ -148,12 +148,12 @@ class Word2Vec(nn.Module):
     def forward_skipgram(self, batch):
         min_ = 1e-06
         max_ = 1.0 - 1e-06
-        #batch[0] : batch of center words (list)
+        #batch[0] : batch of center words (list of list with one element)
         #batch[1] : batch of context words (list)
         #batch[2] : batch of n_sample negative words (list of list)
 
         #Center word is embedded using the input embeddings (iEmb)
-        wrd_emb = self.Embed(batch[0],'iEmb') #[bs,ds]
+        wrd_emb = self.Embed(batch[0],'iEmb').squeeze() #[bs,ds]
 
         #Context words are embedded using the output embeddings (oEmb)
         ctx_emb = self.Embed(batch[1],'oEmb') #[bs,ds]
@@ -184,7 +184,7 @@ class Word2Vec(nn.Module):
     def forward_cbow(self, batch):
         min_ = 1e-06
         max_ = 1.0 - 1e-06
-        #batch[0] : batch of words (list)
+        #batch[0] : batch of words (list of list with one element)
         #batch[1] : batch of context words (list of list)
         #batch[2] : batch of negative words (list of list)
 
@@ -194,7 +194,7 @@ class Word2Vec(nn.Module):
 
         #the center word is embedded using the output embeddings (oEmb)        
         # p(wrd|ctx) the probability of the input word given the context words should be 1.0, then
-        wrd_emb  = self.Embed(batch[0],'oEmb') #[bs,ds]
+        wrd_emb  = self.Embed(batch[0],'oEmb').squeeze() #[bs,ds]
         # if prob=1.0 => neg(log(prob))=0.0
         # if prob=0.0 => neg(log(prob))=Inf
         out = torch.bmm(ctx_emb.unsqueeze(1), wrd_emb.unsqueeze(-1)).squeeze() #[bs,1,ds] x [bs,ds,1] = [bs,1,1] => [bs]
@@ -222,13 +222,13 @@ class Word2Vec(nn.Module):
     def forward_sbow(self, batch):
         min_ = 1e-06
         max_ = 1.0 - 1e-06
-        #batch[0] : batch of words (list)
+        #batch[0] : batch of words (list of list with one element)
         #batch[1] : batch of sentences (list of list)
         #batch[2] : batch of lengths (list)
         #batch[3] : batch of negative words (list of list)
         snt_emb = self.SentEmbed(batch[1], batch[2], 'iEmb', 'avg') #[bs,ds] #mean of sentences considering their lens
 
-        wrd_emb  = self.Embed(batch[0],'oEmb') #[bs,ds]
+        wrd_emb  = self.Embed(batch[0],'oEmb').squeeze() #[bs,ds]
         #p(wrd|snt)
         out = torch.bmm(snt_emb.unsqueeze(1), wrd_emb.unsqueeze(-1)).squeeze() #[bs,1,ds] x [bs,ds,1] = [bs,1,1] => [bs]
         neg_log_sigmoid = out.sigmoid().clamp(min_, max_).log().neg() #[bs]

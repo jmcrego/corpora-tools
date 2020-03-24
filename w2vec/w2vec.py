@@ -208,7 +208,7 @@ class Args():
         self.method = 'cbow'
         self.pooling = 'avg'
         self.batch_size = 2048
-        self.max_epochs = 100
+        self.max_epochs = 1
         self.embedding_size = 300
         self.window = 5
         self.n_negs = 10
@@ -242,11 +242,11 @@ class Args():
    -method       STRING : skipgram, cbow, sbow                      (cbow)
    -pooling      STRING : max, avg                                  (avg)
    -embedding_size  INT : embedding dimension                       (300)
-   -window          INT : window size for skip-gram algorithm       (5)
+   -window          INT : window size                               (5)
    -n_negs          INT : number of negative samples generated      (10)
    -skip_subsampling    : do not subsample corpora                  (False)
    -batch_size      INT : batch size used                           (1024)
-   -max_epochs      INT : stop learning after this number of epochs (100)
+   -max_epochs      INT : stop learning after this number of epochs (1)
    -learning_rate FLOAT : learning rate for Adam optimizer          (0.001)
    -eps           FLOAT : eps for Adam optimizer                    (1e-08)
    -beta1         FLOAT : beta1 for Adam optimizer                  (0.9)

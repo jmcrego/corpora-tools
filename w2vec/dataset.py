@@ -172,96 +172,30 @@ class Dataset():
             logging.info('subsampled to {} tokens'.format(ntokens))
 
 
-    def build_batchs(self):
-        length = [len(self.corpus[i]) for i in range(len(self.corpus))]
-        indexs = np.argsort(np.array(length)) ### from smaller to largest sentences
-        self.batchs = []
-        batch_wrd = []
-        batch_ctx = []
-        batch_neg = []
-        batch_snt = []
-        batch_len = []
-        for index in indexs:
-            toks = self.corpus[index]
-            if len(toks) < 2: ### may be subsampled
-                continue
-
-            for i in range(len(toks)): #for each word in toks. Ex: 'a monster lives in my head'
-                ### i=2 wrd=lives
-                wrd = toks[i]
-                batch_wrd.append(wrd)
-
-                ### snt=[a, monster, in, my, head]
-                snt = list(toks)
-                del snt[i]
-                batch_snt.append(snt)
-                batch_len.append(len(snt))
-                if len(batch_snt) > 1 and len(snt) > len(batch_snt[0]): ### add padding
-                    for k in range(len(batch_snt)-1):
-                        addn = len(batch_snt[-1]) - len(batch_snt[k])
-                        batch_snt[k] += [self.idx_pad]*addn
-
-                ### window=2, ctx=[a, monster, in, my]
-                ctx = []
-                for j in range(i-self.window,i+self.window+1):
-                    if j<0:
-                        ctx.append(self.idx_pad)
-                    elif j>=len(toks):
-                        ctx.append(self.idx_pad)
-                    elif j!=i:
-                        ctx.append(toks[j])
-                batch_ctx.append(ctx)
-
-                ### n_negs=4 neg=[over, last, today, virus]
-                neg = []
-                for _ in range(self.n_negs):
-                    idx = random.randint(1, self.vocab_size-1)
-                    while idx in ctx or idx == wrd:
-                        idx = random.randint(1, self.vocab_size-1)
-                    neg.append(idx)
-                batch_neg.append(neg)
-
-                if len(batch_wrd) == self.batch_size:
-                    self.batchs.append([batch_wrd, batch_ctx, batch_neg, batch_snt, batch_len])
-                    batch_wrd = []
-                    batch_ctx = []
-                    batch_neg = []
-                    batch_snt = []
-                    batch_len = []
-
-        if len(batch_wrd):
-            self.batchs.append([batch_wrd, batch_ctx, batch_neg, batch_snt, batch_len])
-
-        logging.info('built {} batchs'.format(len(self.batchs)))
-        del self.corpus
-        del self.wrd2n
-
-
-    def get_window(self, toks, center, window, with_pad):
+    def get_window(self, toks, center, window, ctx_padded):
+        wrd = []
         ctx = []
         for i in range(center-window,center+window+1):
             if i<0:
-                if with_pad:
+                if ctx_padded:
                     ctx.append(self.idx_pad)
             elif i>=len(toks):
-                if with_pad:
+                if ctx_padded:
                     ctx.append(self.idx_pad)
             elif center==i:
-                pass
+                wrd.append(toks[i])
             else:
                 ctx.append(toks[i])
         beg = max(0, center-window)
         end = min(len(toks)-1,i+self.window)
-        return ctx, beg, end
+        return wrd, ctx, beg, end
 
 
-    def get_n_negs(self, n, context, center):
+    def get_n_negs(self, n, unallowed_words):
         negs = []
         while len(negs) < n:
             idx = random.randint(1, self.vocab_size-1) #do not consider idx=0 (unk)
-            if idx in context:
-                continue
-            if idx == center:
+            if idx in unallowed_words:
                 continue
             negs.append(idx)
         return negs
@@ -330,13 +264,10 @@ class Dataset():
                 if len(toks) < 2: ### may be subsampled
                     continue
                 for i in range(len(toks)): #for each word in toks. Ex: 'a monster lives in my head'
-                    ### i=2 wrd=lives
-                    batch_wrd.append(toks[i])
-                    ### window=2, ctx=[a, monster, in, my]
-                    ctx, beg, end = self.get_window(toks,i,self.window,with_pad=True)
+                    wrd, ctx, beg, end = self.get_window(toks,i,self.window,ctx_padded=True)
+                    neg = self.get_n_negs(self.n_negs,ctx+wrd)
+                    batch_wrd.append(wrd)
                     batch_ctx.append(ctx)
-                    ### n_negs=4 neg=[over, last, today, virus]
-                    neg = self.get_n_negs(self.n_negs,ctx,toks[i])
                     batch_neg.append(neg)
                     ### batch filled
                     if len(batch_wrd) == self.batch_size:
@@ -363,15 +294,12 @@ class Dataset():
                     continue
                 for i in range(len(toks)): #for each word in toks. Ex: 'a monster lives in my head'
                     ### window=2, ctx=[a, monster, in, my]
-                    ctx, beg, end = self.get_window(toks,i,self.window,with_pad=False)
+                    wrd, ctx, beg, end = self.get_window(toks,i,self.window,ctx_padded=False)
                     for j in range(beg,end+1):
-                        if j!=i:
-                            #wrd i=1 'monster'
-                            batch_wrd.append(toks[i])
-                            #ctx j=0 'a'
+                        if j!=i: #for each context word
+                            batch_wrd.append(wrd) #toks[i]
                             batch_ctx.append(toks[j])
-                            #neg n_negs=4 neg=[over, last, today, virus]
-                            neg = self.get_n_negs(self.n_negs,ctx,toks[i])
+                            neg = self.get_n_negs(self.n_negs,ctx+wrd)
                             batch_neg.append(neg)
                             ### batch filled
                             if len(batch_wrd) == self.batch_size:
@@ -397,14 +325,9 @@ class Dataset():
                 if len(toks) < 2: ### may be subsampled
                     continue
                 for i in range(len(toks)): #for each word in toks. Ex: 'a monster lives in my head'
-                    ### i=2 wrd=lives
-                    wrd = toks[i]
+                    wrd, snt, beg, end = self.get_window(toks,i,9999,ctx_padded=False)
                     batch_wrd.append(wrd)
-                    ### snt=[a, monster, in, my]
-                    snt = list(toks)
-                    del snt[i]
                     batch_snt.append(snt)
-                    ### len
                     batch_len.append(len(snt))
                     ### add padding
                     if len(batch_snt) > 1 and len(snt) > len(batch_snt[0]): 
@@ -412,7 +335,7 @@ class Dataset():
                             addn = len(batch_snt[-1]) - len(batch_snt[k])
                             batch_snt[k] += [self.idx_pad]*addn
                     ### n_negs=4 neg=[over, last, today, virus]
-                    neg = self.get_n_negs(self.n_negs,snt,wrd)
+                    neg = self.get_n_negs(self.n_negs,snt+wrd)
                     batch_neg.append(neg)
                     ### batch filled
                     if len(batch_wrd) == self.batch_size:
@@ -422,7 +345,7 @@ class Dataset():
                         batch_snt = []
                         batch_len = []
             if len(batch_wrd):
-                yield [batch_wrd, batch_ctx, batch_snt, batch_len, batch_neg]
+                yield [batch_wrd, batch_snt, batch_len, batch_neg]
 
         ######################################################
         ### error ############################################
