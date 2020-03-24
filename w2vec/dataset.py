@@ -325,7 +325,7 @@ class Dataset():
                 if len(toks) < 2: ### may be subsampled
                     continue
                 for i in range(len(toks)): #for each word in toks. Ex: 'a monster lives in my head'
-                    wrd, snt, beg, end = self.get_window(toks,i,9999,ctx_padded=False)
+                    wrd, snt, beg, end = self.get_window(toks,i,len(toks),ctx_padded=False)
                     batch_wrd.append(wrd)
                     batch_snt.append(snt)
                     batch_len.append(len(snt))
