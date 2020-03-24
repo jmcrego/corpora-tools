@@ -249,9 +249,6 @@ class Dataset():
             elif center==i:
                 pass
             else:
-                if beg == -1:
-                    beg = i
-                end = i
                 ctx.append(toks[i])
         beg = max(0, center-window)
         end = min(len(toks)-1,i+self.window)
