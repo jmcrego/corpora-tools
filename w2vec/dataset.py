@@ -173,9 +173,7 @@ class Dataset():
 
 
     def get_window_negs(self, toks, center, window, n_negs):
-        print('toks',toks)
         wrd = toks[center]
-        print('center',wrd)
         ctx = []
         pos = []
         neg = []
@@ -201,9 +199,6 @@ class Dataset():
             pos.append(False)
             neg.append(True)
             n += 1
-        print('ctx',ctx)
-        print('pos',pos)
-        print('neg',neg)
         return wrd, ctx, pos, neg
 
     def __iter__(self):
