@@ -201,7 +201,7 @@ class Word2Vec(nn.Module):
         #Center words are embedded using oEmb
         wrd_emb = self.Embed(batch[0],'oEmb') #[bs,ds]
         #Negative words are embedded using oEmb
-        neg_emb = self.Embed(batch[2],'oEmb') #[bs,n,ds]
+        neg_emb = self.Embed(batch[2],'oEmb').neg() #[bs,n,ds]
         ###
         ### computing positive words loss
         ###
