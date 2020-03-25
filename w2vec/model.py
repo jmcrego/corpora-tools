@@ -148,33 +148,32 @@ class Word2Vec(nn.Module):
     def forward_skipgram(self, batch):
         min_ = 1e-06
         max_ = 1.0 - 1e-06
-        #batch[0] : batch of center words (list of list with one element)
-        #batch[1] : batch of context words (list)
-        #batch[2] : batch of n_sample negative words (list of list)
+        #batch[0] : batch of center words (list)
+        #batch[1] : batch of context words (list of list)
+        #batch[2] : batch of positive words (list of list)
+        #batch[3] : batch of negative words (list of list)
+        pos = torch.as_tensor(batch[2]) #[bs,n] (positive words are 1.0 others are 0.0)
+        neg = torch.as_tensor(batch[3]) #[bs,n] (negative words are 1.0 others are 0.0)
 
         #Center word is embedded using the input embeddings (iEmb)
-        wrd_emb = self.Embed(batch[0],'iEmb').squeeze() #[bs,ds]
-
+        wrd_emb = self.Embed(batch[0],'iEmb').unsqueeze(1) #[bs,ds] => [bs,1,ds]
         #Context words are embedded using the output embeddings (oEmb)
-        ctx_emb = self.Embed(batch[1],'oEmb') #[bs,ds]
-        # for context words, the probability should be 1.0, then
-        # if prob=1.0 => neg(log(prob))=0.0
-        # if prob=0.0 => neg(log(prob))=Inf
-        out = torch.bmm(wrd_emb.unsqueeze(1), ctx_emb.unsqueeze(-1)).squeeze() #[bs,1,ds] x [bs,ds,1] = [bs,1,1] = > [bs]
-        neg_log_sigmoid = out.sigmoid().clamp(min_, max_).log().neg() #[bs]
-        ploss = neg_log_sigmoid.mean() #[1] batches mean loss
+        ctx_emb = self.Embed(batch[1],'oEmb') #[bs,n,ds]  
+        ctx_emb = (ctx_emb * (-2.0*neg.unsqueeze(-1) + 1.0)) #[bs,n,ds] (negative words are polarity inversed: multiplied by -1.0 rest are not impacted)
 
-        #Negative words are embedded using the output embeddings (oEmb)
-        neg_emb = self.Embed(batch[2],'oEmb').neg() #[bs,n_negs,ds]
-        # for negative words, the probability should be 0.0, then
-        # if prob=1.0 => neg(log(-prob+1))=Inf
-        # if prob=0.0 => neg(log(-prob+1))=0.0
-        out = torch.bmm(wrd_emb.unsqueeze(1), neg_emb.transpose(2,1)).squeeze()  #[bs,1,ds] x [bs,ds,n_negs] = [bs,1,n_negs] => [bs,n_negs]
-        neg_log_sigmoid = out.sigmoid().clamp(min_, max_).log().neg() #[bs,n_negs]
-        nloss = neg_log_sigmoid.sum(1) #[bs] sum of losses predicting all negative words on each batch
-        nloss = nloss.mean() #[1] batches mean loss
+        ### errors are computed word by word using the negative(log(sigmoid))
+        #i use clamp to prevent NaN/Inf appear when computing the log of 1.0/0.0
+        out = torch.bmm(wrd_emb, ctx_emb.transpose(2,1)).squeeze() #[bs,1,ds] x [bs,ds,n] = [bs,1,n] = > [bs,n]
+        neg_log_sigmoid = out.sigmoid().clamp(min_, max_).log().neg() #[bs,n] (this is the error word by word by batch)
 
-        loss = ploss + nloss
+        #### computing positive words loss
+        pos_loss_per_batch = torch.sum(neg_log_sigmoid*pos, dim=1) #/ torch.sum(pos, dim=1) #[bs] (sum errors of positive words)
+        pos_loss_per_batch = pos_loss_per_batch / torch.sum(pos, dim=1) #[bs] errors of positive words are averaged
+        #### computing negative words loss
+        neg_loss_per_batch = torch.sum(neg_log_sigmoid*neg, dim=1) #[bs] (sum of errors of all negative words in each batch)
+#        neg_loss_per_batch = neg_loss_per_batch / torch.sum(neg, dim=1) #[bs] errors of negative words are averaged
+        #### sum of lossess
+        loss = pos_loss_per_batch.mean() + neg_loss_per_batch.mean()
         if torch.isnan(loss).any() or torch.isinf(loss).any():
             logging.error('NaN/Inf detected in sgram_loss for batch {}'.format(batch))
             sys.exit()        
@@ -184,39 +183,38 @@ class Word2Vec(nn.Module):
     def forward_cbow(self, batch):
         min_ = 1e-06
         max_ = 1.0 - 1e-06
-        #batch[0] : batch of words (list of list with one element)
+        #batch[0] : batch of center words (list)
         #batch[1] : batch of context words (list of list)
-        #batch[2] : batch of negative words (list of list)
+        #batch[2] : batch of positive words (list of list)
+        #batch[3] : batch of negative words (list of list)
+        pos = torch.as_tensor(batch[2]) #[bs,n] (positive words are 1.0 others are 0.0)
+        neg = torch.as_tensor(batch[3]) #[bs,n] (negative words are 1.0 others are 0.0)
 
+        #Center words are embedded using the output embeddings (oEmb)        
+        wrd_emb = self.Embed(batch[0],'oEmb').unsqueeze(1) #[bs,ds] => [bs,1,ds]
         #Context words are embedded using the input embeddings (iEmb)
-        #the 2xwindow embeddings [bs,2*window,ds] are summed up into a single vector representing context words [bs,ds]
-        ctx_emb = self.Embed(batch[1],'iEmb').sum(1) #[bs,2*window,ds] => [bs,ds] #sum of h's of the corresponding (2*window) context words
+        ctx_emb = self.Embed(batch[1],'iEmb') #[bs,n,ds]
+        ctx_emb = ctx_emb * (-2.0*neg.unsqueeze(-1) + 1.0) #[bs,n,ds] (negative words are polarity inversed: multiplied by -1.0 rest are not impacted)
 
-        #the center word is embedded using the output embeddings (oEmb)        
-        # p(wrd|ctx) the probability of the input word given the context words should be 1.0, then
-        wrd_emb  = self.Embed(batch[0],'oEmb').squeeze() #[bs,ds]
-        # if prob=1.0 => neg(log(prob))=0.0
-        # if prob=0.0 => neg(log(prob))=Inf
-        out = torch.bmm(ctx_emb.unsqueeze(1), wrd_emb.unsqueeze(-1)).squeeze() #[bs,1,ds] x [bs,ds,1] = [bs,1,1] => [bs]
-        neg_log_sigmoid = out.sigmoid().clamp(min_, max_).log().neg() #[bs]
-        ploss = neg_log_sigmoid.mean() #[1] batches mean loss
+        #### computing positive words loss
+        #all positive word embeddings are averaged into a single vector representing positive context words [bs,ds]
+        pos_emb = (ctx_emb*pos.unsqueeze(-1)).sum(1) / torch.sum(pos, dim=1).unsqueeze(-1) #[bs,n,ds]x[bs,n,1]=>[bs,ds] / [bs,1] = [bs,ds] 
+        #i use clamp to prevent NaN/Inf appear when computing the log of 1.0/0.0
+        out = torch.bmm(wrd_emb, pos_emb.unsqueeze(-1)).squeeze() #[bs,1,ds] x [bs,ds,1] = [bs,1] = > [bs]
+        neg_log_sigmoid = out.sigmoid().clamp(min_, max_).log().neg() #[bs] this is the error of the single positive word (no need to average)
+        pos_loss_per_batch = neg_log_sigmoid #[bs]
 
+        #### computing negative words loss
+        ### errors are computed word by word using the negative(log(sigmoid))
+        out = torch.bmm(wrd_emb, ctx_emb.transpose(2,1)).squeeze() #[bs,1,ds] x [bs,ds,n] = [bs,1,n] = > [bs,n]
+        neg_log_sigmoid = out.sigmoid().clamp(min_, max_).log().neg() #[bs,n] (this is the error word by word by batch)
+        neg_loss_per_batch = torch.sum(neg_log_sigmoid*neg, dim=1) #[bs] (sum of errors of all negative words)
+#        neg_loss_per_batch = neg_loss_per_batch / torch.sum(neg, dim=1) #[bs] errors of negative words are averaged
 
-        #the n_negs negative words are embedded using the output embeddings (oEmb)
-        # p(neg|ctx) for each negative word, the probability should be 0.0, then
-        neg_emb = self.Embed(batch[2],'oEmb').neg() #[bs,n_negs,ds]
-        # if prob=1.0 => neg(log(-prob+1))=Inf
-        # if prob=0.0 => neg(log(-prob+1))=0.0
-        out = torch.bmm(ctx_emb.unsqueeze(1), neg_emb.transpose(1,2)).squeeze(1) #[bs,1,ds] x [bs, ds, n_negs] = [bs,1,n_negs] => [bs,n_negs]
-        neg_log_sigmoid = out.sigmoid().clamp(min_, max_).log().neg() #[bs,n_negs]
-        nloss = neg_log_sigmoid.sum(1) #[bs] for each batch, sum of the n_negs negative words loss
-        nloss = nloss.mean() #batches mean loss
-
-        loss = ploss + nloss
+        loss = pos_loss_per_batch.mean() + neg_loss_per_batch.mean()
         if torch.isnan(loss).any() or torch.isinf(loss).any():
             logging.error('NaN/Inf detected in cbow_loss for batch {}'.format(batch))
             sys.exit()
-
         return loss
 
     def forward_sbow(self, batch):

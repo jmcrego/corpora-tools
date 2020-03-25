@@ -172,33 +172,34 @@ class Dataset():
             logging.info('subsampled to {} tokens'.format(ntokens))
 
 
-    def get_window(self, toks, center, window, ctx_padded):
-        wrd = []
+    def get_window_negs(self, toks, center, window, n_negs):
+        wrd = toks[center]
         ctx = []
+        pos = []
+        neg = []
         for i in range(center-window,center+window+1):
-            if i<0:
-                if ctx_padded:
-                    ctx.append(self.idx_pad)
-            elif i>=len(toks):
-                if ctx_padded:
-                    ctx.append(self.idx_pad)
-            elif center==i:
-                wrd.append(toks[i])
-            else:
+            if i < 0:
+                ctx.append(self.idx_pad)
+                pos.append(False)
+                neg.append(False)
+            elif i >= len(toks):
+                ctx.append(self.idx_pad)
+                pos.append(False)
+                neg.append(False)
+            elif i!=center:
                 ctx.append(toks[i])
-        beg = max(0, center-window)
-        end = min(len(toks)-1,i+self.window)
-        return wrd, ctx, beg, end
-
-
-    def get_n_negs(self, n, unallowed_words):
-        negs = []
-        while len(negs) < n:
+                pos.append(True)
+                neg.append(False)
+        n = 0
+        while n < n_negs:
             idx = random.randint(1, self.vocab_size-1) #do not consider idx=0 (unk)
-            if idx in unallowed_words:
+            if idx in ctx or idx == wrd:
                 continue
-            negs.append(idx)
-        return negs
+            ctx.append(idx)
+            pos.append(False)
+            neg.append(True)
+            n += 1
+        return wrd, ctx, pos, neg
 
     def __iter__(self):
         ######################################################
@@ -251,64 +252,33 @@ class Dataset():
                 yield [batch_wrd,batch_isnt,batch_iwrd]
 
         ######################################################
-        ### cbow #############################################
+        ### cbow / skipgram ##################################
         ######################################################
-        elif self.method == 'cbow':
-            indexs = [i for i in range(len(self.corpus))]
-            random.shuffle(indexs)
-            batch_wrd = []
-            batch_ctx = []
-            batch_neg = []
-            for index in indexs:
-                toks = self.corpus[index]
-                if len(toks) < 2: ### may be subsampled
-                    continue
-                for i in range(len(toks)): #for each word in toks. Ex: 'a monster lives in my head'
-                    wrd, ctx, beg, end = self.get_window(toks,i,self.window,ctx_padded=True)
-                    neg = self.get_n_negs(self.n_negs,ctx+wrd)
-                    batch_wrd.append(wrd)
-                    batch_ctx.append(ctx)
-                    batch_neg.append(neg)
-                    ### batch filled
-                    if len(batch_wrd) == self.batch_size:
-                        yield [batch_wrd, batch_ctx, batch_neg]
-                        batch_wrd = []
-                        batch_ctx = []
-                        batch_neg = []
-            ### last batch
-            if len(batch_wrd):
-                yield [batch_wrd, batch_ctx, batch_neg]
-
-        ######################################################
-        ### skipgram ############################################
-        ######################################################
-        elif self.method == 'skipgram':
+        elif self.method == 'cbow' or self.method == 'skipgram':
             indexs = [i for i in range(len(self.corpus))]
             random.shuffle(indexs) 
             batch_wrd = []
             batch_ctx = []
+            batch_pos = []
             batch_neg = []
             for index in indexs:
                 toks = self.corpus[index]
                 if len(toks) < 2: ### may be subsampled
                     continue
-                for i in range(len(toks)): #for each word in toks. Ex: 'a monster lives in my head'
-                    ### window=2, ctx=[a, monster, in, my]
-                    wrd, ctx, beg, end = self.get_window(toks,i,self.window,ctx_padded=False)
-                    for j in range(beg,end+1):
-                        if j!=i: #for each context word
-                            batch_wrd.append(wrd) #toks[i]
-                            batch_ctx.append(toks[j])
-                            neg = self.get_n_negs(self.n_negs,ctx+wrd)
-                            batch_neg.append(neg)
-                            ### batch filled
-                            if len(batch_wrd) == self.batch_size:
-                                yield [batch_wrd, batch_ctx, batch_neg]
-                                batch_wrd = []
-                                batch_ctx = []
-                                batch_neg = []
+                for i in range(len(toks)):
+                    wrd, ctx, pos, neg = self.get_window_negs(toks,i,self.window,self.n_negs)
+                    batch_wrd.append(wrd)
+                    batch_ctx.append(ctx)
+                    batch_pos.append(pos)
+                    batch_neg.append(neg)
+                    if len(batch_wrd) == self.batch_size:
+                        yield [batch_wrd, batch_ctx, batch_pos, batch_neg]
+                        batch_wrd = []
+                        batch_ctx = []
+                        batch_pos = []
+                        batch_neg = []
             if len(batch_wrd):
-                yield [batch_wrd, batch_ctx, batch_neg]
+                yield [batch_wrd, batch_ctx, batch_pos, batch_neg]
 
         ######################################################
         ### sbow #############################################
