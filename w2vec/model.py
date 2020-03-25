@@ -203,18 +203,26 @@ class Word2Vec(nn.Module):
         #batch[2] : batch of positive words (list of list)
         #batch[3] : batch of negative words (list of list)
         pos = torch.as_tensor(batch[2]) #[bs,n] (positive words are 1.0 others are 0.0)
+#        print('pos',pos)
         neg = torch.as_tensor(batch[3]) #[bs,n] (negative words are 1.0 others are 0.0)
+#        print('neg',neg)
         if self.iEmb.weight.is_cuda:
             pos = pos.cuda()
             neg = neg.cuda()
 
-        #Center words are embedded using the output embeddings (oEmb)        
+        #Center words are embedded using the output embeddings (oEmb)
+#        print('wrd',batch[0])
         wrd_emb = self.Embed(batch[0],'oEmb').unsqueeze(1) #[bs,ds] => [bs,1,ds]
+#        print('wrd_emb',wrd_emb)
         #Context words are embedded using the input embeddings (iEmb)
+#        print('ctx',batch[1])
         ctx_emb = self.Embed(batch[1],'iEmb') #[bs,n,ds]
-#        ctx_emb = ctx_emb * (-2.0*neg.unsqueeze(-1) + 1.0) #[bs,n,ds] (negative words are polarity inversed: multiplied by -1.0 rest are not impacted)
+#        print('ctx_emb',ctx_emb)
+        ctx_emb = ctx_emb * (-2.0*neg.unsqueeze(-1) + 1.0) #[bs,n,ds] (negative words are polarity inversed: multiplied by -1.0 rest are not impacted)
+#        print('-ctx_emb',ctx_emb)
         #all positive word embeddings are averaged into a single vector representing positive context words [bs,ds]
         pos_emb = (ctx_emb*pos.unsqueeze(-1)).sum(1) / torch.sum(pos, dim=1).unsqueeze(-1) #[bs,n,ds]x[bs,n,1]=>[bs,ds] / [bs,1] = [bs,ds] 
+#        sys.exit()
 
         ###
         ### computing positive words loss
