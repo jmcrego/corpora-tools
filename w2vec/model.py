@@ -169,15 +169,25 @@ class Word2Vec(nn.Module):
         #i use clamp to prevent NaN/Inf appear when computing the log of 1.0/0.0
         err = torch.bmm(wrd_emb, ctx_emb.transpose(2,1)).squeeze().sigmoid().clamp(min_, max_).log().neg() #[bs,1,ds] x [bs,ds,n] = [bs,1,n] = > [bs,n]
 
-        #### computing positive words loss
-        pos_loss_per_batch = torch.sum(err*pos, dim=1) #/ torch.sum(pos, dim=1) #[bs] (sum errors of positive words)
-        pos_loss_per_batch = pos_loss_per_batch / torch.sum(pos, dim=1) #[bs] errors of positive words are averaged
-        loss = pos_loss_per_batch.mean()
+        ###
+        ### computing positive words loss
+        ###
+        pos_err = torch.sum(err*pos, dim=1) #/ torch.sum(pos, dim=1) #[bs] (sum errors of positive words)
+        avg_pos = True
+        if avg_pos:
+            pos_err = pos_err / torch.sum(pos, dim=1) #[bs] errors of positive words are averaged
+        loss = pos_err.mean()
+#        logging.info('ploss={:.5f}'.format(pos_loss_per_batch.mean().data.cpu().detach().numpy()))
 
-        #### computing negative words loss
-        neg_loss_per_batch = torch.sum(err*neg, dim=1) #[bs] (sum of errors of all negative words in each batch)
-#        neg_loss_per_batch = neg_loss_per_batch / torch.sum(neg, dim=1) #[bs] errors of negative words are averaged
-        loss += neg_loss_per_batch.mean()
+        ###
+        ### computing negative words loss
+        ###
+        neg_err = torch.sum(err*neg, dim=1) #[bs] (sum of errors of all negative words in each batch)
+        avg_neg = False
+        if avg_neg:
+            neg_err = neg_err / torch.sum(neg, dim=1) #[bs] errors of negative words are averaged
+        loss += neg_err.mean()
+#        logging.info('nloss={:.5f}'.format(neg_err.mean().data.cpu().detach().numpy()))
 
         if torch.isnan(loss).any() or torch.isinf(loss).any():
             logging.error('NaN/Inf detected in sgram_loss for batch {}'.format(batch))
@@ -202,21 +212,29 @@ class Word2Vec(nn.Module):
         wrd_emb = self.Embed(batch[0],'oEmb').unsqueeze(1) #[bs,ds] => [bs,1,ds]
         #Context words are embedded using the input embeddings (iEmb)
         ctx_emb = self.Embed(batch[1],'iEmb') #[bs,n,ds]
-        ctx_emb = ctx_emb * (-2.0*neg.unsqueeze(-1) + 1.0) #[bs,n,ds] (negative words are polarity inversed: multiplied by -1.0 rest are not impacted)
-
-        #### computing positive words loss
+#        ctx_emb = ctx_emb * (-2.0*neg.unsqueeze(-1) + 1.0) #[bs,n,ds] (negative words are polarity inversed: multiplied by -1.0 rest are not impacted)
         #all positive word embeddings are averaged into a single vector representing positive context words [bs,ds]
-        pos_emb = (ctx_emb*pos.unsqueeze(-1)).sum(1) / torch.sum(pos, dim=1).unsqueeze(-1) #[bs,n,ds]x[bs,n,1]=>[bs,ds] / [bs,1] = [bs,ds] 
-        #i use clamp to prevent NaN/Inf appear when computing the log of 1.0/0.0
-        err = torch.bmm(wrd_emb, pos_emb.unsqueeze(-1)).squeeze().sigmoid().clamp(min_, max_).log().neg() #[bs,1,ds] x [bs,ds,1] = [bs,1] = > [bs]
-        ### no need to average positive words errors since there is only one
-        loss = pos.mean()
+        pos_emb = (ctx_emb*pos.unsqueeze(-1)).sum(1) #/ torch.sum(pos, dim=1).unsqueeze(-1) #[bs,n,ds]x[bs,n,1]=>[bs,ds] / [bs,1] = [bs,ds] 
 
-        #### computing negative words loss
+        ###
+        ### computing positive words loss
+        ###
+        #i use clamp to prevent NaN/Inf appear when computing the log of 1.0/0.0
+        pos_err = torch.bmm(wrd_emb, pos_emb.unsqueeze(-1)).squeeze().sigmoid().clamp(min_, max_).log().neg() #[bs,1,ds] x [bs,ds,1] = [bs,1] = > [bs]
+        ### no need to average positive words errors since there is only one
+        loss = pos_err.mean()
+#        logging.info('ploss={:.5f}'.format(err.mean().data.cpu().detach().numpy()))
+
+        ###
+        ### computing negative words loss
+        ###
         err = torch.bmm(wrd_emb, ctx_emb.transpose(2,1)).squeeze().sigmoid().clamp(min_, max_).log().neg() #[bs,1,ds] x [bs,ds,n] = [bs,1,n] = > [bs,n]
-        neg_loss_per_batch = torch.sum(neg_err*neg, dim=1) #[bs] (sum of errors of all negative words)
-#        neg_loss_per_batch = neg_loss_per_batch / torch.sum(neg, dim=1) #[bs] errors of negative words are averaged
-        loss += neg_loss_per_batch.mean()
+        neg_err = torch.sum(err*neg, dim=1) #[bs] (sum of errors of all negative words)
+        avg_neg = False
+        if avg_neg:
+            neg_err = neg_err / torch.sum(neg, dim=1) #[bs] errors of negative words are averaged
+        loss += neg_err.mean()
+#        logging.info('nloss={:.5f}'.format(neg_loss_per_batch.mean().data.cpu().detach().numpy()))
 
         if torch.isnan(loss).any() or torch.isinf(loss).any():
             logging.error('NaN/Inf detected in cbow_loss for batch {}'.format(batch))
