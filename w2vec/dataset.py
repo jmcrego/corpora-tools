@@ -251,7 +251,7 @@ class Dataset():
         ######################################################
         #center word will be embedded by Input
         #positive and negative words will be embedded by Output
-        elif self.method == 'skipgram' or self.method = 'cbow':
+        elif self.method == 'skipgram' or self.method == 'cbow':
             indexs = [i for i in range(len(self.corpus))]
             random.shuffle(indexs) 
             batch_wrd = []
