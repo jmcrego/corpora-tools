@@ -163,7 +163,7 @@ class Word2Vec(nn.Module):
         wrd_emb = self.Embed(batch[0],'iEmb').unsqueeze(1) #[bs,ds] => [bs,1,ds]
         #Context words are embedded using the output embeddings (oEmb)
         ctx_emb = self.Embed(batch[1],'oEmb') #[bs,n,ds]  
-        ctx_emb = (ctx_emb * (-2.0*neg.unsqueeze(-1) + 1.0)) #[bs,n,ds] (negative words are polarity inversed: multiplied by -1.0 rest are not impacted)
+        ctx_emb = (ctx_emb * (-2.0*neg.unsqueeze(-1) + 1.0)) #[bs,n,ds] (negative words are polarity inversed: multiplied by -1.0 the rest are not impacted)
 
         ### errors are computed word by word using the neg(log(sigmoid(wrd*ctx)))
         #i use clamp to prevent NaN/Inf appear when computing the log of 1.0/0.0
@@ -212,7 +212,7 @@ class Word2Vec(nn.Module):
         wrd_emb = self.Embed(batch[0],'oEmb').unsqueeze(1) #[bs,ds] => [bs,1,ds]
         #Context words are embedded using the input embeddings (iEmb)
         ctx_emb = self.Embed(batch[1],'iEmb') #[bs,n,ds]
-#no need        ctx_emb = ctx_emb * (-2.0*neg.unsqueeze(-1) + 1.0) #[bs,n,ds] (negative words are polarity inversed: multiplied by -1.0 rest are not impacted)
+        ctx_emb = ctx_emb * (-2.0*neg.unsqueeze(-1) + 1.0) #[bs,n,ds] (negative words are polarity inversed: multiplied by -1.0 the rest are not impacted)
         #all positive word embeddings are averaged into a single vector representing positive context words [bs,ds]
         pos_emb = (ctx_emb*pos.unsqueeze(-1)).sum(1) / torch.sum(pos, dim=1).unsqueeze(-1) #[bs,n,ds]x[bs,n,1]=>[bs,ds] / [bs,1] = [bs,ds] 
 
@@ -228,7 +228,7 @@ class Word2Vec(nn.Module):
         ###
         ### computing negative words loss
         ###
-        err = torch.bmm(-wrd_emb, ctx_emb.transpose(2,1)).squeeze().sigmoid().clamp(min_, max_).log().neg() #[bs,1,ds] x [bs,ds,n] = [bs,1,n] = > [bs,n]
+        err = torch.bmm(wrd_emb, ctx_emb.transpose(2,1)).squeeze().sigmoid().clamp(min_, max_).log().neg() #[bs,1,ds] x [bs,ds,n] = [bs,1,n] = > [bs,n]
         neg_err = torch.sum(err*neg, dim=1) #[bs] (sum of errors of all negative words)
         avg_neg = False
         if avg_neg:
