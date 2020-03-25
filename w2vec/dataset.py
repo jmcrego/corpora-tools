@@ -174,32 +174,27 @@ class Dataset():
 
     def get_window_negs(self, toks, center, window, n_negs):
         wrd = toks[center]
-        ctx = []
         pos = []
         neg = []
+        msk = [] #mask of positive words (to indicate true words 1.0 or padding 0.0)
         for i in range(center-window,center+window+1):
             if i < 0:
-                ctx.append(self.idx_pad)
-                pos.append(False)
-                neg.append(False)
+                pos.append(self.idx_pad)
+                msk.append(False)
             elif i >= len(toks):
-                ctx.append(self.idx_pad)
-                pos.append(False)
-                neg.append(False)
+                pos.append(self.idx_pad)
+                msk.append(False)
             elif i!=center:
-                ctx.append(toks[i])
-                pos.append(True)
-                neg.append(False)
+                pos.append(toks[i])
+                msk.append(True)
         n = 0
         while n < n_negs:
             idx = random.randint(1, self.vocab_size-1) #do not consider idx=0 (unk)
-            if idx in ctx or idx == wrd:
+            if idx in pos or idx == wrd:
                 continue
-            ctx.append(idx)
-            pos.append(False)
-            neg.append(True)
+            neg.append(idx)
             n += 1
-        return wrd, ctx, pos, neg
+        return wrd, pos, neg, msk
 
     def __iter__(self):
         ######################################################
@@ -252,33 +247,35 @@ class Dataset():
                 yield [batch_wrd,batch_isnt,batch_iwrd]
 
         ######################################################
-        ### cbow / skipgram ##################################
+        ### skipgram / cbow ##################################
         ######################################################
-        elif self.method == 'cbow' or self.method == 'skipgram':
+        #center word will be embedded by Input
+        #positive and negative words will be embedded by Output
+        elif self.method == 'skipgram' or self.method = 'cbow':
             indexs = [i for i in range(len(self.corpus))]
             random.shuffle(indexs) 
             batch_wrd = []
-            batch_ctx = []
             batch_pos = []
             batch_neg = []
+            batch_msk_pos = []
             for index in indexs:
                 toks = self.corpus[index]
                 if len(toks) < 2: ### may be subsampled
                     continue
                 for i in range(len(toks)):
-                    wrd, ctx, pos, neg = self.get_window_negs(toks,i,self.window,self.n_negs)
+                    wrd, pos, neg, msk = self.get_window_negs(toks,i,self.window,self.n_negs)
                     batch_wrd.append(wrd)
-                    batch_ctx.append(ctx)
                     batch_pos.append(pos)
                     batch_neg.append(neg)
+                    batch_msk.append(msk)
                     if len(batch_wrd) == self.batch_size:
-                        yield [batch_wrd, batch_ctx, batch_pos, batch_neg]
+                        yield [batch_wrd, batch_pos, batch_neg, batch_msk]
                         batch_wrd = []
-                        batch_ctx = []
                         batch_pos = []
                         batch_neg = []
+                        batch_msk = []
             if len(batch_wrd):
-                yield [batch_wrd, batch_ctx, batch_pos, batch_neg]
+                yield [batch_wrd, batch_pos, batch_neg, batch_msk]
 
         ######################################################
         ### sbow #############################################
