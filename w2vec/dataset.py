@@ -257,7 +257,7 @@ class Dataset():
             batch_wrd = []
             batch_pos = []
             batch_neg = []
-            batch_msk_pos = []
+            batch_msk = []
             for index in indexs:
                 toks = self.corpus[index]
                 if len(toks) < 2: ### may be subsampled
