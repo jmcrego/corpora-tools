@@ -165,19 +165,20 @@ class Word2Vec(nn.Module):
         ctx_emb = self.Embed(batch[1],'oEmb') #[bs,n,ds]  
         ctx_emb = (ctx_emb * (-2.0*neg.unsqueeze(-1) + 1.0)) #[bs,n,ds] (negative words are polarity inversed: multiplied by -1.0 rest are not impacted)
 
-        ### errors are computed word by word using the negative(log(sigmoid))
+        ### errors are computed word by word using the neg(log(sigmoid(wrd*ctx)))
         #i use clamp to prevent NaN/Inf appear when computing the log of 1.0/0.0
-        out = torch.bmm(wrd_emb, ctx_emb.transpose(2,1)).squeeze() #[bs,1,ds] x [bs,ds,n] = [bs,1,n] = > [bs,n]
-        neg_log_sigmoid = out.sigmoid().clamp(min_, max_).log().neg() #[bs,n] (this is the error word by word by batch)
+        err = torch.bmm(wrd_emb, ctx_emb.transpose(2,1)).squeeze().sigmoid().clamp(min_, max_).log().neg() #[bs,1,ds] x [bs,ds,n] = [bs,1,n] = > [bs,n]
 
         #### computing positive words loss
-        pos_loss_per_batch = torch.sum(neg_log_sigmoid*pos, dim=1) #/ torch.sum(pos, dim=1) #[bs] (sum errors of positive words)
+        pos_loss_per_batch = torch.sum(err*pos, dim=1) #/ torch.sum(pos, dim=1) #[bs] (sum errors of positive words)
         pos_loss_per_batch = pos_loss_per_batch / torch.sum(pos, dim=1) #[bs] errors of positive words are averaged
+        loss = pos_loss_per_batch.mean()
+
         #### computing negative words loss
-        neg_loss_per_batch = torch.sum(neg_log_sigmoid*neg, dim=1) #[bs] (sum of errors of all negative words in each batch)
+        neg_loss_per_batch = torch.sum(err*neg, dim=1) #[bs] (sum of errors of all negative words in each batch)
 #        neg_loss_per_batch = neg_loss_per_batch / torch.sum(neg, dim=1) #[bs] errors of negative words are averaged
-        #### sum of lossess
-        loss = pos_loss_per_batch.mean() + neg_loss_per_batch.mean()
+        loss += neg_loss_per_batch.mean()
+
         if torch.isnan(loss).any() or torch.isinf(loss).any():
             logging.error('NaN/Inf detected in sgram_loss for batch {}'.format(batch))
             sys.exit()        
@@ -207,18 +208,16 @@ class Word2Vec(nn.Module):
         #all positive word embeddings are averaged into a single vector representing positive context words [bs,ds]
         pos_emb = (ctx_emb*pos.unsqueeze(-1)).sum(1) / torch.sum(pos, dim=1).unsqueeze(-1) #[bs,n,ds]x[bs,n,1]=>[bs,ds] / [bs,1] = [bs,ds] 
         #i use clamp to prevent NaN/Inf appear when computing the log of 1.0/0.0
-        out = torch.bmm(wrd_emb, pos_emb.unsqueeze(-1)).squeeze() #[bs,1,ds] x [bs,ds,1] = [bs,1] = > [bs]
-        neg_log_sigmoid = out.sigmoid().clamp(min_, max_).log().neg() #[bs] this is the error of the single positive word (no need to average)
-        pos_loss_per_batch = neg_log_sigmoid #[bs]
+        err = torch.bmm(wrd_emb, pos_emb.unsqueeze(-1)).squeeze().sigmoid().clamp(min_, max_).log().neg() #[bs,1,ds] x [bs,ds,1] = [bs,1] = > [bs]
+        ### no need to average positive words errors since there is only one
+        loss = pos.mean()
 
         #### computing negative words loss
-        ### errors are computed word by word using the negative(log(sigmoid))
-        out = torch.bmm(wrd_emb, ctx_emb.transpose(2,1)).squeeze() #[bs,1,ds] x [bs,ds,n] = [bs,1,n] = > [bs,n]
-        neg_log_sigmoid = out.sigmoid().clamp(min_, max_).log().neg() #[bs,n] (this is the error word by word by batch)
-        neg_loss_per_batch = torch.sum(neg_log_sigmoid*neg, dim=1) #[bs] (sum of errors of all negative words)
+        err = torch.bmm(wrd_emb, ctx_emb.transpose(2,1)).squeeze().sigmoid().clamp(min_, max_).log().neg() #[bs,1,ds] x [bs,ds,n] = [bs,1,n] = > [bs,n]
+        neg_loss_per_batch = torch.sum(neg_err*neg, dim=1) #[bs] (sum of errors of all negative words)
 #        neg_loss_per_batch = neg_loss_per_batch / torch.sum(neg, dim=1) #[bs] errors of negative words are averaged
+        loss += neg_loss_per_batch.mean()
 
-        loss = pos_loss_per_batch.mean() + neg_loss_per_batch.mean()
         if torch.isnan(loss).any() or torch.isinf(loss).any():
             logging.error('NaN/Inf detected in cbow_loss for batch {}'.format(batch))
             sys.exit()
