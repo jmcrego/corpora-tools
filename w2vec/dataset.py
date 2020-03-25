@@ -197,9 +197,9 @@ class Dataset():
         return wrd, pos, neg, msk
 
     def get_sentence_negs(self, sentence, center, n_negs):
-        wrd = toks[center]
-        snt = list(toks)
-        del toks[center]
+        wrd = sentence[center]
+        snt = list(sentence)
+        del snt[center]
         msk = [True] * len(snt)
         neg = []
         n = 0
