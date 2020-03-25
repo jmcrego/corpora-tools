@@ -167,7 +167,7 @@ class Word2Vec(nn.Module):
 
         ### errors are computed word by word using the neg(log(sigmoid(wrd*ctx)))
         #i use clamp to prevent NaN/Inf appear when computing the log of 1.0/0.0
-        err = torch.bmm(wrd_emb, ctx_emb.transpose(2,1)).squeeze().sigmoid().clamp(min_, max_).log()#.neg() #[bs,1,ds] x [bs,ds,n] = [bs,1,n] = > [bs,n]
+        err = torch.bmm(wrd_emb, ctx_emb.transpose(2,1)).squeeze().sigmoid().clamp(min_, max_).log().neg() #[bs,1,ds] x [bs,ds,n] = [bs,1,n] = > [bs,n]
 
         ###
         ### computing positive words loss
@@ -220,7 +220,7 @@ class Word2Vec(nn.Module):
         ### computing positive words loss
         ###
         #i use clamp to prevent NaN/Inf appear when computing the log of 1.0/0.0
-        pos_err = torch.bmm(wrd_emb, pos_emb.unsqueeze(-1)).squeeze().sigmoid().clamp(min_, max_).log()#.neg() #[bs,1,ds] x [bs,ds,1] = [bs,1] = > [bs]
+        pos_err = torch.bmm(wrd_emb, pos_emb.unsqueeze(-1)).squeeze().sigmoid().clamp(min_, max_).log().neg() #[bs,1,ds] x [bs,ds,1] = [bs,1] = > [bs]
         ### no need to average positive words errors since there is only one
         loss = pos_err.mean()
 #        logging.info('ploss={:.5f}'.format(err.mean().data.cpu().detach().numpy()))
@@ -228,7 +228,7 @@ class Word2Vec(nn.Module):
         ###
         ### computing negative words loss
         ###
-        err = torch.bmm(wrd_emb, ctx_emb.transpose(2,1)).squeeze().sigmoid().clamp(min_, max_).log()#.neg() #[bs,1,ds] x [bs,ds,n] = [bs,1,n] = > [bs,n]
+        err = torch.bmm(wrd_emb, ctx_emb.transpose(2,1)).squeeze().sigmoid().clamp(min_, max_).log().neg() #[bs,1,ds] x [bs,ds,n] = [bs,1,n] = > [bs,n]
         neg_err = torch.sum(err*neg, dim=1) #[bs] (sum of errors of all negative words)
         avg_neg = False
         if avg_neg:
