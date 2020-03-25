@@ -154,6 +154,10 @@ class Word2Vec(nn.Module):
         #batch[3] : batch of negative words (list of list)
         pos = torch.as_tensor(batch[2]) #[bs,n] (positive words are 1.0 others are 0.0)
         neg = torch.as_tensor(batch[3]) #[bs,n] (negative words are 1.0 others are 0.0)
+        if self.iEmb.weight.is_cuda:
+            pos = pos.cuda()
+            neg = neg.cuda()
+
 
         #Center word is embedded using the input embeddings (iEmb)
         wrd_emb = self.Embed(batch[0],'iEmb').unsqueeze(1) #[bs,ds] => [bs,1,ds]
@@ -189,6 +193,9 @@ class Word2Vec(nn.Module):
         #batch[3] : batch of negative words (list of list)
         pos = torch.as_tensor(batch[2]) #[bs,n] (positive words are 1.0 others are 0.0)
         neg = torch.as_tensor(batch[3]) #[bs,n] (negative words are 1.0 others are 0.0)
+        if self.iEmb.weight.is_cuda:
+            pos = pos.cuda()
+            neg = neg.cuda()
 
         #Center words are embedded using the output embeddings (oEmb)        
         wrd_emb = self.Embed(batch[0],'oEmb').unsqueeze(1) #[bs,ds] => [bs,1,ds]
