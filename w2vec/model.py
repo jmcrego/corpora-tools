@@ -214,7 +214,7 @@ class Word2Vec(nn.Module):
         ctx_emb = self.Embed(batch[1],'iEmb') #[bs,n,ds]
         ctx_emb = ctx_emb * (-2.0*neg.unsqueeze(-1) + 1.0) #[bs,n,ds] (negative words are polarity inversed: multiplied by -1.0 the rest are not impacted)
         #all positive word embeddings are averaged into a single vector representing positive context words [bs,ds]
-        pos_emb = (ctx_emb*pos.unsqueeze(-1)).sum(1) / torch.sum(pos, dim=1).unsqueeze(-1) #[bs,n,ds]x[bs,n,1]=>[bs,ds] / [bs,1] = [bs,ds] 
+        pos_emb = (ctx_emb*pos.unsqueeze(-1)).sum(1) #/ torch.sum(pos, dim=1).unsqueeze(-1) #[bs,n,ds]x[bs,n,1]=>[bs,ds] / [bs,1] = [bs,ds] 
 
         ###
         ### computing positive words loss
