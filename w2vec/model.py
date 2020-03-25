@@ -15,6 +15,9 @@ import torch.nn as nn
 from collections import Counter
 from dataset import Dataset, Vocab, OpenNMTTokenizer, open_file_read
 
+min_sigm = 1e-06
+max_sigm = 1.0 - 1e-06
+
 def load_model_optim(pattern, EMBEDDING_SIZE, vocab, model, optimizer):
     files = sorted(glob.glob(pattern + '.model.?????????.pth')) 
     if len(files):
@@ -146,13 +149,11 @@ class Word2Vec(nn.Module):
         return emb
 
     def forward_skipgram(self, batch):
-        min_ = 1e-06
-        max_ = 1.0 - 1e-06
         #batch[0] : batch of center words (list)
         #batch[1] : batch of positive words (list of list)
         #batch[2] : batch of negative words (list of list)
         #batch[3] : batch of masks for positive words (list of list)
-        msk = torch.as_tensor(batch[3]) #[bs,n] (negative words are 1.0 others are 0.0)
+        msk = torch.as_tensor(batch[3]) #[bs,n] (positive words are 1.0 others are 0.0)
         if self.iEmb.weight.is_cuda:
             msk = msk.cuda()
 
@@ -165,13 +166,13 @@ class Word2Vec(nn.Module):
         ### computing positive words loss
         ###
         #i use clamp to prevent NaN/Inf appear when computing the log of 1.0/0.0
-        err = torch.bmm(wrd_emb.unsqueeze(1), pos_emb.transpose(2,1)).squeeze().sigmoid().clamp(min_, max_).log().neg() #[bs,1,ds] x [bs,ds,n] = [bs,1,n] = > [bs,n]
+        err = torch.bmm(wrd_emb.unsqueeze(1), pos_emb.transpose(2,1)).squeeze().sigmoid().clamp(min_sigm, max_sigm).log().neg() #[bs,1,ds] x [bs,ds,n] = [bs,1,n] = > [bs,n]
         err = torch.sum(err*msk, dim=1) / torch.sum(msk, dim=1) #[bs] (avg errors of positive words)
         loss = err.mean()
         ###
         ### computing negative words loss
         ###
-        err = torch.bmm(wrd_emb.unsqueeze(1), neg_emb.transpose(2,1)).squeeze().sigmoid().clamp(min_, max_).log().neg() #[bs,1,ds] x [bs,ds,n] = [bs,1,n] = > [bs,n]
+        err = torch.bmm(wrd_emb.unsqueeze(1), neg_emb.transpose(2,1)).squeeze().sigmoid().clamp(min_sigm, max_sigm).log().neg() #[bs,1,ds] x [bs,ds,n] = [bs,1,n] = > [bs,n]
         err = torch.sum(err, dim=1) #[bs] (sum errors of negative words)
         #do not average errors over negative words
         loss += err.mean()
@@ -183,13 +184,11 @@ class Word2Vec(nn.Module):
         return loss
 
     def forward_cbow(self, batch):
-        min_ = 1e-06
-        max_ = 1.0 - 1e-06
         #batch[0] : batch of center words (list)
         #batch[1] : batch of positive words (list of list)
         #batch[2] : batch of negative words (list of list)
         #batch[3] : batch of masks for positive words (list of list)
-        msk = torch.as_tensor(batch[3]) #[bs,n] (negative words are 1.0 others are 0.0)
+        msk = torch.as_tensor(batch[3]) #[bs,n] (positive words are 1.0 others are 0.0)
         if self.iEmb.weight.is_cuda:
             msk = msk.cuda()
 
@@ -206,12 +205,12 @@ class Word2Vec(nn.Module):
         ### computing positive words loss
         ###
         #i use clamp to prevent NaN/Inf appear when computing the log of 1.0/0.0
-        err = torch.bmm(pos_emb.unsqueeze(1), wrd_emb.unsqueeze(-1)).squeeze().sigmoid().clamp(min_, max_).log().neg() #[bs,1,ds] x [bs,ds,1] = [bs,1] = > [bs]
+        err = torch.bmm(pos_emb.unsqueeze(1), wrd_emb.unsqueeze(-1)).squeeze().sigmoid().clamp(min_sigm, max_sigm).log().neg() #[bs,1,ds] x [bs,ds,1] = [bs,1] = > [bs]
         loss = err.mean() # no need to average positive words errors since there is only one
         ###
         ### computing negative words loss
         ###
-        err = torch.bmm(pos_emb.unsqueeze(1), neg_emb.transpose(2,1)).squeeze().sigmoid().clamp(min_, max_).log().neg() #[bs,1,ds] x [bs,ds,n] = [bs,1,n] = > [bs,n]
+        err = torch.bmm(pos_emb.unsqueeze(1), neg_emb.transpose(2,1)).squeeze().sigmoid().clamp(min_sigm, max_sigm).log().neg() #[bs,1,ds] x [bs,ds,n] = [bs,1,n] = > [bs,n]
         err = torch.sum(err, dim=1) #[bs] (sum of errors of all negative words) (not averaged)
         loss += err.mean()
 
@@ -221,32 +220,37 @@ class Word2Vec(nn.Module):
         return loss
 
     def forward_sbow(self, batch):
-        min_ = 1e-06
-        max_ = 1.0 - 1e-06
-        #batch[0] : batch of words (list of list with one element)
+        #batch[0] : batch of center words (list)
         #batch[1] : batch of sentences (list of list)
-        #batch[2] : batch of lengths (list)
-        #batch[3] : batch of negative words (list of list)
-        snt_emb = self.SentEmbed(batch[1], batch[2], 'iEmb', 'avg') #[bs,ds] #mean of sentences considering their lens
+        #batch[2] : batch of negative words (list of list)
+        #batch[3] : batch of sentence masks (list of list)
+        msk = torch.as_tensor(batch[3]) #[bs,n] (positive words are 1.0 others are 0.0)
+        if self.iEmb.weight.is_cuda:
+            msk = msk.cuda()
 
-        wrd_emb  = self.Embed(batch[0],'oEmb').squeeze() #[bs,ds]
-        #p(wrd|snt)
-        out = torch.bmm(snt_emb.unsqueeze(1), wrd_emb.unsqueeze(-1)).squeeze() #[bs,1,ds] x [bs,ds,1] = [bs,1,1] => [bs]
-        neg_log_sigmoid = out.sigmoid().clamp(min_, max_).log().neg() #[bs]
-        ploss = neg_log_sigmoid.mean() #[1] batches mean loss
+        #Sentences are embedded using iEmb
+        snt_emb = self.Embed(batch[1], 'iEmb') #[bs,n,ds]
+        #sentence embedding result from the average of all its word embeddings
+        snt_emb = (snt_emb*msk.unsqueeze(-1)).sum(1) / torch.sum(msk, dim=1).unsqueeze(-1) #[bs,n,ds]x[bs,n,1]=>[bs,ds] / [bs,1] = [bs,ds] 
 
-        #p(neg|snt)
-        neg_emb = self.Embed(batch[3],'oEmb').neg() #[bs,n_negs,ds]
-        #p(neg|snt)
-        # for negative words, the probability should be 0.0, then
-        # if prob=1.0 => neg(log(-prob+1))=Inf
-        # if prob=0.0 => neg(log(-prob+1))=0.0
-        out = torch.bmm(snt_emb.unsqueeze(1), neg_emb.transpose(1,2)).squeeze(1) #[bs,1,ds] x [bs, ds, n_negs] = [bs,1,n_negs] => [bs,n_negs]
-        neg_log_sigmoid = out.sigmoid().clamp(min_, max_).log().neg() #[bs,n_negs]
-        nloss = neg_log_sigmoid.sum(1) #[bs] for each batch, mean of the negative words loss
-        nloss = nloss.mean()
+        #Center words are embedded using oEmb
+        wrd_emb  = self.Embed(batch[0],'oEmb') #[bs,ds]
+        #Negative words are embedded using oEmb
+        neg_emb = self.Embed(batch[2],'oEmb').neg() #[bs,n,ds]
 
-        loss = ploss + nloss
+        ###
+        ### computing sentence words loss
+        ###
+        #i use clamp to prevent NaN/Inf appear when computing the log of 1.0/0.0
+        err = torch.bmm(snt_emb.unsqueeze(1), wrd_emb.unsqueeze(-1)).squeeze().sigmoid().clamp(min_sigm, max_sigm).log().neg() #[bs,1,ds] x [bs,ds,1] = [bs,1] = > [bs]
+        loss = err.mean() # no need to average positive words errors since there is only one
+        ###
+        ### computing negative words loss
+        ###
+        err = torch.bmm(snt_emb.unsqueeze(1), neg_emb.transpose(2,1)).squeeze().sigmoid().clamp(min_sigm, max_sigm).log().neg() #[bs,1,ds] x [bs,ds,n] = [bs,1,n] = > [bs,n]
+        err = torch.sum(err, dim=1) #[bs] (sum of errors of all negative words) (not averaged)
+        loss += err.mean()
+
         if torch.isnan(loss).any() or torch.isinf(loss).any():
             logging.error('NaN/Inf detected in sbow_loss for batch {}'.format(batch))
             sys.exit()

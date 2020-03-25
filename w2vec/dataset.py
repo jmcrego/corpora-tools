@@ -196,6 +196,21 @@ class Dataset():
             n += 1
         return wrd, pos, neg, msk
 
+    def get_sentence_negs(self, sentence, center, n_negs):
+        wrd = toks[center]
+        snt = list(toks)
+        del toks[center]
+        msk = [True] * len(snt)
+        neg = []
+        n = 0
+        while n < n_negs:
+            idx = random.randint(1, self.vocab_size-1) #do not consider idx=0 (unk)
+            if idx in snt or idx == wrd:
+                continue
+            neg.append(idx)
+            n += 1
+        return wrd, snt, neg, msk
+
     def __iter__(self):
         ######################################################
         ### infer_sent #######################################
@@ -284,35 +299,34 @@ class Dataset():
             length = [len(self.corpus[i]) for i in range(len(self.corpus))]
             indexs = np.argsort(np.array(length)) ### from smaller to largest sentences
             batch_wrd = []
-            batch_neg = []
             batch_snt = []
-            batch_len = []
+            batch_neg = []
+            batch_msk = []
             for index in indexs:
                 toks = self.corpus[index]
                 if len(toks) < 2: ### may be subsampled
                     continue
                 for i in range(len(toks)): #for each word in toks. Ex: 'a monster lives in my head'
-                    wrd, snt, beg, end = self.get_window(toks,i,len(toks),ctx_padded=False)
+                    wrd, snt, neg, msk = self.get_sentence_negs(toks,i,self.n_negs)
                     batch_wrd.append(wrd)
                     batch_snt.append(snt)
-                    batch_len.append(len(snt))
+                    batch_neg.append(neg)
+                    batch_msk.append(msk)
                     ### add padding
                     if len(batch_snt) > 1 and len(snt) > len(batch_snt[0]): 
                         for k in range(len(batch_snt)-1):
-                            addn = len(batch_snt[-1]) - len(batch_snt[k])
+                            addn = len(snt) - len(batch_snt[k])
                             batch_snt[k] += [self.idx_pad]*addn
-                    ### n_negs=4 neg=[over, last, today, virus]
-                    neg = self.get_n_negs(self.n_negs,snt+wrd)
-                    batch_neg.append(neg)
+                            batch_msk[k] += [False]*addn
                     ### batch filled
                     if len(batch_wrd) == self.batch_size:
-                        yield [batch_wrd, batch_snt, batch_len, batch_neg]
+                        yield [batch_wrd, batch_snt, batch_neg, batch_msk]
                         batch_wrd = []
-                        batch_neg = []
                         batch_snt = []
-                        batch_len = []
+                        batch_neg = []
+                        batch_msk = []
             if len(batch_wrd):
-                yield [batch_wrd, batch_snt, batch_len, batch_neg]
+                yield [batch_wrd, batch_snt, batch_neg, batch_msk]
 
         ######################################################
         ### error ############################################
