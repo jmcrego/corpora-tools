@@ -157,13 +157,13 @@ def do_infer_word(args):
     with torch.no_grad():
         model.eval()
         voc_i = [i for i in range(0,len(vocab))]
-        voc_e = model.Embed(voc_i,'iEmb')
+        voc_e = model.Embed(voc_i,'iEmb', args.pooling)
         for batch in dataset:
             #batch[0] batch_wrd
             #batch[1] batch_isnt
             #batch[2] batch_iwrd
             wrd_i = batch[0]
-            wrd_e = model.Embed(wrd_i, 'iEmb') #.cpu().detach().numpy().tolist()
+            wrd_e = model.Embed(wrd_i, 'iEmb', args.pooling) #.cpu().detach().numpy().tolist()
 
             for i in range(len(wrd_i)): ### words to find their closest
                 ind_snt = batch[1][i]

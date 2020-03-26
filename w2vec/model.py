@@ -116,7 +116,8 @@ class Word2Vec(nn.Module):
         return semb
 
 
-    def Embed(self, wrd, layer):
+    def Embed(self, wrd, layer, pooling):
+        self.pooling = pooling
         wrd = torch.as_tensor(wrd) 
         if self.iEmb.weight.is_cuda:
             wrd = wrd.cuda()
