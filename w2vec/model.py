@@ -102,12 +102,11 @@ class Word2Vec(nn.Module):
             semb, _ = torch.max(semb*mask + (1.0-mask)*-999.9, dim=1) #-999.9 should be -Inf but it produces a nan when multiplied by 0.0            
         elif self.pooling == 'avg':
             semb = semb*mask
-#            print('semb2.shape',semb.shape)
             semb = torch.sum(semb, dim=1)
-#            print('semb3.shape',semb.shape)
             semb = semb / torch.sum(mask, dim=1) 
-#            print('semb4.shape',semb.shape)
-#            sys.exit()
+        elif self.pooling == 'sum':
+            semb = semb*mask
+            semb = torch.sum(semb, dim=1)
         else:
             logging.error('bad -pooling option {}'.format(self.pooling))
             sys.exit()
@@ -184,7 +183,15 @@ class Word2Vec(nn.Module):
         #Positive words are embedded using the iEmb
         pos_emb = self.Embed(batch[1],'iEmb') #[bs,n,ds]
         #positive embedding result from the average of all positive embeddings
-        pos_emb = (pos_emb*msk.unsqueeze(-1)).sum(1) / torch.sum(msk, dim=1).unsqueeze(-1) #[bs,n,ds]x[bs,n,1]=>[bs,ds] / [bs,1] = [bs,ds] 
+        if self.pooling == 'avg':
+            pos_emb = (pos_emb*msk.unsqueeze(-1)).sum(1) / torch.sum(msk, dim=1).unsqueeze(-1) #[bs,n,ds]x[bs,n,1]=>[bs,ds] / [bs,1] = [bs,ds] 
+        elif self.pooling == 'sum':
+            pos_emb = (pos_emb*msk.unsqueeze(-1)).sum(1) #[bs,n,ds]x[bs,n,1]=>[bs,ds] 
+        elif self.pooling == 'max':
+            pos_emb, _ = torch.max(pos_emb*msk + (1.0-msk)*-999.9, dim=1) #-999.9 should be -Inf but it produces a nan when multiplied by 0.0            
+        else:
+            logging.error('bad -pooling option {}'.format(self.pooling))
+            sys.exit()
 
         #Center words are embedded using oEmb
         wrd_emb = self.Embed(batch[0],'oEmb') #[bs,ds]
@@ -219,8 +226,16 @@ class Word2Vec(nn.Module):
 
         #Sentences are embedded using iEmb
         snt_emb = self.Embed(batch[1], 'iEmb') #[bs,n,ds]
-        #sentence embedding result from the average of all its word embeddings
-        snt_emb = (snt_emb*msk.unsqueeze(-1)).sum(1) / torch.sum(msk, dim=1).unsqueeze(-1) #[bs,n,ds]x[bs,n,1]=>[bs,ds] / [bs,1] = [bs,ds] 
+        #sentence embedding result from the avg/sum/max of all its word embeddings
+        if self.pooling == 'avg':
+            snt_emb = (snt_emb*msk.unsqueeze(-1)).sum(1) / torch.sum(msk, dim=1).unsqueeze(-1) #[bs,n,ds]x[bs,n,1]=>[bs,ds] / [bs,1] = [bs,ds] 
+        elif self.pooling == 'sum':
+            snt_emb = (snt_emb*msk.unsqueeze(-1)).sum(1) #[bs,n,ds]x[bs,n,1]=>[bs,ds] 
+        elif self.pooling == 'max':
+            snt_emb, _ = torch.max(snt_emb*msk + (1.0-msk)*-999.9, dim=1) #-999.9 should be -Inf but it produces a nan when multiplied by 0.0            
+        else:
+            logging.error('bad -pooling option {}'.format(self.pooling))
+            sys.exit()
 
         #Center words are embedded using oEmb
         wrd_emb  = self.Embed(batch[0],'oEmb') #[bs,ds]

@@ -285,7 +285,7 @@ class Args():
  -------- When inference -----------------------------------------------------
    -k               INT : find k closest words to each word in file (5)
    -sim          STRING : cos, pairwise                             (cos)
-   -pooling      STRING : max, avg                                  (avg)
+   -pooling      STRING : max, avg, sum                             (avg)
 
 *** The script needs:
   + pytorch:   conda install pytorch torchvision cudatoolkit=10.1 -c pytorch
