@@ -29,6 +29,22 @@ def create_logger(logfile, loglevel):
         logging.basicConfig(filename=logfile, format='[%(asctime)s.%(msecs)03d] %(levelname)s %(message)s', datefmt='%Y-%m-%d_%H:%M:%S', level=numeric_level)
         logging.info('Created Logger level={} file={}'.format(loglevel, logfile))
 
+def read_params(args):
+    embedding_size = None
+    with open(args.name + '.param', 'r') as f:
+        while line in f:
+            desc, val = line.rstrip().split(' ')
+            if desc == 'embedding_size':
+                embedding_size = int(val)
+    if embedding_size is None:
+        logging.error('missing embedding_size in {}.param'.format(args.name))
+        sys.exit()
+    return embedding_size
+
+def write_params(args):
+    with open(args.name + '.param', 'w') as f:
+        f.write('embedding_size {}\n'.format(args.embedding_size))
+
 def do_preprocess(args):
 
     if args.tok_conf is None:
@@ -61,6 +77,11 @@ def do_train(args):
     token = OpenNMTTokenizer(args.name + '.token')
     vocab = Vocab()
     vocab.read(args.name + '.vocab')
+    if os.path.exists(args.name + '.param'):
+        args.embedding_size = read_params(args)
+    else:
+        write_params(args)        
+
     model = Word2Vec(len(vocab), args.embedding_size, vocab.idx_unk)
     if args.cuda:
         model.cuda()
