@@ -36,7 +36,7 @@ def read_params(args):
         sys.exit()
 
     with open(args.name + '.param', 'r') as f:
-        while line in f:
+        for line in f:
             desc, val = line.rstrip().split(' ')
             if desc == 'embedding_size':
                 embedding_size = int(val)
