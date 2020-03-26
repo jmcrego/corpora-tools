@@ -31,19 +31,19 @@ def create_logger(logfile, loglevel):
 
 def read_params(args):
     embedding_size = None
-    with open(args.name + '.param', 'r') as f:
+    with open(args.name + '.params', 'r') as f:
         while line in f:
             desc, val = line.rstrip().split(' ')
             if desc == 'embedding_size':
                 embedding_size = int(val)
                 logging.info('updated embedding_size {}'.format(embedding_size))
     if embedding_size is None:
-        logging.error('missing embedding_size in {}.param'.format(args.name))
+        logging.error('missing embedding_size in {}.params'.format(args.name))
         sys.exit()
     return embedding_size
 
 def write_params(args):
-    with open(args.name + '.param', 'w') as f:
+    with open(args.name + '.params', 'w') as f:
         f.write('embedding_size {}\n'.format(args.embedding_size))
 
 def do_preprocess(args):
@@ -78,7 +78,7 @@ def do_train(args):
     token = OpenNMTTokenizer(args.name + '.token')
     vocab = Vocab()
     vocab.read(args.name + '.vocab')
-    if os.path.exists(args.name + '.param'):
+    if os.path.exists(args.name + '.params'):
         args.embedding_size = read_params(args)
     else:
         write_params(args)        
