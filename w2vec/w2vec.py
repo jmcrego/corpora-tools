@@ -87,7 +87,7 @@ def do_train(args):
     else:
         write_params(args)        
 
-    model = Word2Vec(len(vocab), args.embedding_size, vocab.idx_unk)
+    model = Word2Vec(len(vocab), args.embedding_size, args.pooling, vocab.idx_unk)
     if args.cuda:
         model.cuda()
 #    optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, betas=(args.beta1,args.beta2), eps=args.eps)
@@ -139,7 +139,7 @@ def do_infer_word(args):
     vocab = Vocab()
     vocab.read(args.name + '.vocab')
     args.embedding_size = read_params(args)
-    model = Word2Vec(len(vocab), args.embedding_size, vocab.idx_unk)
+    model = Word2Vec(len(vocab), args.embedding_size, args.pooling, vocab.idx_unk)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, betas=(args.beta1,args.beta2), eps=args.eps)
     n_steps, model, optimizer = load_model_optim(args.name, args.embedding_size, vocab, model, optimizer)
     if args.cuda:
@@ -200,7 +200,7 @@ def do_infer_sent(args):
     vocab = Vocab()
     vocab.read(args.name + '.vocab')
     args.embedding_size = read_params(args)
-    model = Word2Vec(len(vocab), args.embedding_size, vocab.idx_unk)
+    model = Word2Vec(len(vocab), args.embedding_size, args.pooling, vocab.idx_unk)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, betas=(args.beta1,args.beta2), eps=args.eps)
     n_steps, model, optimizer = load_model_optim(args.name, args.embedding_size, vocab, model, optimizer)
     if args.cuda:
@@ -210,7 +210,7 @@ def do_infer_sent(args):
     with torch.no_grad():
         model.eval()
         for batch in dataset:
-            snts = model.SentEmbed(batch[0], batch[1], 'iEmb', args.pooling).cpu().detach().numpy().tolist()
+            snts = model.SentEmbed(batch[0], batch[1], 'iEmb').cpu().detach().numpy().tolist()
             for i in range(len(snts)):
                 sentence = ["{:.6f}".format(w) for w in snts[i]]
                 print('{}\t{}'.format(batch[2][i]+1, ' '.join(sentence) ))
@@ -268,7 +268,7 @@ class Args():
    -tok_conf       FILE : YAML file with onmt tokenization options  (space)
  -------- When learning ------------------------------------------------------
    -method       STRING : skipgram, cbow, sbow                      (cbow)
-   -pooling      STRING : max, avg                                  (avg)
+   -pooling      STRING : max, avg, sum                             (avg)
    -embedding_size  INT : embedding dimension                       (300)
    -window          INT : window size                               (5)
    -n_negs          INT : number of negative samples generated      (10)

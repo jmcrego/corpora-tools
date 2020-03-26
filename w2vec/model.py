@@ -60,10 +60,11 @@ def sequence_mask(lengths):
 ### Word2Vec #######################################################
 ####################################################################
 class Word2Vec(nn.Module):
-    def __init__(self, vs, ds, pad_idx):
+    def __init__(self, vs, ds, pooling, pad_idx):
         super(Word2Vec, self).__init__()
         self.vs = vs
         self.ds = ds
+        self.pooling = pooling
         self.pad_idx = pad_idx
         self.iEmb = nn.Embedding(self.vs, self.ds, padding_idx=self.pad_idx)#, max_norm=float(ds), norm_type=2)
         self.oEmb = nn.Embedding(self.vs, self.ds, padding_idx=self.pad_idx)#, max_norm=float(ds), norm_type=2)
@@ -72,7 +73,7 @@ class Word2Vec(nn.Module):
         nn.init.uniform_(self.iEmb.weight, -0.1, 0.1)
         nn.init.uniform_(self.oEmb.weight, -0.1, 0.1)
 
-    def SentEmbed(self, snt, lens, layer, pooling):
+    def SentEmbed(self, snt, lens, layer):
         #snt [bs, lw] batch of sentences (list of list of words)
         #lns [bs] length of each sentence in batch
         #mask [bs, lw] contains 0.0 for masked words, 1.0 for unmaksed ones
@@ -90,19 +91,16 @@ class Word2Vec(nn.Module):
         elif layer == 'oEmb':
             semb = self.oEmb(snt)       
         else:
-            logging.error('bad layer value {}'.format(pooling))
+            logging.error('bad layer value {}'.format(self.pooling))
             sys.exit()
 
-#        print('semb.shape',semb.shape)
-
-
         mask = mask.unsqueeze(-1) #[bs, lw, 1]
-        if pooling == 'max':
+        if self.pooling == 'max':
             #torch.max returns the maximum value of each row of the input tensor in the given dimension dim.
             #since masked tokens after iemb*mask are 0.0 we need to make sure that 0.0 is not the max
             #so all these masked tokens are added -999.9
             semb, _ = torch.max(semb*mask + (1.0-mask)*-999.9, dim=1) #-999.9 should be -Inf but it produces a nan when multiplied by 0.0            
-        elif pooling == 'avg':
+        elif self.pooling == 'avg':
             semb = semb*mask
 #            print('semb2.shape',semb.shape)
             semb = torch.sum(semb, dim=1)
@@ -111,22 +109,13 @@ class Word2Vec(nn.Module):
 #            print('semb4.shape',semb.shape)
 #            sys.exit()
         else:
-            logging.error('bad -pooling option {}'.format(pooling))
+            logging.error('bad -pooling option {}'.format(self.pooling))
             sys.exit()
         if torch.isnan(semb).any():
             logging.error('nan detected in snt_iemb')
             sys.exit()
         return semb
 
-
-    def NaN(self, wrd, emb):
-        if len(wrd.shape) == 1:
-            for i in range(len(wrd)):
-                if torch.isnan(emb[i]).any() or torch.isinf(emb[i]).any():
-                    logging.error('NaN/Inf detected\nwrd {}\nemb {}'.format(wrd[i],emb[i]))
-        else:
-            for i in range(len(wrd)):
-                self.NaN(wrd[i],emb[i])
 
     def Embed(self, wrd, layer):
         wrd = torch.as_tensor(wrd) 
