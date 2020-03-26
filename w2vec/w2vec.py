@@ -36,6 +36,7 @@ def read_params(args):
             desc, val = line.rstrip().split(' ')
             if desc == 'embedding_size':
                 embedding_size = int(val)
+                logging.info('updated embedding_size {}'.format(embedding_size))
     if embedding_size is None:
         logging.error('missing embedding_size in {}.param'.format(args.name))
         sys.exit()
@@ -133,6 +134,7 @@ def do_infer_word(args):
     token = OpenNMTTokenizer(args.name + '.token')
     vocab = Vocab()
     vocab.read(args.name + '.vocab')
+    args.embedding_size = read_params(args)
     model = Word2Vec(len(vocab), args.embedding_size, vocab.idx_unk)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, betas=(args.beta1,args.beta2), eps=args.eps)
     n_steps, model, optimizer = load_model_optim(args.name, args.embedding_size, vocab, model, optimizer)
@@ -193,6 +195,7 @@ def do_infer_sent(args):
     token = OpenNMTTokenizer(args.name + '.token')
     vocab = Vocab()
     vocab.read(args.name + '.vocab')
+    args.embedding_size = read_params(args)
     model = Word2Vec(len(vocab), args.embedding_size, vocab.idx_unk)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, betas=(args.beta1,args.beta2), eps=args.eps)
     n_steps, model, optimizer = load_model_optim(args.name, args.embedding_size, vocab, model, optimizer)
