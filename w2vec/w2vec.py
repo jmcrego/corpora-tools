@@ -31,6 +31,7 @@ def create_logger(logfile, loglevel):
 
 def read_params(args):
     embedding_size = None
+    pooling = None
     if not os.path.exists(args.name + '.param'):
         logging.error('missing {}.param file'.format(args.name))
         sys.exit()
@@ -41,14 +42,21 @@ def read_params(args):
             if desc == 'embedding_size':
                 embedding_size = int(val)
                 logging.info('updated embedding_size {}'.format(embedding_size))
+            if desc == 'pooling':
+                pooling = val
+                logging.info('updated pooling {}'.format(pooling))
     if embedding_size is None:
         logging.error('missing embedding_size in {}.param'.format(args.name))
         sys.exit()
-    return embedding_size
+    if pooling is None:
+        logging.error('missing pooling in {}.param'.format(args.name))
+        sys.exit()
+    return embedding_size, pooling
 
 def write_params(args):
     with open(args.name + '.param', 'w') as f:
         f.write('embedding_size {}\n'.format(args.embedding_size))
+        f.write('pooling {}\n'.format(args.pooling))
 
 def do_preprocess(args):
 
@@ -83,7 +91,7 @@ def do_train(args):
     vocab = Vocab()
     vocab.read(args.name + '.vocab')
     if os.path.exists(args.name + '.param'):
-        args.embedding_size = read_params(args)
+        args.embedding_size, args.pooling = read_params(args)
     else:
         write_params(args)        
 
@@ -138,7 +146,7 @@ def do_infer_word(args):
     token = OpenNMTTokenizer(args.name + '.token')
     vocab = Vocab()
     vocab.read(args.name + '.vocab')
-    args.embedding_size = read_params(args)
+    args.embedding_size, args.pooling = read_params(args)
     model = Word2Vec(len(vocab), args.embedding_size, args.pooling, vocab.idx_unk)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, betas=(args.beta1,args.beta2), eps=args.eps)
     n_steps, model, optimizer = load_model_optim(args.name, args.embedding_size, vocab, model, optimizer)
@@ -157,13 +165,13 @@ def do_infer_word(args):
     with torch.no_grad():
         model.eval()
         voc_i = [i for i in range(0,len(vocab))]
-        voc_e = model.Embed(voc_i,'iEmb', args.pooling)
+        voc_e = model.Embed(voc_i,'iEmb')
         for batch in dataset:
             #batch[0] batch_wrd
             #batch[1] batch_isnt
             #batch[2] batch_iwrd
             wrd_i = batch[0]
-            wrd_e = model.Embed(wrd_i, 'iEmb', args.pooling) #.cpu().detach().numpy().tolist()
+            wrd_e = model.Embed(wrd_i, 'iEmb') #.cpu().detach().numpy().tolist()
 
             for i in range(len(wrd_i)): ### words to find their closest
                 ind_snt = batch[1][i]
@@ -199,7 +207,7 @@ def do_infer_sent(args):
     token = OpenNMTTokenizer(args.name + '.token')
     vocab = Vocab()
     vocab.read(args.name + '.vocab')
-    args.embedding_size = read_params(args)
+    args.embedding_size, args.pooling = read_params(args)
     model = Word2Vec(len(vocab), args.embedding_size, args.pooling, vocab.idx_unk)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, betas=(args.beta1,args.beta2), eps=args.eps)
     n_steps, model, optimizer = load_model_optim(args.name, args.embedding_size, vocab, model, optimizer)
@@ -285,7 +293,6 @@ class Args():
  -------- When inference -----------------------------------------------------
    -k               INT : find k closest words to each word in file (5)
    -sim          STRING : cos, pairwise                             (cos)
-   -pooling      STRING : max, avg, sum                             (avg)
 
 *** The script needs:
   + pytorch:   conda install pytorch torchvision cudatoolkit=10.1 -c pytorch
