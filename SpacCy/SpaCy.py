@@ -68,7 +68,7 @@ class Args():
 if __name__ == "__main__":
 
     args = Args(sys.argv) #creates logger
-    nlp = spacy.load(args.model) #, disable=["parser"])
+    nlp = spacy.load(args.model, disable=["parser"])
     #nlp.add_pipe(length_component, first=True) # Add the component first in the pipeline
     logging.info('pipeline: {}'.format(nlp.pipe_names)) #print(nlp.pipeline)
 
@@ -81,7 +81,7 @@ if __name__ == "__main__":
             TEXTS.append(l.rstrip())
     logging.info('read {} with {} lines'.format(args.data,len(TEXTS)))
 
-    docs = list(nlp.pipe(TEXTS, disable=['parser']))
+    docs = list(nlp.pipe(TEXTS))
     logging.info('processed {} lines'.format(len(docs)))
 
     while len(docs):
