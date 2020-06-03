@@ -117,7 +117,10 @@ def main():
             for curr_UD in curr_UDs:
                 #print('curr_UD={}'.format(curr_UD))
                 lhyps[-1] = lhyps[-1].replace(' '+curr_UD+' ', ' <font color="{}">'.format(color)+curr_UD+'</font> ')
-        outline(nsent+1,lud,lhyps)
+        UDs = lud.split(' # ')
+        for u in range(len(UDs)):
+            UDs[u] = '<font color="{}">'+UDs[u]+'</font>'
+        outline(nsent+1,' '.join(UDs),lhyps)
     ending()
     sys.stderr.write('Done!\n')
 
