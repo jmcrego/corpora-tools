@@ -120,7 +120,7 @@ def main():
         UDs = lud.split(' # ')
         for u in range(len(UDs)):
             UDs[u] = '<font color="{}">'.format(color)+UDs[u]+'</font>'
-        outline(nsent+1,' '.join(UDs),lhyps)
+        outline(nsent+1,' # '.join(UDs),lhyps)
     ending()
     sys.stderr.write('Done!\n')
 
