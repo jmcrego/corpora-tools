@@ -34,9 +34,7 @@ tr:nth-child(even) {
     for f in range(len(fhyps)):
         #sys.stdout.write('''<hr><font size="2">{fhyps[f]}</font>''')
         sys.stdout.write('<hr><font size="2">{}</font>'.format(fhyps[f]))
-    print '''</th>
-</tr>
-'''
+    sys.stdout.write('</th>\n</tr>\n')
 
 
 def ending():
