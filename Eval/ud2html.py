@@ -119,7 +119,7 @@ def main():
                 lhyps[-1] = lhyps[-1].replace(' '+curr_UD+' ', ' <font color="{}">'.format(color)+curr_UD+'</font> ')
         UDs = lud.split(' # ')
         for u in range(len(UDs)):
-            UDs[u] = '<font color="{}">'+UDs[u]+'</font>'
+            UDs[u] = '<font color="{}">'.format(color)+UDs[u]+'</font>'
         outline(nsent+1,' '.join(UDs),lhyps)
     ending()
     sys.stderr.write('Done!\n')
