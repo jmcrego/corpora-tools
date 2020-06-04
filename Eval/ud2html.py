@@ -54,11 +54,12 @@ def outline(nsent, ud, hyps):
 def main():
     name = sys.argv.pop(0)
     color = "blue"
-    usage = '''usage: {} -ud FILE [-h FILE]+ [-color COLOR] [-h] > output.html
-    -ud   FILE : file with UDs
-    -hyp  FILE : hypotheses file
-    -col COLOR : color used to highlight UDs (default 'blue')
-    -h         : help
+    onlywithuds = False
+    usage = '''usage: {} -ud FILE [-h TAG:FILE]+ [-onlywithuds] [-color COLOR] [-h] > output.html
+    -ud       FILE : file with UDs
+    -hyp  TAG:FILE : hypotheses file preceded by its tag
+    -col     COLOR : color used to highlight UDs (default 'blue')
+    -h             : help
     '''.format(name)
 
     fud = None
@@ -68,6 +69,7 @@ def main():
         if   (tok=="-ud" and len(sys.argv)): fud = sys.argv.pop(0)
         elif (tok=="-hyp" and len(sys.argv)): fhyps.append(sys.argv.pop(0))
         elif (tok=="-col" and len(sys.argv)): color = sys.argv.pop(0)
+        elif (tok=="-onlywithuds"): onlywithuds = True
         elif (tok=="-h"):
             sys.stderr.write("{}".format(usage))
             sys.exit()
@@ -93,6 +95,12 @@ def main():
             UD.append(line)
 
     HYPS = []
+    tags = []
+    for i in range(len(fhyps)):
+        t,f = fhyps[i].split(':')
+        tags.append('<font color = "red">'+t+':</font>')
+        fhyps[i] = f
+        
     for fhyp in fhyps:
         HYP = []
         with open(fhyp) as f:
@@ -110,17 +118,28 @@ def main():
     heading(fud,fhyps)
     for nsent in range(len(UD)):
         lud = UD[nsent]
-        curr_UDs = lud.split(' # ')
+        if lud == '':
+            if onlywithuds:
+                continue
+            curr_UDs = []
+        else:
+            curr_UDs = lud.split(' # ')
+        #sys.stderr.write('curr_UDs = {}\n'.format(curr_UDs))
         lhyps = []
         for h in range(len(HYPS)):
-            lhyps.append(' '+HYPS[h][nsent]+' ')
+            curr_hyp = tags[h]+' '+HYPS[h][nsent]+' '
+            done = []
             for curr_UD in curr_UDs:
-                #print('curr_UD={}'.format(curr_UD))
-                lhyps[-1] = lhyps[-1].replace(' '+curr_UD+' ', ' <font color="{}">'.format(color)+curr_UD+'</font> ')
-        UDs = lud.split(' # ')
-        for u in range(len(UDs)):
-            UDs[u] = '<font color="{}">'.format(color)+UDs[u]+'</font>'
-        outline(nsent+1,' # '.join(UDs),lhyps)
+                if curr_UD in done:
+                    continue
+                done.append(curr_UD)
+                #sys.stderr.write('curr_UD={}'.format(curr_UD))
+                curr_hyp = curr_hyp.replace(' '+curr_UD+' ', ' <font color="{}">'.format(color)+curr_UD+'</font> ')
+            lhyps.append(curr_hyp)
+        for u in range(len(curr_UDs)):
+            #sys.stderr.write('curr_UD={}\n'.format(curr_UDs[u]))
+            curr_UDs[u] = '<font color="{}">'.format(color)+curr_UDs[u]+'</font>'
+        outline(nsent+1,'<font color="red">UDs</font>: '+' # '.join(curr_UDs),lhyps)
     ending()
     sys.stderr.write('Done!\n')
 
