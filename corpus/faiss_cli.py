@@ -81,7 +81,7 @@ class IndexFaiss:
         logging.info("read {} vectors".format(self.index.ntotal))
 
 
-    def Query(self,file,file_str,k,min_score,skip_same_id,skip_query):
+    def Query(self,file,file_str,k,min_score,skip_same_id,skip_query,do_eval):
         if file == self.file_db:
             query = self.db
         else:
@@ -90,12 +90,12 @@ class IndexFaiss:
         assert len(D) == len(I)     #I[i,j] contains the index in db of the j-th closest sentence to the i-th sentence in query
         assert len(D) == len(query) #D[i,j] contains the corresponding score
 
-        if file == self.file_db:
+        if do_eval:
             n_ok = [0.0] * k
 
         for i_query in range(len(I)): #for each sentence in query
             ### to compute accuracy in case query is db
-            if file == self.file_db:
+            if do_eval:
                 for j in range(k):
                     if i_query in I[i_query,0:j+1]: #if the same index 'i' (current index) is found int the j-best retrieved sentences
                         n_ok[j] += 1.0
@@ -117,7 +117,7 @@ class IndexFaiss:
                     out.append(self.db.txt[i_db])
             print('\t'.join(out))
 
-        if file == self.file_db:
+        if do_eval:
             n_ok = ["{:.3f}".format(n/len(query)) for n in n_ok]
             logging.info('Done k-best Acc = [{}] over {} examples'.format(', '.join(n_ok),len(query)))
         else:
@@ -134,6 +134,7 @@ if __name__ == '__main__':
     min_score = 0.5
     skip_same_id = False
     skip_query = False
+    do_Eval = False
     verbose = False
     log_file = None
     log_level = 'debug'
@@ -147,6 +148,7 @@ if __name__ == '__main__':
     -min_score  FLOAT : minimum distance to accept a match (default 0.5) 
     -skip_same_id     : do not consider matchs with db_id == query_id (k+1 matchs retrieved)
     -skip_query       : do not output query columns (query_index [query_str])
+    -do_eval          : run evaluation (query_index == db_index)
     -log_file    FILE : verbose output (default False)
     -log_level STRING : verbose output (default False)
     -h                : this help
@@ -178,6 +180,8 @@ if __name__ == '__main__':
             log_level = sys.argv.pop(0)
         elif tok=="-skip_same_id":
             skip_same_id = True
+        elif tok=="-do_eval":
+            do_eval = True
         elif tok=="-skip_query":
             skip_query = True
         else:
@@ -193,7 +197,7 @@ if __name__ == '__main__':
     if fquery is not None:
         if skip_same_id:
             k += 1
-        indexdb.Query(fquery,fquery_str,k,min_score,skip_same_id,skip_query)
+        indexdb.Query(fquery,fquery_str,k,min_score,skip_same_id,skip_query,do_eval)
 
 
 
