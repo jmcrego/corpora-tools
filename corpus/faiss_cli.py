@@ -97,7 +97,7 @@ class IndexFaiss:
             ### to compute accuracy in case query is db
             if do_eval:
                 for j in range(k):
-                    if i_query in I[i_query,0:j+1]: #if the same index 'i' (current index) is found int the j-best retrieved sentences
+                    if i_query in I[i_query,0:j+1] and D[i_query,0] >= min_score: #if the same index 'i' (current index) is found int the j-best retrieved sentences
                         n_ok[j] += 1.0
             ### output
             out = []
