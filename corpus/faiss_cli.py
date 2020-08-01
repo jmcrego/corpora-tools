@@ -35,7 +35,7 @@ class Infile:
             l = l.rstrip().split(' ')
             if self.d > 0:
                 if len(l) != self.d:
-                    logging.error('found a vector with {} cells instead of {}'.format(len(l),self.d))
+                    logging.error('found a vector with {} cells instead of {} in line {} of file {}'.format(len(l),self.d,len(vec)+1,self.file))
                     sys.exit()
             else:
                 self.d = len(l)
@@ -134,7 +134,7 @@ if __name__ == '__main__':
     min_score = 0.5
     skip_same_id = False
     skip_query = False
-    do_Eval = False
+    do_eval = False
     verbose = False
     log_file = None
     log_level = 'debug'
