@@ -5,6 +5,7 @@ import gzip
 import faiss
 import logging
 import numpy as np
+from timeit import default_timer as timer
 
 def create_logger(logfile, loglevel):
     numeric_level = getattr(logging, loglevel.upper(), None)
@@ -35,7 +36,7 @@ class Infile:
             l = l.rstrip().split(' ')
             if self.d > 0:
                 if len(l) != self.d:
-                    logging.error('found a vector with {} cells instead of {} in line {} of file {}'.format(len(l),self.d,len(vec)+1,self.file))
+                    logging.error('found a vector with {} cells instead of {} in line {} of file {}'.format(len(l),self.d,len(self.vec)+1,self.file))
                     sys.exit()
             else:
                 self.d = len(l)
@@ -82,6 +83,7 @@ class IndexFaiss:
 
 
     def Query(self,file,file_str,k,min_score,skip_same_id,skip_query,do_eval):
+        tstart = timer()
         if file == self.file_db:
             query = self.db
         else:
@@ -89,7 +91,11 @@ class IndexFaiss:
         D, I = self.index.search(query.vec, k)
         assert len(D) == len(I)     #I[i,j] contains the index in db of the j-th closest sentence to the i-th sentence in query
         assert len(D) == len(query) #D[i,j] contains the corresponding score
-
+        tend = timer()
+        sec_elapsed = (tend - tstart)
+        vecs_per_sec = len(I) / sec_elapsed
+        logging.info('preocessed search with {} vectors in {} sec [{:.2f} vecs/sec]'.format(len(I), vecs_per_sec))
+        
         if do_eval:
             n_ok = [0.0] * k
 
