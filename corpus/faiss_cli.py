@@ -94,7 +94,7 @@ class IndexFaiss:
         tend = timer()
         sec_elapsed = (tend - tstart)
         vecs_per_sec = len(I) / sec_elapsed
-        logging.info('preocessed search with {} vectors in {} sec [{:.2f} vecs/sec]'.format(len(I), sec_elapsed, vecs_per_sec))
+        logging.info('processed readquery+search with {} vectors in {} sec [{:.2f} vecs/sec]'.format(len(I), sec_elapsed, vecs_per_sec))
         
         if do_eval:
             n_ok = [0.0] * k
