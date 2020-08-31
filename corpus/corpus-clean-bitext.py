@@ -110,12 +110,14 @@ Output files are tokenised following opennmt tokenizer 'space' mode
         tokenizer = pyonmttok.Tokenizer(tok_mode, joiner_annotate=False)
 
     f = open(fs,'r')
-    src = [x.decode("utf-8-sig").encode("utf-8").rstrip() for x in f] ### decode and encode are to get rid of BOM
+    #src = [x.decode("utf-8-sig").encode("utf-8").rstrip() for x in f] ### decode and encode are to get rid of BOM
+    src = [x.rstrip() for x in f] ### decode and encode are to get rid of BOM
     f.close()
     sys.stderr.write('Read {}\n'.format(fs))
 
     f = open(ft,'r')
-    tgt = [x.decode("utf-8-sig").encode("utf-8").rstrip() for x in f] ### decode and encode are to get rid of BOM
+    #tgt = [x.decode("utf-8-sig").encode("utf-8").rstrip() for x in f] ### decode and encode are to get rid of BOM
+    tgt = [x.rstrip() for x in f] ### decode and encode are to get rid of BOM
     f.close()
     sys.stderr.write('Read {}\n'.format(ft))
 
