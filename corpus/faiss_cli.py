@@ -110,7 +110,12 @@ class IndexFaiss:
                     continue
                 if skip_same_id and i_query == i_db: ### skip
                     continue
-                results[-1].append((score, i_db))
+                res = []
+                res.append(score)
+                res.append(i_db)
+                if self.db.txts():
+                    res.append(self.db.txt[i_db])
+                results[-1].append(res)
 
         return results
 
