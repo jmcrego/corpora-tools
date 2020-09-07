@@ -259,7 +259,7 @@ if __name__ == '__main__':
         if skip_same_id:
             k += 1
         for i_db in range(len(fdb)):
-            indexdb[i_db].Query(fquery[i_query],fquery_str[i_query],k,min_score,skip_same_id,skip_query,do_eval)
+            indexdb[i_db].Query(fquery[i_query],fquery_str[i_query],k,min_score,skip_same_id)
 
 
 
