@@ -10,7 +10,7 @@ from timeit import default_timer as timer
 def create_logger(logfile, loglevel):
     numeric_level = getattr(logging, loglevel.upper(), None)
     if not isinstance(numeric_level, int):
-        sys.stderr.write("Invalid log level={}\n".format(loglevel))
+        logging.error("Invalid log level={}".format(loglevel))
         sys.exit()
     if logfile is None or logfile == 'stderr':
         logging.basicConfig(format='[%(asctime)s.%(msecs)03d] %(levelname)s %(message)s', datefmt='%Y-%m-%d_%H:%M:%S', level=numeric_level)
@@ -231,11 +231,11 @@ if __name__ == '__main__':
     create_logger(log_file,log_level)
 
     if len(fdb) == 0:
-        sys.stderr.write('error: missing -fdb option\n')
+        logging.error('error: missing -fdb option')
         sys.exit()
 
     if len(fquery) == 0:
-        sys.stderr.write('error: missing -fquery option\n')
+        logging.error('error: missing -fquery option')
         sys.exit()
 
     if len(fdb_str) == 0:
@@ -245,20 +245,20 @@ if __name__ == '__main__':
         fquery_str = [None] * len(fquery)
 
     if len(fdb_str) != len(fdb):
-        sys.stderr.write('error: diff num of files between -fdb and -fdb_str\n')
+        logging.error('error: diff num of files between -fdb and -fdb_str')
         sys.exit()
 
     if len(fquery_str) != len(fquery):
-        sys.stderr.write('error: diff num of files between -fquery and -fquery_str\n')
+        logging.error('error: diff num of files between -fquery and -fquery_str')
         sys.exit()
 
 
     indexdb = []
-    sys.stderr.write('Reading db/s\n')
+    logging.info('Reading db/s')
     for i_db in range(len(fdb)):
         indexdb.append(IndexFaiss(fdb[i_db],fdb_str[i_db]))
 
-    sys.stderr.write('Processing queries\n')
+    logging.info('Processing queries')
     for i_query in range(len(fquery)):
         if skip_same_id:
             k += 1
