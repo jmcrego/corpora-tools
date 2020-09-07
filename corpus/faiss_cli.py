@@ -254,10 +254,11 @@ if __name__ == '__main__':
 
 
     indexdb = []
+    sys.stderr.write('Reading db/s\n')
     for i_db in range(len(fdb)):
         indexdb.append(IndexFaiss(fdb[i_db],fdb_str[i_db]))
 
-    sys.stderr.write('Searching queries over db/s')
+    sys.stderr.write('Processing queries\n')
     for i_query in range(len(fquery)):
         if skip_same_id:
             k += 1
