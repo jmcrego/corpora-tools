@@ -102,7 +102,7 @@ class IndexFaiss:
 
         results = []
         for i_query in range(len(I)): #for each sentence in query, retrieve the k-closest
-            results.append([])
+            results.append([]) #### k-closest sentences in DB for i_query will be in this list
             for j in range(len(I[i_query])):
                 i_db = I[i_query,j]
                 score = D[i_query,j]
