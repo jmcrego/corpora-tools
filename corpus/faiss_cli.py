@@ -83,7 +83,7 @@ class IndexFaiss:
         tend = timer()
         sec_elapsed = (tend - tstart)
         vecs_per_sec = len(I) / sec_elapsed
-        logging.info('read db with {} vectors in {} sec [{:.2f} vecs/sec]'.format(self.index.ntotal, sec_elapsed, vecs_per_sec))
+        logging.info('Read db with {} vectors in {} sec [{:.2f} vecs/sec]'.format(self.index.ntotal, sec_elapsed, vecs_per_sec))
 
     def Query(self,file,file_str,k,min_score,skip_same_id):
         tstart = timer()
@@ -98,7 +98,7 @@ class IndexFaiss:
         tend = timer()
         sec_elapsed = (tend - tstart)
         vecs_per_sec = len(I) / sec_elapsed
-        logging.info('read query + search with {} vectors in {} sec [{:.2f} vecs/sec]'.format(len(I), sec_elapsed, vecs_per_sec))
+        logging.info('Read query + search with {} vectors in {} sec [{:.2f} vecs/sec]'.format(len(I), sec_elapsed, vecs_per_sec))
 
         results = [] * len(query)
         for i_query in range(len(I)): #for each sentence in query, retrieve the k-closest
