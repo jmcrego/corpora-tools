@@ -110,7 +110,7 @@ class IndexFaiss:
                     continue
                 if skip_same_id and i_query == i_db: ### skip
                     continue
-                results[i_query].append((score, i_db))
+                results[-1].append((score, i_db))
 
         return results
 
@@ -257,6 +257,7 @@ if __name__ == '__main__':
     for i_db in range(len(fdb)):
         indexdb.append(IndexFaiss(fdb[i_db],fdb_str[i_db]))
 
+    sys.stderr.write('Searching queries over db/s')
     for i_query in range(len(fquery)):
         if skip_same_id:
             k += 1
