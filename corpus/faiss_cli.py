@@ -102,13 +102,14 @@ class IndexFaiss:
 
         results = [] * len(query)
         for i_query in range(len(I)): #for each sentence in query, retrieve the k-closest
-            i_db = I[i_query,j]
-            score = D[i_query,j]
-            if score < min_score: ### skip
-                continue
-            if skip_same_id and i_query == i_db: ### skip
-                continue
-            results[i_query].append((score, i_db))
+            for j in range(len(I[i_query])):
+                i_db = I[i_query,j]
+                score = D[i_query,j]
+                if score < min_score: ### skip
+                    continue
+                if skip_same_id and i_query == i_db: ### skip
+                    continue
+                results[i_query].append((score, i_db))
 
         return results
 
