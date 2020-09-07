@@ -82,9 +82,7 @@ class IndexFaiss:
         self.index.add(self.db.vec) #add all normalized vectors to the index
         tend = timer()
         sec_elapsed = (tend - tstart)
-        print(tend)
-        print(tstart)
-        vecs_per_sec = len(I) / sec_elapsed
+        vecs_per_sec = len(self.index) / sec_elapsed
         logging.info('Read db with {} vectors in {} sec [{:.2f} vecs/sec]'.format(self.index.ntotal, sec_elapsed, vecs_per_sec))
 
     def Query(self,file,file_str,k,min_score,skip_same_id):
