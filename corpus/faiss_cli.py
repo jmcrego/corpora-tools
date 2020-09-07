@@ -100,8 +100,9 @@ class IndexFaiss:
         vecs_per_sec = len(I) / sec_elapsed
         logging.info('Read query + search with {} vectors in {} sec [{:.2f} vecs/sec]'.format(len(I), sec_elapsed, vecs_per_sec))
 
-        results = [] * len(query)
+        results = []
         for i_query in range(len(I)): #for each sentence in query, retrieve the k-closest
+            results.append([])
             for j in range(len(I[i_query])):
                 i_db = I[i_query,j]
                 score = D[i_query,j]
