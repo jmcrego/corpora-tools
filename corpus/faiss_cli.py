@@ -242,11 +242,11 @@ if __name__ == '__main__':
     if len(fquery_str) == 0:
         fquery_str = [None] * len(fquery)
 
-    if len(fdb_str) != len(fdb)
+    if len(fdb_str) != len(fdb):
         sys.stderr.write('error: diff num of files between -fdb and -fdb_str\n')
         sys.exit()
 
-    if len(fquery_str) != len(fquery)
+    if len(fquery_str) != len(fquery):
         sys.stderr.write('error: diff num of files between -fquery and -fquery_str\n')
         sys.exit()
 
