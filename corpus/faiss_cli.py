@@ -42,7 +42,7 @@ class Infile:
                 self.d = len(l)
             self.vec.append(l)
 
-        logging.info('Read {} vectors ({} cells) in {}'.format(len(self.vec),self.d,self.file))
+        logging.info('Read {} vectors ({} cells) from {}'.format(len(self.vec),self.d,self.file))
         self.vec = np.array(self.vec).astype('float32')
 
         if norm:
@@ -82,6 +82,8 @@ class IndexFaiss:
         self.index.add(self.db.vec) #add all normalized vectors to the index
         tend = timer()
         sec_elapsed = (tend - tstart)
+        print(tend)
+        print(tstart)
         vecs_per_sec = len(I) / sec_elapsed
         logging.info('Read db with {} vectors in {} sec [{:.2f} vecs/sec]'.format(self.index.ntotal, sec_elapsed, vecs_per_sec))
 
