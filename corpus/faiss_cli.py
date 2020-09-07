@@ -75,14 +75,45 @@ class Infile:
 class IndexFaiss:
 
     def __init__(self, file, file_str=None):
+        tstart = timer()
         self.file_db = file
         self.db = Infile(file, file_str=file_str)
         self.index = faiss.IndexFlatIP(self.db.d) #inner product (needs L2 normalization over db and query vectors)
-        self.index.add(self.db.vec) # add all normalized vectors to the index
-        logging.info("read {} vectors".format(self.index.ntotal))
+        self.index.add(self.db.vec) #add all normalized vectors to the index
+        tend = timer()
+        sec_elapsed = (tend - tstart)
+        vecs_per_sec = len(I) / sec_elapsed
+        logging.info('read db with {} vectors in {} sec [{:.2f} vecs/sec]'.format(self.index.ntotal, sec_elapsed, vecs_per_sec))
+
+    def Query(self,file,file_str,k,min_score,skip_same_id):
+        tstart = timer()
+        if file == self.file_db:
+            query = self.db
+        else:
+            query = Infile(file, d=self.db.d, file_str=file_str)
+
+        D, I = self.index.search(query.vec, k)
+        assert len(D) == len(I)     #I[i,j] contains the index in db of the j-th closest sentence to the i-th sentence in query
+        assert len(D) == len(query) #D[i,j] contains the corresponding score
+        tend = timer()
+        sec_elapsed = (tend - tstart)
+        vecs_per_sec = len(I) / sec_elapsed
+        logging.info('read query + search with {} vectors in {} sec [{:.2f} vecs/sec]'.format(len(I), sec_elapsed, vecs_per_sec))
+
+        results = [] * len(query)
+        for i_query in range(len(I)): #for each sentence in query, retrieve the k-closest
+            i_db = I[i_query,j]
+            score = D[i_query,j]
+            if score < min_score: ### skip
+                continue
+            if skip_same_id and i_query == i_db: ### skip
+                continue
+            results[i_query].append((score, i_db))
+
+        return results
 
 
-    def Query(self,file,file_str,k,min_score,skip_same_id,skip_query,do_eval):
+    def Query2(self,file,file_str,k,min_score,skip_same_id,skip_query,do_eval):
         tstart = timer()
         if file == self.file_db:
             query = self.db
@@ -132,10 +163,10 @@ class IndexFaiss:
 
 if __name__ == '__main__':
 
-    fdb = None
-    fquery = None
-    fdb_str = None
-    fquery_str = None
+    fdb = []
+    fquery = []
+    fdb_str = []
+    fquery_str = []
     k = 1
     min_score = 0.5
     skip_same_id = False
@@ -146,10 +177,10 @@ if __name__ == '__main__':
     log_level = 'debug'
     name = sys.argv.pop(0)
     usage = '''usage: {} -db FILE -query FILE [-db_str FILE] [-query_str FILE] [-d INT] [-k INT] [-skip_same_id] [-skip_query] [-log_file FILE] [-log_level STRING]
-    -db          FILE : file to index 
-    -db_str      FILE : file to index 
-    -query       FILE : file with queries
-    -query_str   FILE : file with queries
+    -db         FILEs : file/s to index (comma-separated)
+    -db_str     FILEs : file/s to index (comma-separated)
+    -query      FILEs : file with queries (comma-separated)
+    -query_str  FILEs : file with queries (comma-separated)
     -k            INT : k-best to retrieve (default 1)
     -min_score  FLOAT : minimum distance to accept a match (default 0.5) 
     -skip_same_id     : do not consider matchs with db_id == query_id (k+1 matchs retrieved)
@@ -169,13 +200,13 @@ if __name__ == '__main__':
         elif tok=="-v":
             verbose = True
         elif tok=="-db" and len(sys.argv):
-            fdb = sys.argv.pop(0)
+            fdb = sys.argv.pop(0).split(',')
         elif tok=="-db_str" and len(sys.argv):
-            fdb_str = sys.argv.pop(0)
+            fdb_str = sys.argv.pop(0).split(',')
         elif tok=="-query" and len(sys.argv):
-            fquery = sys.argv.pop(0)
+            fquery = sys.argv.pop(0).split(',')
         elif tok=="-query_str" and len(sys.argv):
-            fquery_str = sys.argv.pop(0)
+            fquery_str = sys.argv.pop(0).split(',')
         elif tok=="-k" and len(sys.argv):
             k = int(sys.argv.pop(0))
         elif tok=="-min_score" and len(sys.argv):
@@ -197,13 +228,43 @@ if __name__ == '__main__':
 
     create_logger(log_file,log_level)
 
-    if fdb is not None:
-        indexdb = IndexFaiss(fdb,fdb_str)
+    if len(fdb) == 0:
+        sys.stderr.write('error: missing -fdb option\n')
+        sys.exit()
 
-    if fquery is not None:
+    if len(fquery) == 0:
+        sys.stderr.write('error: missing -fquery option\n')
+        sys.exit()
+
+    if len(fdb_str) == 0:
+        fdb_str = [None] * len(fdb)
+
+    if len(fquery_str) == 0:
+        fquery_str = [None] * len(fquery)
+
+    if len(fdb_str) != len(fdb)
+        sys.stderr.write('error: diff num of files between -fdb and -fdb_str\n')
+        sys.exit()
+
+    if len(fquery_str) != len(fquery)
+        sys.stderr.write('error: diff num of files between -fquery and -fquery_str\n')
+        sys.exit()
+
+
+    indexdb = []
+    for i_db in range(len(fdb)):
+        indexdb.append(IndexFaiss(fdb[i_db],fdb_str[i_db]))
+
+    for i_query in range(len(fquery)):
         if skip_same_id:
             k += 1
-        indexdb.Query(fquery,fquery_str,k,min_score,skip_same_id,skip_query,do_eval)
+        for i_db in range(len(fdb)):
+            indexdb[i_db].Query(fquery[i_query],fquery_str[i_query],k,min_score,skip_same_id,skip_query,do_eval)
+
+
+
+
+
 
 
 
