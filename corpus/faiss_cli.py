@@ -123,7 +123,7 @@ class IndexFaiss:
                         continue
                     if skip_same_id and i_query == i_db: ### skip
                         continue
-                    results[i_query][self.curr_db.txt[i_db]] = score
+                    results[i_query][curr_db.txt[i_db]] = score
         return results
 
 
