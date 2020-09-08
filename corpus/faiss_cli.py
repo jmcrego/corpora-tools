@@ -5,6 +5,7 @@ import gzip
 import faiss
 import logging
 import numpy as np
+from collections import defaultdict
 from timeit import default_timer as timer
 
 def create_logger(logfile, loglevel):
@@ -19,13 +20,15 @@ def create_logger(logfile, loglevel):
         logging.basicConfig(filename=logfile, format='[%(asctime)s.%(msecs)03d] %(levelname)s %(message)s', datefmt='%Y-%m-%d_%H:%M:%S', level=numeric_level)
         logging.info('Created Logger level={} file={}'.format(loglevel, logfile))
 
+
+
 class Infile:
 
     def __init__(self, file, d=0, norm=True,file_str=None):
-        self.file = file
-        self.vec = []
-        self.txt = []
-        self.d = d
+        self.file = file ### file with vectors
+        self.vec = []    ### list with vectors found in file
+        self.txt = []    ### list with strings found in file_str
+        self.d = d       ### will contain length of vectors
 
         if file.endswith('.gz'): 
             f = gzip.open(file, 'rt')
@@ -68,55 +71,61 @@ class Infile:
     def __len__(self):
         return len(self.vec)
 
+    def nvectors():
+        return len(self.vec)
+
+    def ncells():
+        return len(self.d)
+
     def txts(self):
         return len(self.txt)>0
 
 
+
 class IndexFaiss:
 
-    def __init__(self, file, file_str=None):
+    def __init__(self):
+        self.file = []
+        self.db = []
+        self.index = []
+
+    def add_db(self, file, db):
+        #file is the name of the file
+        #db is the Infile containing the file
         tstart = timer()
-        self.file_db = file
-        self.db = Infile(file, file_str=file_str)
-        self.index = faiss.IndexFlatIP(self.db.d) #inner product (needs L2 normalization over db and query vectors)
-        self.index.add(self.db.vec) #add all normalized vectors to the index
+        self.file.append(file)
+        self.db.append(db)
+        self.index.append(faiss.IndexFlatIP(db.d)) #inner product (needs L2 normalization over db and query vectors)
+        self.index.add(db.vec)                     #add all normalized vectors to the index
         tend = timer()
         sec_elapsed = (tend - tstart)
         vecs_per_sec = len(self.db.vec) / sec_elapsed
-        logging.info('Read db with {} vectors in {} sec [{:.2f} vecs/sec]'.format(self.index.ntotal, sec_elapsed, vecs_per_sec))
+        logging.info('Added DB with {} vectors ({} cells) in {} sec [{:.2f} vecs/sec]'.format(len(db.vec), db.d, sec_elapsed, vecs_per_sec))
 
-    def Query(self,file,file_str,k,min_score,skip_same_id):
-        tstart = timer()
-        if file == self.file_db:
-            query = self.db
-        else:
-            query = Infile(file, d=self.db.d, file_str=file_str)
+    def Query(self,query,k,min_score,skip_same_id):
+        results = [defaultdict(float)] * len(query) ### each query input string has associated a dictionary (string => score)
+        for i_db in range(len(self.db)):
+            curr_db = self.db[i_db]
+            curr_index = self.index[i_db]
+            logging.info('Querying {} over {}'.format(query.file, curr_db.file))
+            tstart = timer()
+            D, I = curr_index.search(query.vec, k)
+            assert len(D) == len(I)     #I[i,j] contains the index in db of the j-th closest sentence to the i-th sentence in query
+            assert len(D) == len(query) #D[i,j] contains the corresponding score
+            tend = timer()
+            sec_elapsed = (tend - tstart)
+            vecs_per_sec = len(I) / sec_elapsed
+            logging.info('Found results in {} sec [{:.2f} vecs/sec]'.format(sec_elapsed, vecs_per_sec))
 
-        D, I = self.index.search(query.vec, k)
-        assert len(D) == len(I)     #I[i,j] contains the index in db of the j-th closest sentence to the i-th sentence in query
-        assert len(D) == len(query) #D[i,j] contains the corresponding score
-        tend = timer()
-        sec_elapsed = (tend - tstart)
-        vecs_per_sec = len(I) / sec_elapsed
-        logging.info('Read query + search with {} vectors in {} sec [{:.2f} vecs/sec]'.format(len(I), sec_elapsed, vecs_per_sec))
-
-        results = []
-        for i_query in range(len(I)): #for each sentence in query, retrieve the k-closest
-            results.append([]) #### k-closest sentences in DB for i_query will be in this list
-            for j in range(len(I[i_query])):
-                i_db = I[i_query,j]
-                score = D[i_query,j]
-                if score < min_score: ### skip
-                    continue
-                if skip_same_id and i_query == i_db: ### skip
-                    continue
-                res = []
-                res.append(score)
-                res.append(i_db)
-                if self.db.txts():
-                    res.append(self.db.txt[i_db])
-                results[-1].append(res)
-
+            for i_query in range(len(I)): #for each sentence in query, retrieve the k-closest
+                for j in range(len(I[i_query])):
+                    i_db = I[i_query,j]
+                    score = D[i_query,j]
+                    if score < min_score: ### skip
+                        continue
+                    if skip_same_id and i_query == i_db: ### skip
+                        continue
+                    results[i_query][self.curr_db.txt[i_db]] = score
         return results
 
 
@@ -269,6 +278,7 @@ if __name__ == '__main__':
             k += 1
         for i_db in range(len(fdb)):
             indexdb[i_db].Query(fquery[i_query],fquery_str[i_query],k,min_score,skip_same_id)
+
 
 
 
