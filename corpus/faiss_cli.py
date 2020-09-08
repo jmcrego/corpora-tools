@@ -120,9 +120,13 @@ class IndexFaiss:
         for my_db in range(len(self.DB)):
             curr_db = self.DB[my_db]
             curr_index = self.INDEX[my_db]
-            logging.info('Querying {} over {}'.format(query.file, curr_db.file))
+            logging.info('Querying {} over db={}'.format(query.file, curr_db.file))
             tstart = timer()
+            if skip_perfect or skip_same_id:
+                k += 1
             D, I = curr_index.search(query.vec, k)
+            if skip_perfect or skip_same_id:
+                k -= 1
             assert len(D) == len(I)     #I[i,j] contains the index in db of the j-th closest sentence to the i-th sentence in query
             assert len(D) == len(query) #D[i,j] contains the corresponding score
             tend = timer()
@@ -131,7 +135,7 @@ class IndexFaiss:
             logging.info('    Found results in {} sec [{:.2f} vecs/sec]'.format(sec_elapsed, vecs_per_sec))
 
             for i_query in range(len(I)): #for each sentence in query, retrieve the k-closest
-                for j in range(min(len(I[i_query]),k)):
+                for j in range(len(I[i_query])):
                     i_db = I[i_query,j]
                     score = D[i_query,j]
                     if score < min_score: ### skip
@@ -150,6 +154,8 @@ class IndexFaiss:
                         key = "{:.6f}：({},{})：({},{})：{}".format(score,my_query,i_query,my_db,i_db,i_db)
                     results[i_query][key] = score
                     #print("{} {}".format(i_query,key))
+                    if len(results[i_query]) >= k:
+                        break
 
         for i_query in range(len(results)):
             result = results[i_query] ### defaultdict
@@ -237,9 +243,6 @@ All indexs start by 0
     if len(fQUERY) == 0:
         logging.error('error: missing -fquery option')
         sys.exit()
-
-    if skip_same_id or skip_perfect:
-        k += 1
 
     logging.info('READING DBs')
     indexfaiss = IndexFaiss()
