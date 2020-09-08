@@ -26,7 +26,7 @@ class Infile:
 
     def __init__(self, file, d=0, norm=True):
 
-        if file.find(','):
+        if file.find(',') >= 0:
             self.file, self.file_str = file.split(',')
         else:
             self.file=file
@@ -135,7 +135,10 @@ class IndexFaiss:
                         continue
                     if skip_same_id and i_query == i_db: ### skip
                         continue
-                    key = "{:.6f}：{}".format(score,curr_db.txt[i_db])
+                    if len(curr_db.txts()):
+                        key = "{:.6f}：{}".format(score,curr_db.txt[i_db])
+                    else:
+                        key = "{:.6f}：{}".format(score,i_db)
                     if key not in results[i_query]:
                         results[i_query][key] = score
                     #print("{} {}".format(i_query,key))
