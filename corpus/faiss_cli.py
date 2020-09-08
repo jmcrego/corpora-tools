@@ -57,24 +57,23 @@ class Infile:
 
         if norm:
             faiss.normalize_L2(self.vec)
-            logging.info('Vectors normalized')
+            logging.info('\tVectors normalized')
 
-        if self.file_str is None:
-            return
+        if self.file_str is not None:
 
-        if self.file_str.endswith('.gz'): 
-            f = gzip.open(self.file_str, 'rt')
-        else:
-            f = io.open(self.file_str, 'r', encoding='utf-8', newline='\n', errors='ignore')
+            if self.file_str.endswith('.gz'): 
+                f = gzip.open(self.file_str, 'rt')
+            else:
+                f = io.open(self.file_str, 'r', encoding='utf-8', newline='\n', errors='ignore')
 
-        for l in f:
-            self.txt.append(l.rstrip())
+            for l in f:
+                self.txt.append(l.rstrip())
 
-        logging.info('\tRead strings from {}'.format(len(self.txt),self.file_str))
+            logging.info('\tRead strings from {}'.format(len(self.txt),self.file_str))
 
-        if len(self.txt) != len(self.vec):
-            logging.error('diff num of entries {} <> {} in files {} and {}'.format(len(self.vec),len(self.txt), self.file, self.file_str))
-            sys.exit()
+            if len(self.txt) != len(self.vec):
+                logging.error('diff num of entries {} <> {} in files {} and {}'.format(len(self.vec),len(self.txt), self.file, self.file_str))
+                sys.exit()
 
     def __len__(self):
         return len(self.vec)
