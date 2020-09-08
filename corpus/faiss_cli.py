@@ -139,13 +139,13 @@ class IndexFaiss:
                     if skip_same_id and i_query == i_db: ### skip
                         continue
                     if curr_db.txts():
-                        key = "{:.6f}：query({},{})db({},{})：{}".format(score,my_query,i_query,my_db,i_db,curr_db.txt[i_db])
+                        key = "{:.6f}：({},{})：({},{})：{}".format(score,my_query,i_query,my_db,i_db,curr_db.txt[i_db])
                         txt = curr_db.txt[i_db]
                         if txt in resultsUniq:
                             continue
                         resultsUniq.add(txt)
                     else:
-                        key = "{:.6f}：query({},{})db({},{})：{}".format(score,my_query,i_query,my_db,i_db,i_db)
+                        key = "{:.6f}：({},{})：({},{})：{}".format(score,my_query,i_query,my_db,i_db,i_db)
                     results[i_query][key] = score
                     #print("{} {}".format(i_query,key))
 
@@ -181,19 +181,19 @@ if __name__ == '__main__':
     -log_file    FILE : verbose output (default False)
     -log_level STRING : verbose output (default False)
     -h                : this help
-All indexs start by 0
 
-An output line consists of the k most similar sentences to an input query sentence:
+An output line contains the up to k most similar db sentences of a given input query sentence:
 out_1 \\t out_2 \\t out_3 \\t ... \\t out_k
 
-where each out_k is composed of:
-score：query(i_query,n_query)db(i_db,n_db)：txt
+Each out_k is composed of:
+score：(i_query,n_query)：(i_db,n_db)：txt
 
 - score is the similarity value
-- i_query, n_query indicate the n-th sentence in the i-th query file
-- i_db, n_db indicate the n-th sentence in the i-th db file
-- txt is the n-th sentence of the i-th db file found similar to the n-th query sentence in the i-th query file
+- (i_query,n_query) indicate the n-th sentence in the i-th query file
+- (i_db,n_db) indicate the n-th sentence in the i-th db file
+- txt is the db similar sentence (when available)
 
+All indexs start by 0
 '''.format(name)
 
 
