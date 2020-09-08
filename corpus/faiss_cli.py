@@ -127,6 +127,7 @@ class IndexFaiss:
                 for j in range(len(I[i_query])):
                     i_db = I[i_query,j]
                     score = D[i_query,j]
+                    print(score,i_db)
                     if score < min_score: ### skip
                         continue
                     if skip_same_id and i_query == i_db: ### skip
