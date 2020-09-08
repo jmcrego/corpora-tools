@@ -24,7 +24,7 @@ def create_logger(logfile, loglevel):
 
 class Infile:
 
-    def __init__(self, file, d=0, norm=True,file_str=None):
+    def __init__(self, file, file_str, d=0, norm=True):
         self.file = file ### file with vectors
         self.vec = []    ### list with vectors found in file
         self.txt = []    ### list with strings found in file_str
@@ -51,9 +51,6 @@ class Infile:
         if norm:
             faiss.normalize_L2(self.vec)
             logging.info('Vectors normalized')
-
-        if file_str is None:
-            return
 
         if file_str.endswith('.gz'): 
             f = gzip.open(file_str, 'rt')
@@ -85,15 +82,13 @@ class Infile:
 class IndexFaiss:
 
     def __init__(self):
-        self.file = []
         self.db = []
         self.index = []
 
-    def add_db(self, file, db):
+    def add_db(self, db):
         #file is the name of the file
         #db is the Infile containing the file
         tstart = timer()
-        self.file.append(file)
         self.db.append(db)
         self.index.append(faiss.IndexFlatIP(db.d)) #inner product (needs L2 normalization over db and query vectors)
         self.index.add(db.vec)                     #add all normalized vectors to the index
@@ -181,8 +176,6 @@ if __name__ == '__main__':
 
     fdb = []
     fquery = []
-    fdb_str = []
-    fquery_str = []
     k = 1
     min_score = 0.5
     skip_same_id = False
@@ -193,10 +186,8 @@ if __name__ == '__main__':
     log_level = 'debug'
     name = sys.argv.pop(0)
     usage = '''usage: {} -db FILE -query FILE [-db_str FILE] [-query_str FILE] [-d INT] [-k INT] [-skip_same_id] [-skip_query] [-log_file FILE] [-log_level STRING]
-    -db         FILEs : file/s to index (comma-separated)
-    -db_str     FILEs : file/s to index (comma-separated)
-    -query      FILEs : file with queries (comma-separated)
-    -query_str  FILEs : file with queries (comma-separated)
+    -db     FILE,FILE : db files with vectors/strings
+    -query  FILE,FILE : query files with vectors/strings
     -k            INT : k-best to retrieve (default 1)
     -min_score  FLOAT : minimum distance to accept a match (default 0.5) 
     -skip_same_id     : do not consider matchs with db_id == query_id (k+1 matchs retrieved)
@@ -216,13 +207,9 @@ if __name__ == '__main__':
         elif tok=="-v":
             verbose = True
         elif tok=="-db" and len(sys.argv):
-            fdb = sys.argv.pop(0).split(',')
-        elif tok=="-db_str" and len(sys.argv):
-            fdb_str = sys.argv.pop(0).split(',')
+            fdb.append(sys.argv.pop(0))
         elif tok=="-query" and len(sys.argv):
-            fquery = sys.argv.pop(0).split(',')
-        elif tok=="-query_str" and len(sys.argv):
-            fquery_str = sys.argv.pop(0).split(',')
+            fquery.append(sys.argv.pop(0))
         elif tok=="-k" and len(sys.argv):
             k = int(sys.argv.pop(0))
         elif tok=="-min_score" and len(sys.argv):
@@ -252,25 +239,12 @@ if __name__ == '__main__':
         logging.error('error: missing -fquery option')
         sys.exit()
 
-    if len(fdb_str) == 0:
-        fdb_str = [None] * len(fdb)
-
-    if len(fquery_str) == 0:
-        fquery_str = [None] * len(fquery)
-
-    if len(fdb_str) != len(fdb):
-        logging.error('error: diff num of files between -fdb and -fdb_str')
-        sys.exit()
-
-    if len(fquery_str) != len(fquery):
-        logging.error('error: diff num of files between -fquery and -fquery_str')
-        sys.exit()
-
-
-    indexdb = []
     logging.info('READING DBs')
+    indexfaiss = IndexFaiss()
     for i_db in range(len(fdb)):
-        indexdb.append(IndexFaiss(fdb[i_db],fdb_str[i_db]))
+        fdb, fdb_str = fdb[i_db].split(',')
+        db = Infile(fdb, fdb_str, d=0, norm=True):
+        indexdb.add_db(IndexFaiss(fdb))
 
     logging.info('PROCESSING Queries')
     for i_query in range(len(fquery)):
