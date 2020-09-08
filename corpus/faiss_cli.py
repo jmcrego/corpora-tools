@@ -108,7 +108,7 @@ class IndexFaiss:
         self.INDEX.append(index) 
         logging.info('Added DB with {} vectors ({} cells) in {} sec [{:.2f} vecs/sec]'.format(len(db.vec), db.d, sec_elapsed, vecs_per_sec))
 
-    def Query(self,i_query,query,k,min_score,max_score):
+    def Query(self,i_query,query,k,min_score,max_score,fout):
         results = []
         resultsUniq = []
         for _ in range(len(query)):
@@ -148,6 +148,9 @@ class IndexFaiss:
                     if len(results[n_query]) >= k:
                         break
 
+        if fout is not None:
+            F = open(fout,"w") 
+
         for n_query in range(len(results)):
             result = results[n_query] ### defaultdict
             out = []
@@ -155,8 +158,13 @@ class IndexFaiss:
                 out.append(key)
                 if len(out) >= k:
                     break
-            print('\t'.join(out))
+            if fout is not None:
+                F.write('\t'.join(out) + '\n')
+            else:
+                print('\t'.join(out))
 
+        if fout is not None:
+            F.close()
 
 
 
@@ -170,6 +178,7 @@ if __name__ == '__main__':
     verbose = False
     log_file = None
     log_level = 'debug'
+    tag = None
     name = sys.argv.pop(0)
     usage = '''usage: {} [-db FILE[,FILE]]+ [-query FILE]+ [-k INT] [-min_score FLOAT] [-max_score FLOAT] [-log_file FILE] [-log_level STRING]
     -db     FILE,FILE : db files with vectors/strings (strings are not needed)
@@ -179,6 +188,7 @@ if __name__ == '__main__':
     -max_score  FLOAT : maximum distance to accept a match (default 1.0) 
     -log_file    FILE : verbose output (default False)
     -log_level STRING : verbose output (default False)
+    -tag       STRING : use [query].[tag] to output matches (default stdout)
     -h                : this help
 
 use -max_score 0.9999 to prevent perfect matches
@@ -218,6 +228,8 @@ All indexs start by 0
             log_file = sys.argv.pop(0)
         elif tok=="-log_level" and len(sys.argv):
             log_level = sys.argv.pop(0)
+        elif tok=="-tag" and len(sys.argv):
+            tag = sys.argv.pop(0)
         else:
             sys.stderr.write('error: unparsed {} option\n'.format(tok))
             sys.stderr.write("{}".format(usage))
@@ -242,7 +254,9 @@ All indexs start by 0
     logging.info('PROCESSING Queries')
     for i_query in range(len(fQUERY)):
         query = Infile(fQUERY[i_query], d=0, norm=True)
-        indexfaiss.Query(i_query,query,k,min_score,max_score)
+        if tag is not None:
+            tag = fQUERY[i_query] + "." = tag
+        indexfaiss.Query(i_query,query,k,min_score,max_score,tag)
 
 
 
