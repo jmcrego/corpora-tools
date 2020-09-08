@@ -24,16 +24,22 @@ def create_logger(logfile, loglevel):
 
 class Infile:
 
-    def __init__(self, file, file_str, d=0, norm=True):
-        self.file = file ### file with vectors
+    def __init__(self, file, d=0, norm=True):
+
+        if file.find(','):
+            self.file, self.file_str = file.split(',')
+        else:
+            self.file=file
+            self.file_str = None
+
         self.vec = []    ### list with vectors found in file
         self.txt = []    ### list with strings found in file_str
         self.d = d       ### will contain length of vectors
 
-        if file.endswith('.gz'): 
-            f = gzip.open(file, 'rt')
+        if self.file.endswith('.gz'): 
+            f = gzip.open(self.file, 'rt')
         else:
-            f = io.open(file, 'r', encoding='utf-8', newline='\n', errors='ignore')
+            f = io.open(self.file, 'r', encoding='utf-8', newline='\n', errors='ignore')
 
         for l in f:
             l = l.rstrip().split(' ')
@@ -53,10 +59,13 @@ class Infile:
             faiss.normalize_L2(self.vec)
             logging.info('Vectors normalized')
 
-        if file_str.endswith('.gz'): 
-            f = gzip.open(file_str, 'rt')
+        if self.file_str is None:
+            return
+
+        if self.file_str.endswith('.gz'): 
+            f = gzip.open(self.file_str, 'rt')
         else:
-            f = io.open(file_str, 'r', encoding='utf-8', newline='\n', errors='ignore')
+            f = io.open(self.file_str, 'r', encoding='utf-8', newline='\n', errors='ignore')
 
         for l in f:
             self.txt.append(l.rstrip())
@@ -245,16 +254,14 @@ if __name__ == '__main__':
     logging.info('READING DBs')
     indexfaiss = IndexFaiss()
     for i_db in range(len(fDB)):
-        fdb, fdb_str = fDB[i_db].split(',')
-        db = Infile(fdb, fdb_str, d=0, norm=True)
+        db = Infile(fDB[i_db], d=0, norm=True)
         indexfaiss.add_db(db)
 
     logging.info('PROCESSING Queries')
     for i_query in range(len(fQUERY)):
         if skip_same_id:
             k += 1
-        fquery, fquery_str = fQUERY[i_query].split(',')
-        query = Infile(fquery, fquery_str, d=0, norm=True)
+        query = Infile(fQUERY[i_query], d=0, norm=True)
         indexfaiss.Query(query,k,min_score,skip_same_id)
 
 
