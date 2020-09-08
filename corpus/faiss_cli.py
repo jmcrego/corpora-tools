@@ -137,7 +137,8 @@ class IndexFaiss:
         for i_query in range(len(results)):
             res = results[i_query]
             out = []
-            for txt, score in sorted(data.items(), lambda (k,v): v, reverse=True):
+            for txt, score in sorted(results[i_query].items(), key=lambda item: item[1], reverse=True):
+#            for txt, score in sorted(data.items(), lambda (k,v): v, reverse=True):
                 out.append('{:.6f}：{}'.format(score,txt))
             print('\t'.join(out))
 
