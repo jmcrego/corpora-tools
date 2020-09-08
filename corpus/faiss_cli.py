@@ -108,15 +108,15 @@ class IndexFaiss:
         self.INDEX.append(index) 
         logging.info('Added DB with {} vectors ({} cells) in {} sec [{:.2f} vecs/sec]'.format(len(db.vec), db.d, sec_elapsed, vecs_per_sec))
 
-    def Query(self,j_query,query,k,min_score,skip_same_id):
+    def Query(self,my_query,query,k,min_score,skip_same_id):
         results = []
         for _ in range(len(query)):
             d = defaultdict(float)
             results.append(d)
 
-        for i in range(len(self.DB)):
-            curr_db = self.DB[i]
-            curr_index = self.INDEX[i]
+        for my_db in range(len(self.DB)):
+            curr_db = self.DB[my_db]
+            curr_index = self.INDEX[my_db]
             logging.info('Querying {} over {}'.format(query.file, curr_db.file))
             tstart = timer()
             D, I = curr_index.search(query.vec, k)
@@ -139,7 +139,7 @@ class IndexFaiss:
                         txt = curr_db.txt[i_db]
                     else:
                         txt = str(i_db)
-                    key = "{:.6f}：{}：{}：{}".format(score,j_query,i,txt)
+                    key = "{:.6f}：{}：{}：{}".format(score,my_query,my_db,txt)
                     if key not in results[i_query]:
                         results[i_query][key] = score
                     #print("{} {}".format(i_query,key))
