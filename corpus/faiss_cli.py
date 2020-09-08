@@ -133,6 +133,7 @@ class IndexFaiss:
                         continue
                     key = "{:.6f}：{}：{}：{}".format(score,j,i_db,curr_db.txt[i_db])
                     results[i_query][key] = score
+                    print(i_query,query.txt[i_query],i_db,curr_db.txt[i_db],score)
 
         for i_query in range(len(results)):
             result = results[i_query]
