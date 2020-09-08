@@ -255,7 +255,7 @@ All indexs start by 0
     for i_query in range(len(fQUERY)):
         query = Infile(fQUERY[i_query], d=0, norm=True)
         if tag is not None:
-            tag = fQUERY[i_query] + "." = tag
+            tag = fQUERY[i_query] + "." + tag
         indexfaiss.Query(i_query,query,k,min_score,max_score,tag)
 
 
