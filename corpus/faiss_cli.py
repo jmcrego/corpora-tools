@@ -109,7 +109,7 @@ class IndexFaiss:
         self.INDEX.append(index) 
         logging.info('Indexed DB with {} vectors ({} cells) in {} sec [{:.2f} vecs/sec]'.format(len(db.vec), db.d, sec_elapsed, vecs_per_sec))
 
-    def Query(self,i_query,query,k,min_score,max_score,fout):
+    def Query(self,i_query,query,k,min_score,max_score,fin,tag):
         results = []
         resultsUniq = []
         for _ in range(len(query)):
@@ -150,8 +150,8 @@ class IndexFaiss:
                         break
 
         logging.info('Building results in {}'.format(fout))
-        if fout is not None:
-            F = open(fout,"w") 
+        if tag is not None:
+            F = open(fin+'.'+tag,"w") 
 
         for n_query in range(len(results)):
             result = results[n_query] ### defaultdict
@@ -160,12 +160,12 @@ class IndexFaiss:
                 out.append(key)
                 if len(out) >= k:
                     break
-            if fout is not None:
+            if tag is not None:
                 F.write('\t'.join(out) + '\n')
             else:
                 print('\t'.join(out))
 
-        if fout is not None:
+        if tag is not None:
             F.close()
 
 
@@ -256,9 +256,7 @@ All indexs start by 0
     logging.info('PROCESSING Queries')
     for i_query in range(len(fQUERY)):
         query = Infile(fQUERY[i_query], d=0, norm=True)
-        if tag is not None:
-            tag = "{}.{}".format(fQUERY[i_query],tag)
-        indexfaiss.Query(i_query,query,k,min_score,max_score,tag)
+        indexfaiss.Query(i_query,query,k,min_score,max_score,fQUERY[i_query],tag)
 
 
 
