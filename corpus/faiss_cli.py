@@ -131,18 +131,17 @@ class IndexFaiss:
                         continue
                     if skip_same_id and i_query == i_db: ### skip
                         continue
-                    key = "{:.6f}：{}：{}：{}".format(score,j,i_db,curr_db.txt[i_db])
-                    results[i_query][key] = score
-                    print("{} {} {:.6f} {} ||| {}".format(i_query,i_db,score,query.txt[i_query],curr_db.txt[i_db]))
+                    key = "{:.6f}：{}".format(score,curr_db.txt[i_db])
+                    if key not in results[i_query]:
+                        results[i_query][key] = score
+                    print("{} {}".format(i_query,key))
 
         for i_query in range(len(results)):
-            result = results[i_query]
+            result = results[i_query] ### defaultdict
             out = []
-            j = 0
             for key, score in sorted(result.items(), key=lambda item: item[1], reverse=True):
                 out.append('{}'.format(key))
-                j += 1
-                if j >= k:
+                if len(out) >= k:
                     break
             print('\t'.join(out))
 
