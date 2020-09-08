@@ -184,7 +184,7 @@ if __name__ == '__main__':
 All indexs start by 0
 
 An output line consists of the k most similar sentences to an input query sentence:
-out_1 \t out_2 \t out_3 \t ... \t out_k
+out_1 \\t out_2 \\t out_3 \\t ... \\t out_k
 
 where each out_k is composed of:
 score：query(i_query,n_query)db(i_db,n_db)：txt
