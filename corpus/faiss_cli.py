@@ -109,7 +109,11 @@ class IndexFaiss:
         logging.info('Added DB with {} vectors ({} cells) in {} sec [{:.2f} vecs/sec]'.format(len(db.vec), db.d, sec_elapsed, vecs_per_sec))
 
     def Query(self,query,k,min_score,skip_same_id):
-        results = [defaultdict(float)] * len(query) ### each query input string has associated a dictionary (string => score)
+        results = []
+        for _ in range(len(query)):
+            d = defaultdict(float)
+            results.append(d)
+
         for i_db in range(len(self.DB)):
             curr_db = self.DB[i_db]
             curr_index = self.INDEX[i_db]
