@@ -135,7 +135,7 @@ class IndexFaiss:
                         continue
                     if skip_same_id and i_query == i_db: ### skip
                         continue
-                    if len(curr_db.txts()):
+                    if curr_db.txts():
                         key = "{:.6f}：{}".format(score,curr_db.txt[i_db])
                     else:
                         key = "{:.6f}：{}".format(score,i_db)
