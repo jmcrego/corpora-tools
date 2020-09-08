@@ -124,25 +124,22 @@ class IndexFaiss:
             logging.info('Found results in {} sec [{:.2f} vecs/sec]'.format(sec_elapsed, vecs_per_sec))
 
             for i_query in range(len(I)): #for each sentence in query, retrieve the k-closest
-                for j in range(len(I[i_query])):
+                for j in range(min(len(I[i_query]),k)):
                     i_db = I[i_query,j]
                     score = D[i_query,j]
-                    #print(score,i_db,curr_db.txt[i_db])
                     if score < min_score: ### skip
                         continue
                     if skip_same_id and i_query == i_db: ### skip
                         continue
-                    txt = "{:.6f}：{}：{}：{}".format(score,j,i_db,curr_db.txt[i_db])
-                    results[i_query][txt] = score
-                    if j >= k:
-                        break
+                    key = "{:.6f}：{}：{}：{}".format(score,j,i_db,curr_db.txt[i_db])
+                    results[i_query][key] = score
 
         for i_query in range(len(results)):
-            res = results[i_query]
+            result = results[i_query]
             out = []
             j = 0
-            for txt, score in sorted(res.items(), key=lambda item: item[1], reverse=True):
-                out.append('{}'.format(txt))
+            for key, score in sorted(result.items(), key=lambda item: item[1], reverse=True):
+                out.append('{}'.format(key))
                 j += 1
                 if j >= k:
                     break
