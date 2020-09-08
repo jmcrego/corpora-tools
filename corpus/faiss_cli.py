@@ -141,7 +141,7 @@ class IndexFaiss:
             res = results[i_query]
             out = []
             j = 0
-            for txt, score in sorted(res[i_query].items(), key=lambda item: item[1], reverse=True):
+            for txt, score in sorted(res.items(), key=lambda item: item[1], reverse=True):
                 out.append('{}'.format(txt))
                 j += 1
                 if j >= k:
