@@ -138,7 +138,7 @@ class IndexFaiss:
                     key = "{:.6f}：{}".format(score,curr_db.txt[i_db])
                     if key not in results[i_query]:
                         results[i_query][key] = score
-                    print("{} {}".format(i_query,key))
+                    #print("{} {}".format(i_query,key))
 
         for i_query in range(len(results)):
             result = results[i_query] ### defaultdict
@@ -147,7 +147,7 @@ class IndexFaiss:
                 out.append(key)
                 if len(out) >= k:
                     break
-            print(i_query,'\t'.join(out))
+            print('\t'.join(out))
 
 
     def Query2(self,file,file_str,k,min_score,skip_same_id,skip_query,do_eval):
