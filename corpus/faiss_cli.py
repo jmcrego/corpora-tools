@@ -108,7 +108,7 @@ class IndexFaiss:
         self.INDEX.append(index) 
         logging.info('Added DB with {} vectors ({} cells) in {} sec [{:.2f} vecs/sec]'.format(len(db.vec), db.d, sec_elapsed, vecs_per_sec))
 
-    def Query(self,my_query,query,k,min_score,skip_same_id,skip_perfect):
+    def Query(self,my_query,query,k,min_score,max_score):
         results = []
         resultsUniq = []
         for _ in range(len(query)):
@@ -138,11 +138,7 @@ class IndexFaiss:
                 for j in range(len(I[i_query])):
                     i_db = I[i_query,j]
                     score = D[i_query,j]
-                    if score < min_score: ### skip
-                        continue
-                    if skip_same_id and i_query == i_db: ### skip
-                        continue
-                    if skip_perfect and score >= 0.9999: ### skip
+                    if score < min_score or score > max_score: ### skip
                         continue
                     if curr_db.txts():
                         key = "{:.6f}：({},{})：({},{})：{}".format(score,my_query,i_query,my_db,i_db,curr_db.txt[i_db])
@@ -174,8 +170,8 @@ if __name__ == '__main__':
     fDB = []
     fQUERY = []
     k = 1
-    min_score = 0.5
-    skip_same_id = False
+    min_score = 0.0
+    max_score = 1.0
     skip_perfect = False
     verbose = False
     log_file = None
@@ -185,12 +181,13 @@ if __name__ == '__main__':
     -db     FILE,FILE : db files with vectors/strings (strings are not needed)
     -query       FILE : query files with vectors
     -k            INT : k-best to retrieve (default 1)
-    -min_score  FLOAT : minimum distance to accept a match (default 0.5) 
-    -skip_same_id     : do not consider matchs with db_id == query_id (k+1 matchs retrieved)
-    -skip_perfect     : do not consider perfect matchs (k+1 matchs retrieved)
+    -min_score  FLOAT : minimum distance to accept a match (default 0.0) 
+    -max_score  FLOAT : maximum distance to accept a match (default 1.0) 
     -log_file    FILE : verbose output (default False)
     -log_level STRING : verbose output (default False)
     -h                : this help
+
+use -max_score 0.9999 to prevent perfect matches
 
 An output line contains the up to k most similar db sentences of a given input query sentence:
 out_1 \\t out_2 \\t out_3 \\t ... \\t out_k
@@ -221,14 +218,12 @@ All indexs start by 0
             k = int(sys.argv.pop(0))
         elif tok=="-min_score" and len(sys.argv):
             min_score = float(sys.argv.pop(0))
+        elif tok=="-max_score" and len(sys.argv):
+            max_score = float(sys.argv.pop(0))
         elif tok=="-log_file" and len(sys.argv):
             log_file = sys.argv.pop(0)
         elif tok=="-log_level" and len(sys.argv):
             log_level = sys.argv.pop(0)
-        elif tok=="-skip_same_id":
-            skip_same_id = True
-        elif tok=="-skip_perfect":
-            skip_perfect = True
         else:
             sys.stderr.write('error: unparsed {} option\n'.format(tok))
             sys.stderr.write("{}".format(usage))
@@ -253,7 +248,7 @@ All indexs start by 0
     logging.info('PROCESSING Queries')
     for i_query in range(len(fQUERY)):
         query = Infile(fQUERY[i_query], d=0, norm=True)
-        indexfaiss.Query(i_query,query,k,min_score,skip_same_id,skip_perfect)
+        indexfaiss.Query(i_query,query,k,min_score,max_score)
 
 
 
