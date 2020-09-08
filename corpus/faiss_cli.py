@@ -53,7 +53,7 @@ class Infile:
 
         self.vec = np.array(self.vec).astype('float32')
 
-        logging.info('Read {} vectors ({} cells) from {}'.format(len(self.vec),self.d,self.file))
+        logging.info('\tRead {} vectors ({} cells) from {}'.format(len(self.vec),self.d,self.file))
 
         if norm:
             faiss.normalize_L2(self.vec)
