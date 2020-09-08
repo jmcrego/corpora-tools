@@ -5,6 +5,7 @@ import gzip
 import faiss
 import logging
 import numpy as np
+import os
 from collections import defaultdict
 from timeit import default_timer as timer
 
@@ -106,7 +107,7 @@ class IndexFaiss:
         vecs_per_sec = len(db.vec) / sec_elapsed
         self.DB.append(db)
         self.INDEX.append(index) 
-        logging.info('Added DB with {} vectors ({} cells) in {} sec [{:.2f} vecs/sec]'.format(len(db.vec), db.d, sec_elapsed, vecs_per_sec))
+        logging.info('Indexed DB with {} vectors ({} cells) in {} sec [{:.2f} vecs/sec]'.format(len(db.vec), db.d, sec_elapsed, vecs_per_sec))
 
     def Query(self,i_query,query,k,min_score,max_score,fout):
         results = []
@@ -148,6 +149,7 @@ class IndexFaiss:
                     if len(results[n_query]) >= k:
                         break
 
+        logging.info('Building results in {}'.format(fout))
         if fout is not None:
             F = open(fout,"w") 
 
@@ -255,7 +257,7 @@ All indexs start by 0
     for i_query in range(len(fQUERY)):
         query = Infile(fQUERY[i_query], d=0, norm=True)
         if tag is not None:
-            tag = fQUERY[i_query] + "." + tag
+            tag = "{}.{}".format(fQUERY[i_query],tag)
         indexfaiss.Query(i_query,query,k,min_score,max_score,tag)
 
 
