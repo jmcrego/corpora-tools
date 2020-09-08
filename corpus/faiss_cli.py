@@ -53,11 +53,11 @@ class Infile:
 
         self.vec = np.array(self.vec).astype('float32')
 
-        logging.info('\tRead {} vectors ({} cells) from {}'.format(len(self.vec),self.d,self.file))
+        logging.info('    Read {} vectors ({} cells) from {}'.format(len(self.vec),self.d,self.file))
 
         if norm:
             faiss.normalize_L2(self.vec)
-            logging.info('\tVectors normalized')
+            logging.info('    Vectors normalized')
 
         if self.file_str is not None:
 
@@ -69,7 +69,7 @@ class Infile:
             for l in f:
                 self.txt.append(l.rstrip())
 
-            logging.info('\tRead strings from {}'.format(self.file_str))
+            logging.info('    Read strings from {}'.format(self.file_str))
 
             if len(self.txt) != len(self.vec):
                 logging.error('diff num of entries {} <> {} in files {} and {}'.format(len(self.vec),len(self.txt), self.file, self.file_str))
