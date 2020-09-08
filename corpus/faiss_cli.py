@@ -108,7 +108,7 @@ class IndexFaiss:
         self.INDEX.append(index) 
         logging.info('Added DB with {} vectors ({} cells) in {} sec [{:.2f} vecs/sec]'.format(len(db.vec), db.d, sec_elapsed, vecs_per_sec))
 
-    def Query(self,my_query,query,k,min_score,max_score):
+    def Query(self,i_query,query,k,min_score,max_score):
         results = []
         resultsUniq = []
         for _ in range(len(query)):
@@ -117,9 +117,9 @@ class IndexFaiss:
             duniq = set()
             resultsUniq.append(duniq) #for a fast access to strings presents in resultsUniq[i]
 
-        for my_db in range(len(self.DB)):
-            curr_db = self.DB[my_db]
-            curr_index = self.INDEX[my_db]
+        for i_db in range(len(self.DB)):
+            curr_db = self.DB[i_db]
+            curr_index = self.INDEX[i_db]
             logging.info('Query={} over db={}'.format(query.file, curr_db.file))
             tstart = timer()
             D, I = curr_index.search(query.vec, k+5) ### retrieve more tha k in case the first are filtered out by (min_score, max_score)
@@ -130,27 +130,27 @@ class IndexFaiss:
             vecs_per_sec = len(I) / sec_elapsed
             logging.info('\t\tFound results in {} sec [{:.2f} vecs/sec]'.format(sec_elapsed, vecs_per_sec))
 
-            for i_query in range(len(I)): #for each sentence in query, retrieve the k-closest
-                for j in range(len(I[i_query])):
-                    i_db = I[i_query,j]
-                    score = D[i_query,j]
+            for n_query in range(len(I)): #for each sentence in query, retrieve the k-closest
+                for j in range(len(I[n_query])):
+                    n_db = I[n_query,j]
+                    score = D[n_query,j]
                     if score < min_score or score > max_score: ### skip
                         continue
                     if curr_db.txts():
-                        key = "{:.6f}：({},{})：({},{})：{}".format(score,my_query,i_query,my_db,i_db,curr_db.txt[i_db])
-                        txt = curr_db.txt[i_db]
-                        if txt in resultsUniq[i_query]:
+                        key = "{:.6f}：({},{})：({},{})：{}".format(score,i_query,n_query,i_db,n_db,curr_db.txt[n_db])
+                        txt = curr_db.txt[n_db]
+                        if txt in resultsUniq[n_query]:
                             continue
-                        resultsUniq[i_query].add(txt)
+                        resultsUniq[n_query].add(txt)
                     else:
-                        key = "{:.6f}：({},{})：({},{})".format(score,my_query,i_query,my_db,i_db)
-                    results[i_query][key] = score
-                    #print("{} {}".format(i_query,key))
-                    if len(results[i_query]) >= k:
+                        key = "{:.6f}：({},{})：({},{})".format(score,i_query,n_query,n_db,n_db)
+                    results[n_query][key] = score
+                    #print("{} {}".format(n_query,key))
+                    if len(results[n_query]) >= k:
                         break
 
-        for i_query in range(len(results)):
-            result = results[i_query] ### defaultdict
+        for n_query in range(len(results)):
+            result = results[n_query] ### defaultdict
             out = []
             for key, _ in sorted(result.items(), key=lambda item: item[1], reverse=True):
                 out.append(key)
