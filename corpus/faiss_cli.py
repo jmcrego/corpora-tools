@@ -110,9 +110,12 @@ class IndexFaiss:
 
     def Query(self,my_query,query,k,min_score,skip_same_id):
         results = []
+        resultsUniq = []
         for _ in range(len(query)):
             d = defaultdict(float)
             results.append(d)
+            duniq = set()
+            resultsUniq.append(duniq) #for a fast access to strings presents in resultsUniq[i]
 
         for my_db in range(len(self.DB)):
             curr_db = self.DB[my_db]
@@ -125,7 +128,7 @@ class IndexFaiss:
             tend = timer()
             sec_elapsed = (tend - tstart)
             vecs_per_sec = len(I) / sec_elapsed
-            logging.info('Found results in {} sec [{:.2f} vecs/sec]'.format(sec_elapsed, vecs_per_sec))
+            logging.info('    Found results in {} sec [{:.2f} vecs/sec]'.format(sec_elapsed, vecs_per_sec))
 
             for i_query in range(len(I)): #for each sentence in query, retrieve the k-closest
                 for j in range(min(len(I[i_query]),k)):
@@ -136,12 +139,14 @@ class IndexFaiss:
                     if skip_same_id and i_query == i_db: ### skip
                         continue
                     if curr_db.txts():
+                        key = "{:.6f}：query({},{})db({},{})：{}".format(score,my_query,i_query,my_db,i_db,curr_db.txt[i_db])
                         txt = curr_db.txt[i_db]
+                        if txt in resultsUniq:
+                            continue
+                        resultsUniq.add(txt)
                     else:
-                        txt = str(i_db)
-                    key = "{:.6f}：queryFile={}：dbFile={}：{}".format(score,my_query,my_db,txt)
-                    if key not in results[i_query]:
-                        results[i_query][key] = score
+                        key = "{:.6f}：query({},{})db({},{})：{}".format(score,my_query,i_query,my_db,i_db,i_db)
+                    results[i_query][key] = score
                     #print("{} {}".format(i_query,key))
 
         for i_query in range(len(results)):
