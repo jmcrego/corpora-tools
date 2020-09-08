@@ -141,9 +141,9 @@ class IndexFaiss:
                     if curr_db.txts():
                         key = "{:.6f}：({},{})：({},{})：{}".format(score,my_query,i_query,my_db,i_db,curr_db.txt[i_db])
                         txt = curr_db.txt[i_db]
-                        if txt in resultsUniq:
+                        if txt in resultsUniq[i_query]:
                             continue
-                        resultsUniq.add(txt)
+                        resultsUniq[i_query].add(txt)
                     else:
                         key = "{:.6f}：({},{})：({},{})：{}".format(score,my_query,i_query,my_db,i_db,i_db)
                     results[i_query][key] = score
@@ -172,9 +172,9 @@ if __name__ == '__main__':
     log_file = None
     log_level = 'debug'
     name = sys.argv.pop(0)
-    usage = '''usage: {} [-db FILE[,FILE]]+ [-query FILE[,FILE]]+ [-k INT] [-skip_same_id] [-log_file FILE] [-log_level STRING]
-    -db     FILE,FILE : db files with vectors/strings
-    -query  FILE,FILE : query files with vectors/strings
+    usage = '''usage: {} [-db FILE[,FILE]]+ [-query FILE]+ [-k INT] [-skip_same_id] [-log_file FILE] [-log_level STRING]
+    -db     FILE,FILE : db files with vectors/strings (strings are not needed)
+    -query       FILE : query files with vectors
     -k            INT : k-best to retrieve (default 1)
     -min_score  FLOAT : minimum distance to accept a match (default 0.5) 
     -skip_same_id     : do not consider matchs with db_id == query_id (k+1 matchs retrieved)
@@ -187,7 +187,6 @@ out_1 \\t out_2 \\t out_3 \\t ... \\t out_k
 
 Each out_k is composed of:
 score：(i_query,n_query)：(i_db,n_db)：txt
-
 - score is the similarity value
 - (i_query,n_query) indicate the n-th sentence in the i-th query file
 - (i_db,n_db) indicate the n-th sentence in the i-th db file
