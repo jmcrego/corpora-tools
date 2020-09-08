@@ -53,11 +53,11 @@ class Infile:
 
         self.vec = np.array(self.vec).astype('float32')
 
-        logging.info('    Read {} vectors ({} cells) from {}'.format(len(self.vec),self.d,self.file))
+        logging.info('\t\tRead {} vectors ({} cells) from {}'.format(len(self.vec),self.d,self.file))
 
         if norm:
             faiss.normalize_L2(self.vec)
-            logging.info('    Vectors normalized')
+            logging.info('\t\tVectors normalized')
 
         if self.file_str is not None:
 
@@ -69,7 +69,7 @@ class Infile:
             for l in f:
                 self.txt.append(l.rstrip())
 
-            logging.info('    Read strings from {}'.format(self.file_str))
+            logging.info('\t\tRead strings from {}'.format(self.file_str))
 
             if len(self.txt) != len(self.vec):
                 logging.error('diff num of entries {} <> {} in files {} and {}'.format(len(self.vec),len(self.txt), self.file, self.file_str))
@@ -122,17 +122,13 @@ class IndexFaiss:
             curr_index = self.INDEX[my_db]
             logging.info('Query={} over db={}'.format(query.file, curr_db.file))
             tstart = timer()
-            if skip_perfect or skip_same_id:
-                k += 1
-            D, I = curr_index.search(query.vec, k)
-            if skip_perfect or skip_same_id:
-                k -= 1
+            D, I = curr_index.search(query.vec, k+5) ### retrieve more tha k in case the first are filtered out by (min_score, max_score)
             assert len(D) == len(I)     #I[i,j] contains the index in db of the j-th closest sentence to the i-th sentence in query
             assert len(D) == len(query) #D[i,j] contains the corresponding score
             tend = timer()
             sec_elapsed = (tend - tstart)
             vecs_per_sec = len(I) / sec_elapsed
-            logging.info('    Found results in {} sec [{:.2f} vecs/sec]'.format(sec_elapsed, vecs_per_sec))
+            logging.info('\t\tFound results in {} sec [{:.2f} vecs/sec]'.format(sec_elapsed, vecs_per_sec))
 
             for i_query in range(len(I)): #for each sentence in query, retrieve the k-closest
                 for j in range(len(I[i_query])):
@@ -197,7 +193,7 @@ score：(i_query,n_query)：(i_db,n_db)：txt
 - score is the similarity value
 - (i_query,n_query) indicate the n-th sentence in the i-th query file
 - (i_db,n_db) indicate the n-th sentence in the i-th db file
-- txt is the db similar sentence (when available)
+- txt is the db similar sentence (only if available)
 
 All indexs start by 0
 '''.format(name)
