@@ -70,10 +70,10 @@ class Infile:
         for l in f:
             self.txt.append(l.rstrip())
 
-        logging.info('Read {} strings from {}'.format(len(self.txt),file_str))
+        logging.info('Read {} strings from {}'.format(len(self.txt),self.file_str))
 
         if len(self.txt) != len(self.vec):
-            logging.error('diff num of entries {} <> {} in files {} and {}'.format(len(self.vec),len(self.txt),file, file_str))
+            logging.error('diff num of entries {} <> {} in files {} and {}'.format(len(self.vec),len(self.txt), self.file, self.file_str))
             sys.exit()
 
     def __len__(self):
@@ -251,6 +251,9 @@ if __name__ == '__main__':
         logging.error('error: missing -fquery option')
         sys.exit()
 
+    if skip_same_id:
+        k += 1
+
     logging.info('READING DBs')
     indexfaiss = IndexFaiss()
     for i_db in range(len(fDB)):
@@ -259,8 +262,6 @@ if __name__ == '__main__':
 
     logging.info('PROCESSING Queries')
     for i_query in range(len(fQUERY)):
-        if skip_same_id:
-            k += 1
         query = Infile(fQUERY[i_query], d=0, norm=True)
         indexfaiss.Query(query,k,min_score,skip_same_id)
 
