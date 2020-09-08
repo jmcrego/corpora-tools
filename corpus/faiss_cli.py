@@ -136,9 +136,9 @@ class IndexFaiss:
                     if skip_same_id and i_query == i_db: ### skip
                         continue
                     if curr_db.txts():
-                        key = "{:.6f}：{}".format(score,curr_db.txt[i_db])
+                        key = "{:.6f}：{}：{}".format(score,i_db,curr_db.txt[i_db])
                     else:
-                        key = "{:.6f}：{}".format(score,i_db)
+                        key = "{:.6f}：{}：{}".format(score,i_db,i_db)
                     if key not in results[i_query]:
                         results[i_query][key] = score
                     #print("{} {}".format(i_query,key))
@@ -153,52 +153,6 @@ class IndexFaiss:
             print('\t'.join(out))
 
 
-    def Query2(self,file,file_str,k,min_score,skip_same_id,skip_query,do_eval):
-        tstart = timer()
-        if file == self.file_db:
-            query = self.db
-        else:
-            query = Infile(file, d=self.db.d, file_str=file_str)
-        D, I = self.index.search(query.vec, k)
-        assert len(D) == len(I)     #I[i,j] contains the index in db of the j-th closest sentence to the i-th sentence in query
-        assert len(D) == len(query) #D[i,j] contains the corresponding score
-        tend = timer()
-        sec_elapsed = (tend - tstart)
-        vecs_per_sec = len(I) / sec_elapsed
-        logging.info('processed readquery+search with {} vectors in {} sec [{:.2f} vecs/sec]'.format(len(I), sec_elapsed, vecs_per_sec))
-        
-        if do_eval:
-            n_ok = [0.0] * k
-
-        for i_query in range(len(I)): #for each sentence in query
-            ### to compute accuracy in case query is db
-            if do_eval:
-                for j in range(k):
-                    if i_query in I[i_query,0:j+1] and D[i_query,0] >= min_score: #if the same index 'i' (current index) is found int the j-best retrieved sentences
-                        n_ok[j] += 1.0
-            ### output
-            out = []
-            if not skip_query:
-                out.append(str(i_query+1))
-                if query.txts():
-                    out.append(query.txt[i_query])
-            for j in range(len(I[i_query])):
-                i_db = I[i_query,j]
-                score = D[i_query,j]
-                if score < min_score: ### skip
-                    continue
-                if skip_same_id and i_query == i_db: ### skip
-                    continue
-                out.append("{:.6f}：{}".format(score,i_db+1))
-                if self.db.txts():
-                    out.append(self.db.txt[i_db])
-            print('\t'.join(out))
-
-        if do_eval:
-            n_ok = ["{:.3f}".format(n/len(query)) for n in n_ok]
-            logging.info('Done k-best Acc = [{}] over {} examples'.format(', '.join(n_ok),len(query)))
-        else:
-            logging.info('Done over {} examples'.format(len(query)))
 
 
 if __name__ == '__main__':
