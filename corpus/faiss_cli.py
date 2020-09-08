@@ -108,7 +108,7 @@ class IndexFaiss:
         self.INDEX.append(index) 
         logging.info('Added DB with {} vectors ({} cells) in {} sec [{:.2f} vecs/sec]'.format(len(db.vec), db.d, sec_elapsed, vecs_per_sec))
 
-    def Query(self,my_query,query,k,min_score,skip_same_id):
+    def Query(self,my_query,query,k,min_score,skip_same_id,skip_perfect):
         results = []
         resultsUniq = []
         for _ in range(len(query)):
@@ -137,6 +137,8 @@ class IndexFaiss:
                     if score < min_score: ### skip
                         continue
                     if skip_same_id and i_query == i_db: ### skip
+                        continue
+                    if skip_perfect and score == 1.0: ### skip
                         continue
                     if curr_db.txts():
                         key = "{:.6f}：({},{})：({},{})：{}".format(score,my_query,i_query,my_db,i_db,curr_db.txt[i_db])
@@ -168,6 +170,7 @@ if __name__ == '__main__':
     k = 1
     min_score = 0.5
     skip_same_id = False
+    skip_perfect = False
     verbose = False
     log_file = None
     log_level = 'debug'
@@ -178,6 +181,7 @@ if __name__ == '__main__':
     -k            INT : k-best to retrieve (default 1)
     -min_score  FLOAT : minimum distance to accept a match (default 0.5) 
     -skip_same_id     : do not consider matchs with db_id == query_id (k+1 matchs retrieved)
+    -skip_perfect     : do not consider perfect matchs (k+1 matchs retrieved)
     -log_file    FILE : verbose output (default False)
     -log_level STRING : verbose output (default False)
     -h                : this help
@@ -217,6 +221,8 @@ All indexs start by 0
             log_level = sys.argv.pop(0)
         elif tok=="-skip_same_id":
             skip_same_id = True
+        elif tok=="-skip_perfect":
+            skip_perfect = True
         else:
             sys.stderr.write('error: unparsed {} option\n'.format(tok))
             sys.stderr.write("{}".format(usage))
@@ -232,7 +238,7 @@ All indexs start by 0
         logging.error('error: missing -fquery option')
         sys.exit()
 
-    if skip_same_id:
+    if skip_same_id or skip_perfect:
         k += 1
 
     logging.info('READING DBs')
@@ -244,7 +250,7 @@ All indexs start by 0
     logging.info('PROCESSING Queries')
     for i_query in range(len(fQUERY)):
         query = Infile(fQUERY[i_query], d=0, norm=True)
-        indexfaiss.Query(i_query,query,k,min_score,skip_same_id)
+        indexfaiss.Query(i_query,query,k,min_score,skip_same_id,skip_perfect)
 
 
 
