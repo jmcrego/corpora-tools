@@ -120,7 +120,7 @@ class IndexFaiss:
         for my_db in range(len(self.DB)):
             curr_db = self.DB[my_db]
             curr_index = self.INDEX[my_db]
-            logging.info('Querying {} over db={}'.format(query.file, curr_db.file))
+            logging.info('Query={} over db={}'.format(query.file, curr_db.file))
             tstart = timer()
             if skip_perfect or skip_same_id:
                 k += 1
