@@ -132,13 +132,13 @@ class IndexFaiss:
                         continue
                     if skip_same_id and i_query == i_db: ### skip
                         continue
-                    results[i_query][curr_db.txt[i_db]] = score
+                    txt = "{:.6f}：{}：{}：{}".format(score,j,i_db,curr_db.txt[i_db])
+                    results[i_query][txt] = score
 
         for i_query in range(len(results)):
             res = results[i_query]
             out = []
-            for txt, score in sorted(results[i_query].items(), key=lambda item: item[2], reverse=True):
-#            for txt, score in sorted(data.items(), lambda (k,v): v, reverse=True):
+            for txt, score in sorted(results[i_query].items(), key=lambda item: item[1], reverse=True):
                 out.append('{:.6f}：{}'.format(score,txt))
             print('\t'.join(out))
 
