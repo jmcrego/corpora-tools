@@ -139,11 +139,11 @@ class IndexFaiss:
         for i_query in range(len(results)):
             result = results[i_query] ### defaultdict
             out = []
-            for key, score in sorted(result.items(), key=lambda item: item[1], reverse=True):
-                out.append('{}'.format(key))
+            for key, _ in sorted(result.items(), key=lambda item: item[1], reverse=True):
+                out.append(key)
                 if len(out) >= k:
                     break
-            print('\t'.join(out))
+            print(i_query,'\t'.join(out))
 
 
     def Query2(self,file,file_str,k,min_score,skip_same_id,skip_query,do_eval):
