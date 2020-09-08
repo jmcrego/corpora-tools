@@ -127,13 +127,19 @@ class IndexFaiss:
                 for j in range(len(I[i_query])):
                     i_db = I[i_query,j]
                     score = D[i_query,j]
-                    print(score,i_db,curr_db.txt[i_db])
+                    #print(score,i_db,curr_db.txt[i_db])
                     if score < min_score: ### skip
                         continue
                     if skip_same_id and i_query == i_db: ### skip
                         continue
                     results[i_query][curr_db.txt[i_db]] = score
-        return results
+
+        for i_query in range(len(results)):
+            res = results[i_query]
+            out = []
+            for txt, score in sorted(data.items(), lambda (k,v): v, reverse=True):
+                out.append('{:.6f}：{}'.format(score,txt))
+            print('\t'.join(out))
 
 
     def Query2(self,file,file_str,k,min_score,skip_same_id,skip_query,do_eval):
