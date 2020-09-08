@@ -244,7 +244,7 @@ if __name__ == '__main__':
     for i_db in range(len(fdb)):
         fdb, fdb_str = fdb[i_db].split(',')
         db = Infile(fdb, fdb_str, d=0, norm=True)
-        indexdb.add_db(IndexFaiss(fdb))
+        indexfaiss.add_db(db)
 
     logging.info('PROCESSING Queries')
     for i_query in range(len(fquery)):
