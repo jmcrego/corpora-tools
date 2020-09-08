@@ -134,6 +134,8 @@ class IndexFaiss:
                         continue
                     txt = "{:.6f}：{}：{}：{}".format(score,j,i_db,curr_db.txt[i_db])
                     results[i_query][txt] = score
+                    if j >= k:
+                        break
 
         for i_query in range(len(results)):
             res = results[i_query]
