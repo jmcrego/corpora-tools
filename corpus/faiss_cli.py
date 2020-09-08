@@ -149,8 +149,8 @@ class IndexFaiss:
                     if len(results[n_query]) >= k:
                         break
 
-        logging.info('Building results in {}'.format(fout))
         if tag is not None:
+            logging.info('Building results in {}'.format(fin+'.'+tag))
             F = open(fin+'.'+tag,"w") 
 
         for n_query in range(len(results)):
