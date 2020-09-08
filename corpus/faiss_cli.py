@@ -45,8 +45,9 @@ class Infile:
                 self.d = len(l)
             self.vec.append(l)
 
-        logging.info('Read {} vectors ({} cells) from {}'.format(len(self.vec),self.d,self.file))
         self.vec = np.array(self.vec).astype('float32')
+
+        logging.info('Read {} vectors ({} cells) from {}'.format(len(self.vec),self.d,self.file))
 
         if norm:
             faiss.normalize_L2(self.vec)
@@ -59,7 +60,8 @@ class Infile:
 
         for l in f:
             self.txt.append(l.rstrip())
-        logging.info('Read {} strings in {}'.format(len(self.txt),file_str))
+
+        logging.info('Read {} strings from {}'.format(len(self.txt),file_str))
 
         if len(self.txt) != len(self.vec):
             logging.error('diff num of entries {} <> {} in files {} and {}'.format(len(self.vec),len(self.txt),file, file_str))
@@ -175,8 +177,8 @@ class IndexFaiss:
 
 if __name__ == '__main__':
 
-    fdb = []
-    fquery = []
+    fDB = []
+    fQUERY = []
     k = 1
     min_score = 0.5
     skip_same_id = False
@@ -208,9 +210,9 @@ if __name__ == '__main__':
         elif tok=="-v":
             verbose = True
         elif tok=="-db" and len(sys.argv):
-            fdb.append(sys.argv.pop(0))
+            fDB.append(sys.argv.pop(0))
         elif tok=="-query" and len(sys.argv):
-            fquery.append(sys.argv.pop(0))
+            fQUERY.append(sys.argv.pop(0))
         elif tok=="-k" and len(sys.argv):
             k = int(sys.argv.pop(0))
         elif tok=="-min_score" and len(sys.argv):
@@ -232,27 +234,28 @@ if __name__ == '__main__':
 
     create_logger(log_file,log_level)
 
-    if len(fdb) == 0:
+    if len(fDB) == 0:
         logging.error('error: missing -fdb option')
         sys.exit()
 
-    if len(fquery) == 0:
+    if len(fQUERY) == 0:
         logging.error('error: missing -fquery option')
         sys.exit()
 
     logging.info('READING DBs')
     indexfaiss = IndexFaiss()
-    for i_db in range(len(fdb)):
-        fdb, fdb_str = fdb[i_db].split(',')
+    for i_db in range(len(fDB)):
+        fdb, fdb_str = fDB[i_db].split(',')
         db = Infile(fdb, fdb_str, d=0, norm=True)
         indexfaiss.add_db(db)
 
     logging.info('PROCESSING Queries')
-    for i_query in range(len(fquery)):
+    for i_query in range(len(fQUERY)):
         if skip_same_id:
             k += 1
-        for i_db in range(len(fdb)):
-            indexdb[i_db].Query(fquery[i_query],fquery_str[i_query],k,min_score,skip_same_id)
+        fquery, fquery_str = fQUERY[i_query].split(',')
+        query = Infile(fquery, fquery_str, d=0, norm=True)
+        indexfaiss.Query(query,k,min_score,skip_same_id)
 
 
 
