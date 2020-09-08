@@ -168,12 +168,11 @@ if __name__ == '__main__':
     k = 1
     min_score = 0.0
     max_score = 1.0
-    skip_perfect = False
     verbose = False
     log_file = None
     log_level = 'debug'
     name = sys.argv.pop(0)
-    usage = '''usage: {} [-db FILE[,FILE]]+ [-query FILE]+ [-k INT] [-skip_same_id] [-log_file FILE] [-log_level STRING]
+    usage = '''usage: {} [-db FILE[,FILE]]+ [-query FILE]+ [-k INT] [-min_score FLOAT] [-max_score FLOAT] [-log_file FILE] [-log_level STRING]
     -db     FILE,FILE : db files with vectors/strings (strings are not needed)
     -query       FILE : query files with vectors
     -k            INT : k-best to retrieve (default 1)
