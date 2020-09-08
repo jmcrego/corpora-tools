@@ -139,7 +139,7 @@ class IndexFaiss:
                         txt = curr_db.txt[i_db]
                     else:
                         txt = str(i_db)
-                    key = "{:.6f}：query={}：db={}：{}".format(score,my_query,my_db,txt)
+                    key = "{:.6f}：queryFile={}：dbFile={}：{}".format(score,my_query,my_db,txt)
                     if key not in results[i_query]:
                         results[i_query][key] = score
                     #print("{} {}".format(i_query,key))
