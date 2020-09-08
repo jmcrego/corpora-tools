@@ -120,7 +120,7 @@ class IndexFaiss:
         for i_db in range(len(self.DB)):
             curr_db = self.DB[i_db]
             curr_index = self.INDEX[i_db]
-            logging.info('Query={} over db={}'.format(query.file, curr_db.file))
+            logging.info('\t\tQuery={} over db={}'.format(query.file, curr_db.file))
             tstart = timer()
             D, I = curr_index.search(query.vec, k+5) ### retrieve more tha k in case the first are filtered out by (min_score, max_score)
             assert len(D) == len(I)     #I[i,j] contains the index in db of the j-th closest sentence to the i-th sentence in query
@@ -128,8 +128,7 @@ class IndexFaiss:
             tend = timer()
             sec_elapsed = (tend - tstart)
             vecs_per_sec = len(I) / sec_elapsed
-            logging.info('\t\tFound results in {} sec [{:.2f} vecs/sec]'.format(sec_elapsed, vecs_per_sec))
-
+            logging.info('Found results in {} sec [{:.2f} vecs/sec]'.format(sec_elapsed, vecs_per_sec))
             for n_query in range(len(I)): #for each sentence in query, retrieve the k-closest
                 for j in range(len(I[n_query])):
                     n_db = I[n_query,j]
