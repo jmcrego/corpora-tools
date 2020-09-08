@@ -69,7 +69,7 @@ class Infile:
             for l in f:
                 self.txt.append(l.rstrip())
 
-            logging.info('\tRead strings')
+            logging.info('\tRead strings from {}'.format(self.file_str))
 
             if len(self.txt) != len(self.vec):
                 logging.error('diff num of entries {} <> {} in files {} and {}'.format(len(self.vec),len(self.txt), self.file, self.file_str))
