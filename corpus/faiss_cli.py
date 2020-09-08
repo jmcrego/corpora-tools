@@ -82,26 +82,27 @@ class Infile:
 class IndexFaiss:
 
     def __init__(self):
-        self.db = []
-        self.index = []
+        self.DB = []
+        self.INDEX = []
 
     def add_db(self, db):
         #file is the name of the file
         #db is the Infile containing the file
         tstart = timer()
-        self.db.append(db)
-        self.index.append(faiss.IndexFlatIP(db.d)) #inner product (needs L2 normalization over db and query vectors)
-        self.index.add(db.vec)                     #add all normalized vectors to the index
+        index = faiss.IndexFlatIP(db.d) #inner product (needs L2 normalization over db and query vectors)
+        index.add(db.vec)               #add all normalized vectors to the index
         tend = timer()
-        sec_elapsed = (tend - tstart)
-        vecs_per_sec = len(self.db.vec) / sec_elapsed
+        sec_elapsed = tend - tstart
+        vecs_per_sec = len(db.vec) / sec_elapsed
+        self.DB.append(db)
+        self.INDEX.append(index) 
         logging.info('Added DB with {} vectors ({} cells) in {} sec [{:.2f} vecs/sec]'.format(len(db.vec), db.d, sec_elapsed, vecs_per_sec))
 
     def Query(self,query,k,min_score,skip_same_id):
         results = [defaultdict(float)] * len(query) ### each query input string has associated a dictionary (string => score)
-        for i_db in range(len(self.db)):
-            curr_db = self.db[i_db]
-            curr_index = self.index[i_db]
+        for i_db in range(len(self.DB)):
+            curr_db = self.DB[i_db]
+            curr_index = self.INDEX[i_db]
             logging.info('Querying {} over {}'.format(query.file, curr_db.file))
             tstart = timer()
             D, I = curr_index.search(query.vec, k)
