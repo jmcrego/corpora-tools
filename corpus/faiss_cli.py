@@ -138,12 +138,14 @@ class IndexFaiss:
                 for j in range(len(I[i_query])):
                     i_db = I[i_query,j]
                     score = D[i_query,j]
+                    print(score,skip_perfect)
                     if score < min_score: ### skip
                         continue
                     if skip_same_id and i_query == i_db: ### skip
                         continue
                     if skip_perfect and score == 1.0: ### skip
                         continue
+                    print('ok')
                     if curr_db.txts():
                         key = "{:.6f}：({},{})：({},{})：{}".format(score,my_query,i_query,my_db,i_db,curr_db.txt[i_db])
                         txt = curr_db.txt[i_db]
