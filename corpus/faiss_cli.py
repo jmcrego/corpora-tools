@@ -108,7 +108,7 @@ class IndexFaiss:
         self.INDEX.append(index) 
         logging.info('Added DB with {} vectors ({} cells) in {} sec [{:.2f} vecs/sec]'.format(len(db.vec), db.d, sec_elapsed, vecs_per_sec))
 
-    def Query(self,query,k,min_score,skip_same_id):
+    def Query(self,j_query,query,k,min_score,skip_same_id):
         results = []
         for _ in range(len(query)):
             d = defaultdict(float)
@@ -136,9 +136,10 @@ class IndexFaiss:
                     if skip_same_id and i_query == i_db: ### skip
                         continue
                     if curr_db.txts():
-                        key = "{:.6f}：{}：{}".format(score,i,curr_db.txt[i_db])
+                        txt = curr_db.txt[i_db]
                     else:
-                        key = "{:.6f}：{}：{}".format(score,i,i_db)
+                        txt = str(i_db)
+                    key = "{:.6f}：{}：{}：{}".format(score,j_query,i,txt)
                     if key not in results[i_query]:
                         results[i_query][key] = score
                     #print("{} {}".format(i_query,key))
@@ -162,23 +163,20 @@ if __name__ == '__main__':
     k = 1
     min_score = 0.5
     skip_same_id = False
-    skip_query = False
-    do_eval = False
     verbose = False
     log_file = None
     log_level = 'debug'
     name = sys.argv.pop(0)
-    usage = '''usage: {} -db FILE -query FILE [-db_str FILE] [-query_str FILE] [-d INT] [-k INT] [-skip_same_id] [-skip_query] [-log_file FILE] [-log_level STRING]
+    usage = '''usage: {} [-db FILE[,FILE]]+ [-query FILE[,FILE]]+ [-k INT] [-skip_same_id] [-log_file FILE] [-log_level STRING]
     -db     FILE,FILE : db files with vectors/strings
     -query  FILE,FILE : query files with vectors/strings
     -k            INT : k-best to retrieve (default 1)
     -min_score  FLOAT : minimum distance to accept a match (default 0.5) 
     -skip_same_id     : do not consider matchs with db_id == query_id (k+1 matchs retrieved)
-    -skip_query       : do not output query columns (query_index [query_str])
-    -do_eval          : run evaluation (query_index == db_index)
     -log_file    FILE : verbose output (default False)
     -log_level STRING : verbose output (default False)
     -h                : this help
+All indexs start by 0
 '''.format(name)
 
 
@@ -203,10 +201,6 @@ if __name__ == '__main__':
             log_level = sys.argv.pop(0)
         elif tok=="-skip_same_id":
             skip_same_id = True
-        elif tok=="-do_eval":
-            do_eval = True
-        elif tok=="-skip_query":
-            skip_query = True
         else:
             sys.stderr.write('error: unparsed {} option\n'.format(tok))
             sys.stderr.write("{}".format(usage))
@@ -234,7 +228,7 @@ if __name__ == '__main__':
     logging.info('PROCESSING Queries')
     for i_query in range(len(fQUERY)):
         query = Infile(fQUERY[i_query], d=0, norm=True)
-        indexfaiss.Query(query,k,min_score,skip_same_id)
+        indexfaiss.Query(i_query,query,k,min_score,skip_same_id)
 
 
 
