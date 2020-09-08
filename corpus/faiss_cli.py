@@ -114,9 +114,9 @@ class IndexFaiss:
             d = defaultdict(float)
             results.append(d)
 
-        for i_db in range(len(self.DB)):
-            curr_db = self.DB[i_db]
-            curr_index = self.INDEX[i_db]
+        for i in range(len(self.DB)):
+            curr_db = self.DB[i]
+            curr_index = self.INDEX[i]
             logging.info('Querying {} over {}'.format(query.file, curr_db.file))
             tstart = timer()
             D, I = curr_index.search(query.vec, k)
@@ -136,9 +136,9 @@ class IndexFaiss:
                     if skip_same_id and i_query == i_db: ### skip
                         continue
                     if curr_db.txts():
-                        key = "{:.6f}：{}：{}".format(score,i_db,curr_db.txt[i_db])
+                        key = "{:.6f}：{}：{}".format(score,i,curr_db.txt[i_db])
                     else:
-                        key = "{:.6f}：{}：{}".format(score,i_db,i_db)
+                        key = "{:.6f}：{}：{}".format(score,i,i_db)
                     if key not in results[i_query]:
                         results[i_query][key] = score
                     #print("{} {}".format(i_query,key))
