@@ -59,7 +59,8 @@ if __name__ == '__main__':
             sys.exit()
 
     create_logger()
-            
+    t.build_tokenizer()
+    
     if fin is not None and fout is not None:
         logging.info('Reading {} writing {}'.format(fin,fout))
         t.tokenize_file(fin, fout, num_threads)
