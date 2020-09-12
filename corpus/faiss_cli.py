@@ -51,13 +51,12 @@ class Infile:
 
         for i in range(len(self.vecs)):
             self.vecs[i] = np.array(self.vecs[i]).astype('float32')
-            logging.info('\t\tCreated float32 array on chunk {}'.format(i))
+            logging.info('\t\tBuilt float32 array for chunk {}'.format(i))
+            if norm:
+                faiss.normalize_L2(self.vecs[i])
+                logging.info('\t\t(normalized)')
 
         sys.exit()
-
-        if norm:
-            faiss.normalize_L2(self.vec)
-            logging.info('\t\tVectors normalized')
 
         if self.file_str is not None:
 
