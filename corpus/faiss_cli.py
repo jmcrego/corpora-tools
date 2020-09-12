@@ -83,7 +83,9 @@ class IndexFaiss:
         logging.info('Indexed DB with {} vectors ({} cells) over {} chunks in {} sec [{:.2f} vecs/sec]'.format(len(self.db.vec), self.db.d, len(self.db.vecs), sec_elapsed, vecs_per_sec))
 
     def Query(self,query,k_best):
-        query_results = [defaultdict(float)] * len(query.vec) ### list of dicts (one dict for each line in this query file)
+        query_results = [] ### list of dicts (one dict for each line in this query file)
+        for _ in range(len(query.vec)):
+            query_results.append(defaultdict(float))
 
         for i_query in range(len(query.vecs)): #### chunk in query
             for i_db in range(len(self.indexs)): #### chunk in db
@@ -105,7 +107,7 @@ class IndexFaiss:
                         n_db = I[n,j] + (i_db * self.db.max_vec)
                         score = D[n,j]
                         query_results[n_query][n_db] = score
-                        print('inserted n_query={} len={}'.format(n_query,len(query_results[n_query])))
+                        #print('inserted n_query={} len={}'.format(n_query,len(query_results[n_query])))
                         if len(query_results[n_query]) >= k_best:
                             break
 
