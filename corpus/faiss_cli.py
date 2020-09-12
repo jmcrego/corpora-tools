@@ -210,14 +210,16 @@ All indexs start by 0
             for result in results: ### one line per query line
                 print(result)
                 sys.exit()
-                out = []
+                res = []
                 for n_query, score in sorted(result.items(), key=lambda item: item[1], reverse=True):
-                    if score >= min_score and score <= max_score:
-                        out.append("{:.6f}".format(score))
-                        out.append(str(n_query))
-                        if len(out) >= k*2:
-                            break
-                fout.write('\t'.join(out) + '\n')
+                    if score < min_score:
+                        break
+                    if score > max_score:
+                        continue
+                    res.append("{:.6f}\t{}".format(score,n_query))
+                    if len(res) >= k:
+                        break
+                fout.write('\t'.join(res) + '\n')
         logging.info('Done')
  
 
