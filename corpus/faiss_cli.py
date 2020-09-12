@@ -38,12 +38,11 @@ class Infile:
 
         for l in f:
             l = l.rstrip().split(' ')
-            if self.d > 0:
-                if len(l) != self.d:
-                    logging.error('found a vector with {} cells instead of {} in line {} of file {}'.format(len(l),self.d,len(vec)+1,self.file))
-                    sys.exit()
-            else:
+            if self.d == 0:
                 self.d = len(l)
+            if len(l) != self.d:
+                logging.error('found a vector with {} cells instead of {} in line {} of file {}'.format(len(l),self.d,len(vec)+1,self.file))
+                sys.exit()
             vec.append(l)
 
         logging.info('\t\tRead {} vectors ({} cells) from {}'.format(len(self.vec),self.d,self.file))
@@ -246,7 +245,7 @@ All indexs start by 0
         logging.error('error: missing -tag option')
         sys.exit()
 
-    logging.info('READING DBs')
+    logging.info('READING DB')
     indexfaiss = IndexFaiss()
     db = Infile(fDB, d=0, norm=True)
     indexfaiss.add_db(db)
