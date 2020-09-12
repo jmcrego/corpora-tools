@@ -105,7 +105,7 @@ class IndexFaiss:
                         n_db = I[n,j] + (i_db * self.db.max_vec)
                         score = D[n,j]
                         query_results[n_query][n_db] = score
-                        print('inserted n_query={} len={}'.format(n_query),len(query_results[n_query]))
+                        print('inserted n_query={} len={}'.format(n_query,len(query_results[n_query])))
                         if len(query_results[n_query]) >= k_best:
                             break
 
