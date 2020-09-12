@@ -45,9 +45,11 @@ class Infile:
                 sys.exit()
             vec.append(l)
 
-        logging.info('\t\tRead {} vectors ({} cells) from {}'.format(len(self.vec),self.d,self.file))
+        logging.info('\t\tRead {} vectors ({} cells) from {}'.format(len(vec),self.d,self.file))
 
-        self.vec = np.array(self.vec).astype('float32')
+        sys.exit()
+
+        vec = np.array(vec).astype('float32')
         logging.info('\t\tCreated float32 array')
 
         if norm:
