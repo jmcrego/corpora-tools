@@ -30,7 +30,7 @@ class Infile:
 
         self.file = file
         self.d = d     ### will contain length of vectors
-        vec = []      ### list with vectors found in file
+        self.vec = []  ### list with all vectors found in file
 
         if self.file.endswith('.gz'): 
             f = gzip.open(self.file, 'rt')
@@ -42,37 +42,20 @@ class Infile:
             if self.d == 0:
                 self.d = len(l)
             if len(l) != self.d:
-                logging.error('found a vector with {} cells instead of {} in line {} of file {}'.format(len(l),self.d,len(vec)+1,self.file))
+                logging.error('found a vector with {} cells instead of {} in line {} of file {}'.format(len(l),self.d,len(self.vec)+1,self.file))
                 sys.exit()
-            vec.append(l)
+            self.vec.append(l)
 
-        self.vecs = [vec[i: i+max_vec] for i in range(0, len(vec), max_vec)]
-        logging.info('\t\tRead {} vectors ({} cells) into {} chunks'.format(len(vec),self.d,len(self.vecs)))
+        self.vecs = [self.vec[i: i+max_vec] for i in range(0, len(self.vec), max_vec)]
+        logging.info('\t\tRead {} vectors ({} cells) into {} chunks'.format(len(self.vec),self.d,len(self.vecs)))
 
         for i in range(len(self.vecs)):
             self.vecs[i] = np.array(self.vecs[i]).astype('float32')
             logging.info('\t\tBuilt float32 array for chunk {}'.format(i))
             if norm:
                 faiss.normalize_L2(self.vecs[i])
-                logging.info('\t\t(normalized)')
+                logging.info('\t\t\t(normalized)')
 
-        sys.exit()
-
-        if self.file_str is not None:
-
-            if self.file_str.endswith('.gz'): 
-                f = gzip.open(self.file_str, 'rt')
-            else:
-                f = io.open(self.file_str, 'r', encoding='utf-8', newline='\n', errors='ignore')
-
-            for l in f:
-                self.txt.append(l.rstrip())
-
-            logging.info('\t\tRead strings from {}'.format(self.file_str))
-
-            if len(self.txt) != len(self.vec):
-                logging.error('diff num of entries {} <> {} in files {} and {}'.format(len(self.vec),len(self.txt), self.file, self.file_str))
-                sys.exit()
 
     def __len__(self):
         return len(self.vec)
@@ -80,32 +63,25 @@ class Infile:
     def nvectors():
         return len(self.vec)
 
-    def ncells():
-        return len(self.d)
-
-    def txts(self):
-        return len(self.txt)>0
-
 
 
 class IndexFaiss:
 
-    def __init__(self):
-        self.DB = []
-        self.INDEX = []
-
-    def add_db(self, db):
+    def __init__(self, db):
+        self.db = db
+        self.index = []
         #file is the name of the file
         #db is the Infile containing the file
+        indexs = []
         tstart = timer()
-        index = faiss.IndexFlatIP(db.d) #inner product (needs L2 normalization over db and query vectors)
-        index.add(db.vec)               #add all normalized vectors to the index
+        for i in len(db.vecs): #we use n different indexs (one for each db chunk)
+            index = faiss.IndexFlatIP(db.d) #inner product (needs L2 normalization over db and query vectors)
+            index.add(db.vecs[i])           #add all normalized vectors to the index
+            self.index.append(index) 
         tend = timer()
         sec_elapsed = tend - tstart
         vecs_per_sec = len(db.vec) / sec_elapsed
-        self.DB.append(db)
-        self.INDEX.append(index) 
-        logging.info('Indexed DB with {} vectors ({} cells) in {} sec [{:.2f} vecs/sec]'.format(len(db.vec), db.d, sec_elapsed, vecs_per_sec))
+        logging.info('Indexed DB with {} vectors ({} cells) over {} chunks in {} sec [{:.2f} vecs/sec]'.format(len(db.vec), db.d, len(db.vecs), sec_elapsed, vecs_per_sec))
 
     def Query(self,i_query,query,k,min_score,max_score,fin,tag):
         results = []
@@ -253,9 +229,7 @@ All indexs start by 0
         logging.error('error: missing -tag option')
         sys.exit()
 
-    indexfaiss = IndexFaiss()
-    db = Infile(fDB, d=0, norm=True, max_vec=max_vec)
-    indexfaiss.add_db(db)
+    indexfaiss = IndexFaiss(Infile(fDB, d=0, norm=True, max_vec=max_vec))
 
     logging.info('PROCESSING Queries')
     for i_query in range(len(fQUERY)):
