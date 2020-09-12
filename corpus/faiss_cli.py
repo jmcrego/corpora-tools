@@ -195,11 +195,9 @@ All indexs start by 0
         logging.error('error: missing -tag option')
         sys.exit()
 
-    tstart = timer()
     indexfaiss = IndexFaiss(Infile(fdb, d=0, norm=True, max_vec=max_vec))
 
     for fquery in fqueries:
-        tstart = timer()
         query = Infile(fquery, d=0, norm=True, max_vec=max_vec)
         results = indexfaiss.Query(query,k)
         logging.info('\t\tDumping {}-bests in {}'.format(k,fquery+'.'+tag))
@@ -215,10 +213,7 @@ All indexs start by 0
                     if len(res) >= k:
                         break
                 fout.write('\t'.join(res) + '\n')
-        tend = timer()
-        sec_elapsed = tend - tstart
-        vecs_per_sec = len(indexfaiss.db.vec) / sec_elapsed
-        logging.info('Retrieved query with {} vectors in {} sec [{:.2f} vecs/sec]'.format(len(query.vec), sec_elapsed, vecs_per_sec))
+        #logging.info('Retrieved query with {} vectors in {} sec [{:.2f} vecs/sec]'.format(len(query.vec), sec_elapsed, vecs_per_sec))
 
     logging.info('Done')
  
