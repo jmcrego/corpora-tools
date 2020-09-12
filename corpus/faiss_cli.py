@@ -143,7 +143,7 @@ class IndexFaiss:
                             continue
                         resultsUniq[n_query].add(txt)
                     else:
-                        key = "{:.6f}：({},{})：({},{})".format(score,i_query,n_query,n_db,n_db)
+                        key = "{:.6f}：({},{})：({},{})".format(score,i_query,n_query,i_db,n_db)
                     results[n_query][key] = score
                     #print("{} {}".format(n_query,key))
                     if len(results[n_query]) >= k:
