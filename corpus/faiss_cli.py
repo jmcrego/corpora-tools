@@ -70,31 +70,49 @@ class IndexFaiss:
 
     def __init__(self, db):
         self.db = db #infile containing the db
-        self.index = []
-        indexs = []
+        self.indexs = []
         tstart = timer()
         for i in range(len(self.db.vecs)): #we use n different indexs (one for each db chunk)
             index = faiss.IndexFlatIP(self.db.d) #inner product (needs L2 normalization over db and query vectors)
             index.add(self.db.vecs[i]) #add all normalized vectors to the index
-            self.index.append(index) 
+            self.indexs.append(index) 
         tend = timer()
         sec_elapsed = tend - tstart
         vecs_per_sec = len(db.vec) / sec_elapsed
         logging.info('Indexed DB with {} vectors ({} cells) over {} chunks in {} sec [{:.2f} vecs/sec]'.format(len(self.db.vec), self.db.d, len(self.db.vecs), sec_elapsed, vecs_per_sec))
 
-    def Query(self,i_query,query,k,min_score,max_score,fin,tag):
-        results = []
-        resultsUniq = []
-        for _ in range(len(query)):
-            d = defaultdict(float)
-            results.append(d)
-            duniq = set()
-            resultsUniq.append(duniq) #for a fast access to strings presents in resultsUniq[i]
+    def Query(self,query,k):
+        query_results = []
 
-        for i_db in range(len(self.DB)):
-            curr_db = self.DB[i_db]
-            curr_index = self.INDEX[i_db]
-            logging.info('\t\tQuery={} over db={}'.format(query.file, curr_db.file))
+        for i_query in range(len(query.vecs)): #### chunk in query
+            for i_db in range(len(self.indexs)): #### chunk in db
+
+                curr_db_index = self.indexs[i_db]
+                curr_query_vecs = query.vecs[i_query]
+                tstart = timer()
+                D, I = curr_db_index.search(curr_query_vecs, k+2) ### retrieve more than k in case the first are filtered out by max_score
+                assert len(D) == len(I)               #I[i,j] contains the index in db of the j-th closest sentence to the i-th sentence in query
+                assert len(D) == len(curr_query_vecs) #D[i,j] contains the corresponding score
+                tend = timer()
+                sec_elapsed = (tend - tstart)
+                vecs_per_sec = len(I) / sec_elapsed
+                logging.info('Found results chunks [query={},db={}] in {} sec [{:.2f} vecs/sec]'.format(i_query, i_db, sec_elapsed, vecs_per_sec))
+
+                for n_query in range(len(I)): #for each sentence in query, retrieve the k-closest
+                    for j in range(len(I[n_query])):
+                        n_db = I[n_query,j] + (i_db * len(self.indexs[0]))
+                        score = D[n_query,j]
+                        query_results[n_query][n_db] = score
+                        if len(query_results[n_query]) >= k:
+                            break
+
+        return query_results
+
+
+
+        for i_index in range(len(self.indexs)):
+            curr_index = self.indexs[i_index]
+            logging.info('\t\tQuery={} over chunk={}'.format(query.file, i_index))
             tstart = timer()
             D, I = curr_index.search(query.vec, k+5) ### retrieve more tha k in case the first are filtered out by (min_score, max_score)
             assert len(D) == len(I)     #I[i,j] contains the index in db of the j-th closest sentence to the i-th sentence in query
@@ -122,31 +140,12 @@ class IndexFaiss:
                     if len(results[n_query]) >= k:
                         break
 
-        if tag is not None:
-            logging.info('Building results in {}'.format(fin+'.'+tag))
-            F = open(fin+'.'+tag,"w") 
-
-        for n_query in range(len(results)):
-            result = results[n_query] ### defaultdict
-            out = []
-            for key, _ in sorted(result.items(), key=lambda item: item[1], reverse=True):
-                out.append(key)
-                if len(out) >= k:
-                    break
-            if tag is not None:
-                F.write('\t'.join(out) + '\n')
-            else:
-                print('\t'.join(out))
-
-        if tag is not None:
-            F.close()
-
 
 
 if __name__ == '__main__':
 
-    fDB = None
-    fQUERY = []
+    fdb = None
+    fqueries = []
     k = 1
     min_score = 0.0
     max_score = 1.0
@@ -192,9 +191,9 @@ All indexs start by 0
         elif tok=="-v":
             verbose = True
         elif tok=="-db" and len(sys.argv):
-            fDB = sys.argv.pop(0)
+            fdb = sys.argv.pop(0)
         elif tok=="-query" and len(sys.argv):
-            fQUERY.append(sys.argv.pop(0))
+            fqueries.append(sys.argv.pop(0))
         elif tok=="-k" and len(sys.argv):
             k = int(sys.argv.pop(0))
         elif tok=="-max_vec" and len(sys.argv):
@@ -216,25 +215,34 @@ All indexs start by 0
 
     create_logger(log_file,log_level)
 
-    if fDB is None:
-        logging.error('error: missing -fdb option')
+    if fdb is None:
+        logging.error('error: missing -db option')
         sys.exit()
 
-    if len(fQUERY) == 0:
-        logging.error('error: missing -fquery option')
+    if len(fqueries) == 0:
+        logging.error('error: missing -query option')
         sys.exit()
 
     if tag is None:
         logging.error('error: missing -tag option')
         sys.exit()
 
-    indexfaiss = IndexFaiss(Infile(fDB, d=0, norm=True, max_vec=max_vec))
+    indexfaiss = IndexFaiss(Infile(fdb, d=0, norm=True, max_vec=max_vec))
 
-    logging.info('PROCESSING Queries')
-    for i_query in range(len(fQUERY)):
-        query = Infile(fQUERY[i_query], d=0, norm=True, max_vec=max_vec)
-        indexfaiss.Query(i_query,query,k,min_score,max_score,fQUERY[i_query],tag)
-
+    for fquery in range(len(fqueries)):
+        query = Infile(fquery, d=0, norm=True, max_vec=max_vec)
+        results = indexfaiss.Query(query,k)
+        #logging.info('Building results in {}'.format(fquery+'.'+tag))
+        with open(fquery+'.'+tag, "w") as fout:
+            for result in results: ### one line per query line
+                out = []
+                for key, score in sorted(result.items(), key=lambda item: item[1], reverse=True):
+                    if score >= min_score and score <= max_score:
+                        out.append(score)
+                        out.append(key)
+                        if len(out) >= k*2:
+                            break
+                fout.write('\t'.join(out) + '\n')
 
 
 
