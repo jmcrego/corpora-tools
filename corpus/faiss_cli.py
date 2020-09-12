@@ -31,6 +31,7 @@ class Infile:
         self.file = file
         self.d = d     ### will contain length of vectors
         self.vec = []  ### list with all vectors found in file
+        self.max_vec = max_vec
 
         if self.file.endswith('.gz'): 
             f = gzip.open(self.file, 'rt')
@@ -46,10 +47,10 @@ class Infile:
                 sys.exit()
             self.vec.append(l)
 
-        if max_vec == 0:
+        if self.max_vec == 0:
             self.vecs = [self.vec]
         else:
-            self.vecs = [self.vec[i: i+max_vec] for i in range(0, len(self.vec), max_vec)]
+            self.vecs = [self.vec[i: i+self.max_vec] for i in range(0, len(self.vec), self.max_vec)]
         logging.info('\t\tRead {} vectors into {} chunks ({} cells)'.format(len(self.vec),len(self.vecs),self.d))
 
         for i in range(len(self.vecs)):
@@ -99,47 +100,15 @@ class IndexFaiss:
                 logging.info('Found results chunks [query={},db={}] in {} sec [{:.2f} vecs/sec]'.format(i_query, i_db, sec_elapsed, vecs_per_sec))
 
                 for n in range(len(I)): #for each sentence in this query chunk, retrieve the k-closest
-                    n_query = n + (i_query * len(query.vecs[0]))
+                    n_query = n + (i_query * len(query.max_vec))
                     for j in range(len(I[n])): ### for each result of this sentence
-                        n_db = I[n,j] + (i_db * len(self.db.vecs[0]))
+                        n_db = I[n,j] + (i_db * len(self.db.max_vec))
                         score = D[n,j]
                         query_results[n_query][n_db] = score
                         if len(query_results[n_query]) >= k:
                             break
 
         return query_results
-
-
-
-        for i_index in range(len(self.indexs)):
-            curr_index = self.indexs[i_index]
-            logging.info('\t\tQuery={} over chunk={}'.format(query.file, i_index))
-            tstart = timer()
-            D, I = curr_index.search(query.vec, k+5) ### retrieve more tha k in case the first are filtered out by (min_score, max_score)
-            assert len(D) == len(I)     #I[i,j] contains the index in db of the j-th closest sentence to the i-th sentence in query
-            assert len(D) == len(query) #D[i,j] contains the corresponding score
-            tend = timer()
-            sec_elapsed = (tend - tstart)
-            vecs_per_sec = len(I) / sec_elapsed
-            logging.info('Found results in {} sec [{:.2f} vecs/sec]'.format(sec_elapsed, vecs_per_sec))
-            for n_query in range(len(I)): #for each sentence in query, retrieve the k-closest
-                for j in range(len(I[n_query])):
-                    n_db = I[n_query,j]
-                    score = D[n_query,j]
-                    if score < min_score or score > max_score: ### skip
-                        continue
-                    if curr_db.txts():
-                        key = "{:.6f}：({},{})：({},{})：{}".format(score,i_query,n_query,i_db,n_db,curr_db.txt[n_db])
-                        txt = curr_db.txt[n_db]
-                        if txt in resultsUniq[n_query]:
-                            continue
-                        resultsUniq[n_query].add(txt)
-                    else:
-                        key = "{:.6f}：({},{})：({},{})".format(score,i_query,n_query,i_db,n_db)
-                    results[n_query][key] = score
-                    #print("{} {}".format(n_query,key))
-                    if len(results[n_query]) >= k:
-                        break
 
 
 
