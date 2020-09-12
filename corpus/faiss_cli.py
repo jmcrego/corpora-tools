@@ -202,9 +202,11 @@ All indexs start by 0
     for fquery in fqueries:
         query = Infile(fquery, d=0, norm=True, max_vec=max_vec)
         results = indexfaiss.Query(query,k)
-        #logging.info('Building results in {}'.format(fquery+'.'+tag))
+        logging.info('Dumping {} k-best in {}'.format(len(results),fquery+'.'+tag))
         with open(fquery+'.'+tag, "w") as fout:
             for result in results: ### one line per query line
+                print(result)
+                sys.exit()
                 out = []
                 for n_query, score in sorted(result.items(), key=lambda item: item[1], reverse=True):
                     if score >= min_score and score <= max_score:
@@ -213,7 +215,8 @@ All indexs start by 0
                         if len(out) >= k*2:
                             break
                 fout.write('\t'.join(out) + '\n')
-
+        logging.info('Done')
+ 
 
 
 
