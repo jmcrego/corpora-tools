@@ -47,12 +47,12 @@ class Infile:
 
         self.vecs = [vec[i: i+max_vec] for i in range(0, len(vec), max_vec)]
 
-        logging.info('\t\tRead {} vectors ({} cells) into {} chunks from {}'.format(len(vec),self.d,len(self.vecs),self.file))
+        logging.info('Read {} vectors ({} cells) into {} chunks from {}'.format(len(vec),self.d,len(self.vecs),self.file))
+
+        self.vec = np.array(self.vecs).astype('float32')
+        logging.info('\t\tCreated float32 array')
 
         sys.exit()
-
-        vec = np.array(vec).astype('float32')
-        logging.info('\t\tCreated float32 array')
 
         if norm:
             faiss.normalize_L2(self.vec)
@@ -253,7 +253,6 @@ All indexs start by 0
         logging.error('error: missing -tag option')
         sys.exit()
 
-    logging.info('READING DB')
     indexfaiss = IndexFaiss()
     db = Infile(fDB, d=0, norm=True, max_vec=max_vec)
     indexfaiss.add_db(db)
