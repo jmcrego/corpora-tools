@@ -100,9 +100,9 @@ class IndexFaiss:
                 logging.info('Found results chunks [query={},db={}] in {} sec [{:.2f} vecs/sec]'.format(i_query, i_db, sec_elapsed, vecs_per_sec))
 
                 for n in range(len(I)): #for each sentence in this query chunk, retrieve the k-closest
-                    n_query = n + (i_query * len(query.max_vec))
+                    n_query = n + (i_query * query.max_vec)
                     for j in range(len(I[n])): ### for each result of this sentence
-                        n_db = I[n,j] + (i_db * len(self.db.max_vec))
+                        n_db = I[n,j] + (i_db * self.db.max_vec)
                         score = D[n,j]
                         query_results[n_query][n_db] = score
                         if len(query_results[n_query]) >= k:
