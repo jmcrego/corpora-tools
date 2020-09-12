@@ -82,8 +82,8 @@ class IndexFaiss:
         vecs_per_sec = len(db.vec) / sec_elapsed
         logging.info('Indexed DB with {} vectors ({} cells) over {} chunks in {} sec [{:.2f} vecs/sec]'.format(len(self.db.vec), self.db.d, len(self.db.vecs), sec_elapsed, vecs_per_sec))
 
-    def Query(self,query,k):
-        query_results = [defaultdict(float)] * len(query.vec) ### list of n lists (n being the number of total lines in this query file)
+    def Query(self,query,k_best):
+        query_results = [defaultdict(float)] * len(query.vec) ### list of dicts (one dict for each line in this query file)
 
         for i_query in range(len(query.vecs)): #### chunk in query
             for i_db in range(len(self.indexs)): #### chunk in db
@@ -91,7 +91,7 @@ class IndexFaiss:
                 curr_db_index = self.indexs[i_db]
                 curr_query_vecs = query.vecs[i_query]
                 tstart = timer()
-                D, I = curr_db_index.search(curr_query_vecs, k+2) ### retrieve more than k in case the first are filtered out by max_score
+                D, I = curr_db_index.search(curr_query_vecs, k_best+2) ### retrieve more than k in case the first are filtered out by max_score
                 assert len(D) == len(I)               #I[i,j] contains the index in db of the j-th closest sentence to the i-th sentence in query
                 assert len(D) == len(curr_query_vecs) #D[i,j] contains the corresponding score
                 tend = timer()
@@ -105,7 +105,8 @@ class IndexFaiss:
                         n_db = I[n,j] + (i_db * self.db.max_vec)
                         score = D[n,j]
                         query_results[n_query][n_db] = score
-                        if len(query_results[n_query]) >= k:
+                        print('inserted n_query={} len={}'.format(n_query),len(query_results[n_query]))
+                        if len(query_results[n_query]) >= k_best:
                             break
 
         return query_results
@@ -202,7 +203,7 @@ All indexs start by 0
     for fquery in fqueries:
         query = Infile(fquery, d=0, norm=True, max_vec=max_vec)
         results = indexfaiss.Query(query,k)
-        logging.info('Dumping {} k-best in {}'.format(len(results),fquery+'.'+tag))
+        logging.info('Dumping {} {}-best in {}'.format(len(results),k,fquery+'.'+tag))
         with open(fquery+'.'+tag, "w") as fout:
             for result in results: ### one line per query line
                 print(result)
