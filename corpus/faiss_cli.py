@@ -46,7 +46,10 @@ class Infile:
                 sys.exit()
             self.vec.append(l)
 
-        self.vecs = [self.vec[i: i+max_vec] for i in range(0, len(self.vec), max_vec)]
+        if max_vec == 0:
+            self.vecs.append(self.vec)
+        else:
+            self.vecs = [self.vec[i: i+max_vec] for i in range(0, len(self.vec), max_vec)]
         logging.info('\t\tRead {} vectors ({} cells) into {} chunks'.format(len(self.vec),self.d,len(self.vecs)))
 
         for i in range(len(self.vecs)):
@@ -54,8 +57,6 @@ class Infile:
             logging.info('\t\tBuilt float32 array for chunk {}'.format(i))
             if norm:
                 faiss.normalize_L2(self.vecs[i])
-                logging.info('\t\t\t(normalized)')
-
 
     def __len__(self):
         return len(self.vec)
@@ -68,20 +69,18 @@ class Infile:
 class IndexFaiss:
 
     def __init__(self, db):
-        self.db = db
+        self.db = db #infile containing the db
         self.index = []
-        #file is the name of the file
-        #db is the Infile containing the file
         indexs = []
         tstart = timer()
-        for i in len(db.vecs): #we use n different indexs (one for each db chunk)
-            index = faiss.IndexFlatIP(db.d) #inner product (needs L2 normalization over db and query vectors)
-            index.add(db.vecs[i])           #add all normalized vectors to the index
+        for i in len(self.db.vecs): #we use n different indexs (one for each db chunk)
+            index = faiss.IndexFlatIP(self.db.d) #inner product (needs L2 normalization over db and query vectors)
+            index.add(self.db.vecs[i]) #add all normalized vectors to the index
             self.index.append(index) 
         tend = timer()
         sec_elapsed = tend - tstart
         vecs_per_sec = len(db.vec) / sec_elapsed
-        logging.info('Indexed DB with {} vectors ({} cells) over {} chunks in {} sec [{:.2f} vecs/sec]'.format(len(db.vec), db.d, len(db.vecs), sec_elapsed, vecs_per_sec))
+        logging.info('Indexed DB with {} vectors ({} cells) over {} chunks in {} sec [{:.2f} vecs/sec]'.format(len(self.db.vec), self.db.d, len(self.db.vecs), sec_elapsed, vecs_per_sec))
 
     def Query(self,i_query,query,k,min_score,max_score,fin,tag):
         results = []
@@ -233,7 +232,7 @@ All indexs start by 0
 
     logging.info('PROCESSING Queries')
     for i_query in range(len(fQUERY)):
-        query = Infile(fQUERY[i_query], d=0, norm=True)
+        query = Infile(fQUERY[i_query], d=0, norm=True, max_vec=max_vec)
         indexfaiss.Query(i_query,query,k,min_score,max_score,fQUERY[i_query],tag)
 
 
