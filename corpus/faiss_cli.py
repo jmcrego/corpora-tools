@@ -73,7 +73,7 @@ class IndexFaiss:
         self.index = []
         indexs = []
         tstart = timer()
-        for i in len(self.db.vecs): #we use n different indexs (one for each db chunk)
+        for i in range(len(self.db.vecs)): #we use n different indexs (one for each db chunk)
             index = faiss.IndexFlatIP(self.db.d) #inner product (needs L2 normalization over db and query vectors)
             index.add(self.db.vecs[i]) #add all normalized vectors to the index
             self.index.append(index) 
