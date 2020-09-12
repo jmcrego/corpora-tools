@@ -82,7 +82,7 @@ class IndexFaiss:
         logging.info('Indexed DB with {} vectors ({} cells) over {} chunks in {} sec [{:.2f} vecs/sec]'.format(len(self.db.vec), self.db.d, len(self.db.vecs), sec_elapsed, vecs_per_sec))
 
     def Query(self,query,k):
-        query_results = []
+        query_results = [[]] * len(query.vec) ### list of n lists (n being the number of total lines in this query file)
 
         for i_query in range(len(query.vecs)): #### chunk in query
             for i_db in range(len(self.indexs)): #### chunk in db
@@ -98,10 +98,11 @@ class IndexFaiss:
                 vecs_per_sec = len(I) / sec_elapsed
                 logging.info('Found results chunks [query={},db={}] in {} sec [{:.2f} vecs/sec]'.format(i_query, i_db, sec_elapsed, vecs_per_sec))
 
-                for n_query in range(len(I)): #for each sentence in query, retrieve the k-closest
-                    for j in range(len(I[n_query])):
-                        n_db = I[n_query,j] + (i_db * len(self.db.vecs[0]))
-                        score = D[n_query,j]
+                for n in range(len(I)): #for each sentence in this query chunk, retrieve the k-closest
+                    n_query = n + (i_query * len(query.vecs[0]))
+                    for j in range(len(I[n])): ### for each result of this sentence
+                        n_db = I[n,j] + (i_db * len(self.db.vecs[0]))
+                        score = D[n,j]
                         query_results[n_query][n_db] = score
                         if len(query_results[n_query]) >= k:
                             break
