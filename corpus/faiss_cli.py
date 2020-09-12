@@ -105,7 +105,7 @@ class IndexFaiss:
                     n_query = n + (i_query * query.max_vec)
                     for j in range(len(I[n])): ### for each result of this sentence
                         n_db = I[n,j] + (i_db * self.db.max_vec)
-                        score = D[n,j]
+                        score = float(D[n,j])
                         query_results[n_query][n_db] = score
                         #print('inserted n_query={} len={}'.format(n_query,len(query_results[n_query])))
                         if len(query_results[n_query]) >= k_best:
@@ -208,7 +208,7 @@ All indexs start by 0
         logging.info('Dumping {} {}-best in {}'.format(len(results),k,fquery+'.'+tag))
         with open(fquery+'.'+tag, "w") as fout:
             for result in results: ### one line per query line
-                print(result)
+                #print(result)
                 res = []
                 for n_query, score in sorted(result.items(), key=lambda item: item[1], reverse=True):
                     if score < min_score:
