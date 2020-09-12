@@ -25,7 +25,7 @@ def create_logger(logfile, loglevel):
 
 class Infile:
 
-    def __init__(self, file, d=0, norm=True):
+    def __init__(self, file, d=0, norm=True, max_vec=1000000):
 
         self.file = file
         self.d = d     ### will contain length of vectors
@@ -45,7 +45,9 @@ class Infile:
                 sys.exit()
             vec.append(l)
 
-        logging.info('\t\tRead {} vectors ({} cells) from {}'.format(len(vec),self.d,self.file))
+        self.vecs = [vec[i: i+max_vec] for i in range(0, len(vec), max_vec)]
+
+        logging.info('\t\tRead {} vectors ({} cells) into {} chunks from {}'.format(len(vec),self.d,len(self.vecs),self.file))
 
         sys.exit()
 
@@ -173,6 +175,7 @@ if __name__ == '__main__':
     k = 1
     min_score = 0.0
     max_score = 1.0
+    max_vec = 1000000
     verbose = False
     log_file = None
     log_level = 'debug'
@@ -186,6 +189,7 @@ if __name__ == '__main__':
     -k            INT : k-best to retrieve (default 1)
     -min_score  FLOAT : minimum distance to accept a match (default 0.0) 
     -max_score  FLOAT : maximum distance to accept a match (default 1.0) 
+    -max_vec     INT : maximum vector length (default 1000000)
 
     -log_file    FILE : verbose output (default False)
     -log_level STRING : verbose output (default False)
@@ -218,6 +222,8 @@ All indexs start by 0
             fQUERY.append(sys.argv.pop(0))
         elif tok=="-k" and len(sys.argv):
             k = int(sys.argv.pop(0))
+        elif tok=="-max_vec" and len(sys.argv):
+            max_vec = int(sys.argv.pop(0))
         elif tok=="-min_score" and len(sys.argv):
             min_score = float(sys.argv.pop(0))
         elif tok=="-max_score" and len(sys.argv):
@@ -249,7 +255,7 @@ All indexs start by 0
 
     logging.info('READING DB')
     indexfaiss = IndexFaiss()
-    db = Infile(fDB, d=0, norm=True)
+    db = Infile(fDB, d=0, norm=True, max_vec=max_vec)
     indexfaiss.add_db(db)
 
     logging.info('PROCESSING Queries')
