@@ -72,15 +72,10 @@ class IndexFaiss:
     def __init__(self, db):
         self.db = db #infile containing the db
         self.indexs = []
-        tstart = timer()
         for i in range(len(self.db.vecs)): #we use n different indexs (one for each db chunk)
             index = faiss.IndexFlatIP(self.db.d) #inner product (needs L2 normalization over db and query vectors)
             index.add(self.db.vecs[i]) #add all normalized vectors to the index
             self.indexs.append(index) 
-        tend = timer()
-        sec_elapsed = tend - tstart
-        vecs_per_sec = len(db.vec) / sec_elapsed
-        logging.info('Indexed DB with {} vectors ({} cells) over {} chunks in {} sec [{:.2f} vecs/sec]'.format(len(self.db.vec), self.db.d, len(self.db.vecs), sec_elapsed, vecs_per_sec))
 
     def Query(self,query,k_best):
         query_results = [] ### list of dicts (one dict for each line in this query file)
@@ -200,9 +195,11 @@ All indexs start by 0
         logging.error('error: missing -tag option')
         sys.exit()
 
+    tstart = timer()
     indexfaiss = IndexFaiss(Infile(fdb, d=0, norm=True, max_vec=max_vec))
 
     for fquery in fqueries:
+        tstart = timer()
         query = Infile(fquery, d=0, norm=True, max_vec=max_vec)
         results = indexfaiss.Query(query,k)
         logging.info('Dumping {}-bests in {}'.format(k,fquery+'.'+tag))
@@ -218,7 +215,12 @@ All indexs start by 0
                     if len(res) >= k:
                         break
                 fout.write('\t'.join(res) + '\n')
-        logging.info('Done')
+        tend = timer()
+        sec_elapsed = tend - tstart
+        vecs_per_sec = len(indexfaiss.db.vec) / sec_elapsed
+        logging.info('Indexed query with {} vectors ({} cells) over {} chunks in {} sec [{:.2f} vecs/sec]'.format(len(query.vec), query.d, len(query.vecs), sec_elapsed, vecs_per_sec))
+
+    logging.info('Done')
  
 
 
