@@ -218,7 +218,7 @@ All indexs start by 0
         tend = timer()
         sec_elapsed = tend - tstart
         vecs_per_sec = len(indexfaiss.db.vec) / sec_elapsed
-        logging.info('Indexed query with {} vectors ({} cells) over {} chunks in {} sec [{:.2f} vecs/sec]'.format(len(query.vec), query.d, len(query.vecs), sec_elapsed, vecs_per_sec))
+        logging.info('Retrieved query with {} vectors in {} sec [{:.2f} vecs/sec]'.format(len(query.vec), sec_elapsed, vecs_per_sec))
 
     logging.info('Done')
  
