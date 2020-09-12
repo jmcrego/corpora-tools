@@ -27,15 +27,9 @@ class Infile:
 
     def __init__(self, file, d=0, norm=True):
 
-        if file.find(',') >= 0:
-            self.file, self.file_str = file.split(',')
-        else:
-            self.file=file
-            self.file_str = None
-
-        self.vec = []    ### list with vectors found in file
-        self.txt = []    ### list with strings found in file_str
-        self.d = d       ### will contain length of vectors
+        self.file = file
+        self.d = d     ### will contain length of vectors
+        vec = []      ### list with vectors found in file
 
         if self.file.endswith('.gz'): 
             f = gzip.open(self.file, 'rt')
@@ -46,15 +40,16 @@ class Infile:
             l = l.rstrip().split(' ')
             if self.d > 0:
                 if len(l) != self.d:
-                    logging.error('found a vector with {} cells instead of {} in line {} of file {}'.format(len(l),self.d,len(self.vec)+1,self.file))
+                    logging.error('found a vector with {} cells instead of {} in line {} of file {}'.format(len(l),self.d,len(vec)+1,self.file))
                     sys.exit()
             else:
                 self.d = len(l)
-            self.vec.append(l)
-
-        self.vec = np.array(self.vec).astype('float32')
+            vec.append(l)
 
         logging.info('\t\tRead {} vectors ({} cells) from {}'.format(len(self.vec),self.d,self.file))
+
+        self.vec = np.array(self.vec).astype('float32')
+        logging.info('\t\tCreated float32 array')
 
         if norm:
             faiss.normalize_L2(self.vec)
@@ -172,7 +167,7 @@ class IndexFaiss:
 
 if __name__ == '__main__':
 
-    fDB = []
+    fDB = None
     fQUERY = []
     k = 1
     min_score = 0.0
@@ -182,28 +177,28 @@ if __name__ == '__main__':
     log_level = 'debug'
     tag = None
     name = sys.argv.pop(0)
-    usage = '''usage: {} [-db FILE[,FILE]]+ [-query FILE]+ [-k INT] [-min_score FLOAT] [-max_score FLOAT] [-log_file FILE] [-log_level STRING]
-    -db     FILE,FILE : db files with vectors/strings (strings are not needed)
-    -query       FILE : query files with vectors
+    usage = '''usage: {} -db FILE [-query FILE]+ -tag STRING [-k INT] [-min_score FLOAT] [-max_score FLOAT] [-log_file FILE] [-log_level STRING]
+    -db          FILE : db file with vectors
+    -query       FILE : query file/s with vectors
+    -tag       STRING : use [query].[tag] to output matches (default stdout)
+
     -k            INT : k-best to retrieve (default 1)
     -min_score  FLOAT : minimum distance to accept a match (default 0.0) 
     -max_score  FLOAT : maximum distance to accept a match (default 1.0) 
+
     -log_file    FILE : verbose output (default False)
     -log_level STRING : verbose output (default False)
-    -tag       STRING : use [query].[tag] to output matches (default stdout)
     -h                : this help
 
-use -max_score 0.9999 to prevent perfect matches
+Use -max_score 0.9999 to prevent perfect matches
 
-An output line contains the up to k most similar db sentences of a given input query sentence:
-out_1 \\t out_2 \\t out_3 \\t ... \\t out_k
+Output lines are parallel to query files and contain the corresponding k most similar db sentences:
+score_1 \\t line_1 \\t score_2 \\t line_2 \\t ... \\t score_k \\t line_k
 
-Each out_k is composed of:
-score：(i_query,n_query)：(i_db,n_db)：txt
-- score is the similarity value
-- (i_query,n_query) indicate the n-th sentence in the i-th query file
-- (i_db,n_db) indicate the n-th sentence in the i-th db file
-- txt is the db similar sentence (only if available)
+score is the similarity value (FLOAT)
+line is [i_db,]n_db
+- i_db indicates the i-th db file
+- n_db indicates the n-th line in the i-th db file
 
 All indexs start by 0
 '''.format(name)
@@ -217,7 +212,7 @@ All indexs start by 0
         elif tok=="-v":
             verbose = True
         elif tok=="-db" and len(sys.argv):
-            fDB.append(sys.argv.pop(0))
+            fDB = sys.argv.pop(0)
         elif tok=="-query" and len(sys.argv):
             fQUERY.append(sys.argv.pop(0))
         elif tok=="-k" and len(sys.argv):
@@ -239,7 +234,7 @@ All indexs start by 0
 
     create_logger(log_file,log_level)
 
-    if len(fDB) == 0:
+    if fDB is None:
         logging.error('error: missing -fdb option')
         sys.exit()
 
@@ -247,11 +242,14 @@ All indexs start by 0
         logging.error('error: missing -fquery option')
         sys.exit()
 
+    if tag is None:
+        logging.error('error: missing -tag option')
+        sys.exit()
+
     logging.info('READING DBs')
     indexfaiss = IndexFaiss()
-    for i_db in range(len(fDB)):
-        db = Infile(fDB[i_db], d=0, norm=True)
-        indexfaiss.add_db(db)
+    db = Infile(fDB, d=0, norm=True)
+    indexfaiss.add_db(db)
 
     logging.info('PROCESSING Queries')
     for i_query in range(len(fQUERY)):
