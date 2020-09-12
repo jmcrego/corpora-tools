@@ -97,7 +97,7 @@ class IndexFaiss:
                 tend = timer()
                 sec_elapsed = (tend - tstart)
                 vecs_per_sec = len(I) / sec_elapsed
-                logging.info('\t\tFound results chunks [query={},db={}] in {} sec [{:.2f} vecs/sec]'.format(i_query, i_db, sec_elapsed, vecs_per_sec))
+                logging.info('\t\tFound results for [i_query={},i_db={}] in {} sec [{:.2f} vecs/sec]'.format(i_query, i_db, sec_elapsed, vecs_per_sec))
 
                 for n in range(len(I)): #for each sentence in this query chunk, retrieve the k-closest
                     n_query = n + (i_query * query.max_vec)
