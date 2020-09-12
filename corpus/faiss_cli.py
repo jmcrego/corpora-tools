@@ -208,6 +208,7 @@ All indexs start by 0
         logging.info('Dumping {} {}-best in {}'.format(len(results),k,fquery+'.'+tag))
         with open(fquery+'.'+tag, "w") as fout:
             for result in results: ### one line per query line
+                print(result)
                 res = []
                 for n_query, score in sorted(result.items(), key=lambda item: item[1], reverse=True):
                     if score < min_score:
