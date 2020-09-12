@@ -50,7 +50,7 @@ class Infile:
             self.vecs.append(self.vec)
         else:
             self.vecs = [self.vec[i: i+max_vec] for i in range(0, len(self.vec), max_vec)]
-        logging.info('\t\tRead {} vectors ({} cells) into {} chunks'.format(len(self.vec),self.d,len(self.vecs)))
+        logging.info('\t\tRead {} vectors into {} chunks ({} cells)'.format(len(self.vec),len(self.vecs),self.d))
 
         for i in range(len(self.vecs)):
             self.vecs[i] = np.array(self.vecs[i]).astype('float32')
