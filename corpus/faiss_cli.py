@@ -84,7 +84,6 @@ class IndexFaiss:
 
     def Query(self,query,k):
         query_results = [defaultdict(float)] * len(query.vec) ### list of n lists (n being the number of total lines in this query file)
-        print('prepared {} results'.format(len(query.vec)))
 
         for i_query in range(len(query.vecs)): #### chunk in query
             for i_db in range(len(self.indexs)): #### chunk in db
@@ -98,7 +97,7 @@ class IndexFaiss:
                 tend = timer()
                 sec_elapsed = (tend - tstart)
                 vecs_per_sec = len(I) / sec_elapsed
-                logging.info('Found results chunks [query={},db={}] in {} sec [{:.2f} vecs/sec]'.format(i_query, i_db, sec_elapsed, vecs_per_sec))
+                logging.info('\t\tFound results chunks [query={},db={}] in {} sec [{:.2f} vecs/sec]'.format(i_query, i_db, sec_elapsed, vecs_per_sec))
 
                 for n in range(len(I)): #for each sentence in this query chunk, retrieve the k-closest
                     n_query = n + (i_query * query.max_vec)
@@ -207,10 +206,10 @@ All indexs start by 0
         with open(fquery+'.'+tag, "w") as fout:
             for result in results: ### one line per query line
                 out = []
-                for key, score in sorted(result.items(), key=lambda item: item[1], reverse=True):
+                for n_query, score in sorted(result.items(), key=lambda item: item[1], reverse=True):
                     if score >= min_score and score <= max_score:
-                        out.append(score)
-                        out.append(key)
+                        out.append("{:.6f}".format(score))
+                        out.append(str(n_query))
                         if len(out) >= k*2:
                             break
                 fout.write('\t'.join(out) + '\n')
