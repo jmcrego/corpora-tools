@@ -195,8 +195,10 @@ All indexs start by 0
         logging.error('error: missing -tag option')
         sys.exit()
 
+    logging.info('*** Read DB ***')
     indexfaiss = IndexFaiss(Infile(fdb, d=0, norm=True, max_vec=max_vec))
 
+    logging.info('*** Read Queries ***')
     for fquery in fqueries:
         query = Infile(fquery, d=0, norm=True, max_vec=max_vec)
         results = indexfaiss.Query(query,k)
