@@ -121,7 +121,7 @@ if __name__ == '__main__':
     fqueries = []
     k = 1
     min_score = 0.0
-    max_score = 1.0
+    max_score = 9.9
     max_vec = 1000000
     verbose = False
     log_file = None
@@ -135,14 +135,14 @@ if __name__ == '__main__':
 
     -k            INT : k-best to retrieve (default 1)
     -min_score  FLOAT : minimum distance to accept a match (default 0.0) 
-    -max_score  FLOAT : maximum distance to accept a match (default 1.0) 
+    -max_score  FLOAT : maximum distance to accept a match (default 9.9) 
     -max_vec     INT : maximum vector length (default 1000000)
 
     -log_file    FILE : verbose output (default False)
     -log_level STRING : verbose output (default False)
     -h                : this help
 
-Use -max_score 0.9999 to prevent perfect matches
+Use -max_score 0.9999 to prevent perfect matches (perfect scores may exceed 1.0)
 
 Output lines are parallel to query files and contain the corresponding k most similar db sentences:
 score_1 \\t line_1 \\t score_2 \\t line_2 \\t ... \\t score_k \\t line_k
@@ -208,7 +208,7 @@ All indexs start by 0
         logging.info('Dumping {} {}-best in {}'.format(len(results),k,fquery+'.'+tag))
         with open(fquery+'.'+tag, "w") as fout:
             for result in results: ### one line per query line
-                #print(result)
+                print(result)
                 res = []
                 for n_query, score in sorted(result.items(), key=lambda item: item[0], reverse=True):
                     if score < min_score:
