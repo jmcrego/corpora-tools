@@ -54,7 +54,7 @@ class Infile:
 
         for i in range(len(self.vecs)):
             self.vecs[i] = np.array(self.vecs[i]).astype('float32')
-            logging.info('\t\tBuilt float32 array for chunk {}'.format(i))
+            logging.info('\t\tBuilt float32 array for chunk {} with {} vectors'.format(i,len(self.vecs[i])))
             if norm:
                 faiss.normalize_L2(self.vecs[i])
 
