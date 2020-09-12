@@ -200,7 +200,6 @@ All indexs start by 0
     for fquery in fqueries:
         query = Infile(fquery, d=0, norm=True, max_vec=max_vec)
         results = indexfaiss.Query(query,k)
-        logging.info('\t\tDumping {}-bests in {}'.format(k,fquery+'.'+tag))
         with open(fquery+'.'+tag, "w") as fout:
             for result in results: ### one line per query line
                 res = []
@@ -213,9 +212,7 @@ All indexs start by 0
                     if len(res) >= k:
                         break
                 fout.write('\t'.join(res) + '\n')
-        #logging.info('Retrieved query with {} vectors in {} sec [{:.2f} vecs/sec]'.format(len(query.vec), sec_elapsed, vecs_per_sec))
-
-    logging.info('Done')
+        logging.info('Dumped {}-bests in {}'.format(k,fquery+'.'+tag))
  
 
 
