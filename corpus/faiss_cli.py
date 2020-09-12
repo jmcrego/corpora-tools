@@ -58,11 +58,11 @@ class Infile:
             if norm:
                 faiss.normalize_L2(self.vecs[i])
 
-    def __len__(self):
-        return len(self.vec)
+#    def __len__(self):
+#        return len(self.vec)
 
-    def nvectors():
-        return len(self.vec)
+#    def nvectors():
+#        return len(self.vec)
 
 
 
@@ -100,7 +100,7 @@ class IndexFaiss:
 
                 for n_query in range(len(I)): #for each sentence in query, retrieve the k-closest
                     for j in range(len(I[n_query])):
-                        n_db = I[n_query,j] + (i_db * len(self.indexs[0]))
+                        n_db = I[n_query,j] + (i_db * len(self.db.vecs[0]))
                         score = D[n_query,j]
                         query_results[n_query][n_db] = score
                         if len(query_results[n_query]) >= k:
