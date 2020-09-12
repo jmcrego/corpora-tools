@@ -202,7 +202,7 @@ All indexs start by 0
         tstart = timer()
         query = Infile(fquery, d=0, norm=True, max_vec=max_vec)
         results = indexfaiss.Query(query,k)
-        logging.info('Dumping {}-bests in {}'.format(k,fquery+'.'+tag))
+        logging.info('\t\tDumping {}-bests in {}'.format(k,fquery+'.'+tag))
         with open(fquery+'.'+tag, "w") as fout:
             for result in results: ### one line per query line
                 res = []
