@@ -26,6 +26,7 @@ def create_logger(logfile, loglevel):
 class Infile:
 
     def __init__(self, file, d=0, norm=True, max_vec=1000000):
+        logging.info('Reading {}'.format(file))
 
         self.file = file
         self.d = d     ### will contain length of vectors
@@ -46,11 +47,11 @@ class Infile:
             vec.append(l)
 
         self.vecs = [vec[i: i+max_vec] for i in range(0, len(vec), max_vec)]
+        logging.info('\t\tRead {} vectors ({} cells) into {} chunks'.format(len(vec),self.d,len(self.vecs)))
 
-        logging.info('Read {} vectors ({} cells) into {} chunks from {}'.format(len(vec),self.d,len(self.vecs),self.file))
-
-        self.vec = np.array(self.vecs).astype('float32')
-        logging.info('\t\tCreated float32 array')
+        for i in range(len(self.vecs)):
+            self.vecs[i] = np.array(self.vecs[i]).astype('float32')
+            logging.info('\t\tCreated float32 array on chunk {}'.format(i))
 
         sys.exit()
 
