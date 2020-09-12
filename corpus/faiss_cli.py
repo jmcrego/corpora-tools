@@ -229,7 +229,7 @@ All indexs start by 0
 
     indexfaiss = IndexFaiss(Infile(fdb, d=0, norm=True, max_vec=max_vec))
 
-    for fquery in range(len(fqueries)):
+    for fquery in fqueries:
         query = Infile(fquery, d=0, norm=True, max_vec=max_vec)
         results = indexfaiss.Query(query,k)
         #logging.info('Building results in {}'.format(fquery+'.'+tag))
