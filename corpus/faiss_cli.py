@@ -83,7 +83,8 @@ class IndexFaiss:
         logging.info('Indexed DB with {} vectors ({} cells) over {} chunks in {} sec [{:.2f} vecs/sec]'.format(len(self.db.vec), self.db.d, len(self.db.vecs), sec_elapsed, vecs_per_sec))
 
     def Query(self,query,k):
-        query_results = [[]] * len(query.vec) ### list of n lists (n being the number of total lines in this query file)
+        query_results = [defaultdict(float)] * len(query.vec) ### list of n lists (n being the number of total lines in this query file)
+        print('prepared {} results'.format(len(query.vec)))
 
         for i_query in range(len(query.vecs)): #### chunk in query
             for i_db in range(len(self.indexs)): #### chunk in db
