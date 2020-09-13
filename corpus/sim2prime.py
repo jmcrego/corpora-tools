@@ -63,6 +63,8 @@ if __name__ == '__main__':
    -n       INT : max n-best similar to output (default 1)
    -t     FLOAT : min threshold to consider (default 0.5)
    -h           : this help
+
+ONLY augmented sentences are output!
 '''.format(name)
 
     while len(sys.argv):
@@ -165,23 +167,23 @@ if __name__ == '__main__':
 
             tag = get_separator(use_range, score)
 
-            src_augmented.append(tag + ' ' + DB_src[n_db])
-            if fdb_tgt is not None:
+            if fdb_src is not None: ### augment source and target sides with DB_src and DB_tgt respectively
+                src_augmented.append(tag + ' ' + DB_src[n_db])
                 tgt_augmented.append(tag + ' ' + DB_tgt[n_db])
+            else: ### augment soruce side with DB_tgt
+                src_augmented.append(tag + ' ' + DB_tgt[n_db])
 
-            if len(src_augmented) >= n:
+            if len(src_augmented) >= n: ### already augmented with n similar sentences
                 break
 
-        if len(src_sentences) == 0:
+        if len(src_sentences) == 0: ### if not augmented not shown
             print('')
             continue
             
         ### add query sentence/s
-        if fq_tgt is None:
-            src_sentences.append(get_separator(False) + ' ' + Q_tgt[n_query])
-        else:
-            src_sentences.append(get_separator(False) + ' ' + Q_src[n_query])
-            tgt_sentences.append(get_separator(False) + ' ' + Q_tgt[n_query])
+        src_sentences.append('✸' + ' ' + Q_src[n_query])
+        if fq_tgt is not None:
+            tgt_sentences.append('✸' + ' ' + Q_tgt[n_query])
             
         if len(tgt_sentences) == 0:
             print(' '.join(src_sentences))
