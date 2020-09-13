@@ -15,23 +15,23 @@ def get_range(score):
         return '⓪'
     elif score >= 0.5 and score < 0.55:
         return '①'
-    elif score >= 0.55 and score < 0.6
+    elif score >= 0.55 and score < 0.6:
         return '②'
-    elif score >= 0.6 and score < 0.65
+    elif score >= 0.6 and score < 0.65:
         return '③'
-    elif score >= 0.65 and score < 0.7
+    elif score >= 0.65 and score < 0.7:
         return '④'
-    elif score >= 0.7 and score < 0.75
+    elif score >= 0.7 and score < 0.75:
         return '⑤'
-    elif score >= 0.75 and score < 0.8
+    elif score >= 0.75 and score < 0.8:
         return '⑥'
-    elif score >= 0.8 and score < 0.85
+    elif score >= 0.8 and score < 0.85:
         return '⑦'
-    elif score >= 0.85 and score < 0.9
+    elif score >= 0.85 and score < 0.9:
         return '⑧'
-    elif score >= 0.9 and score < 0.95
+    elif score >= 0.9 and score < 0.95:
         return '⑨'
-    elif score >= 0.95 and score < 1.0
+    elif score >= 0.95 and score < 1.0:
         return '⑩'
     else:
         return 'ⓟ'
