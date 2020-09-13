@@ -4,6 +4,20 @@ import sys
 import os
 
 augmented_sep = '⨷'  ### augmented sentence without range
+augmented_range0 = '⓪'
+augmented_range1 = '①'
+augmented_range2 = '②'
+augmented_range3 = '③'
+augmented_range4 = '④'
+augmented_range5 = '⑤'
+augmented_range6 = '⑥'
+augmented_range7 = '⑦'
+augmented_range8 = '⑧'
+augmented_range9 = '⑨'
+augmented_range10 = '⑩'
+augmented_perfect = 'ⓟ'
+augmented_src = 'ⓢ'
+augmented_tgt = 'ⓣ'
 
 def progress(n_line):
     if n_line%10000 == 0:
@@ -17,29 +31,29 @@ def get_separator(use_range, score=0.0):
         return augmented_sep
 
     if score < 0.5:
-        return '⓪'
+        return augmented_range0
     elif score >= 0.5 and score < 0.55:
-        return '①'
+        return augmented_range1
     elif score >= 0.55 and score < 0.6:
-        return '②'
+        return augmented_range2
     elif score >= 0.6 and score < 0.65:
-        return '③'
+        return augmented_range3
     elif score >= 0.65 and score < 0.7:
-        return '④'
+        return augmented_range4
     elif score >= 0.7 and score < 0.75:
-        return '⑤'
+        return augmented_range5
     elif score >= 0.75 and score < 0.8:
-        return '⑥'
+        return augmented_range6
     elif score >= 0.8 and score < 0.85:
-        return '⑦'
+        return augmented_range7
     elif score >= 0.85 and score < 0.9:
-        return '⑧'
+        return augmented_range8
     elif score >= 0.9 and score < 0.95:
-        return '⑨'
+        return augmented_range9
     elif score >= 0.95 and score < 1.0:
-        return '⑩'
+        return augmented_range10
     else:
-        return 'ⓟ' ### perfect augmented sentence
+        return augmented_perfect
 
 #####################################################################
 ### MAIN ############################################################
@@ -183,9 +197,9 @@ ONLY augmented sentences are output!
             continue
             
         ### add query sentence/s
-        src_augmented.append('Ⓢ' + ' ' + Q_src[n_query])
+        src_augmented.append(augmented_src + ' ' + Q_src[n_query])
         if fq_tgt is not None:
-            tgt_augmented.append('Ⓣ' + ' ' + Q_tgt[n_query])
+            tgt_augmented.append(augmented_tgt + ' ' + Q_tgt[n_query])
             
         if len(tgt_augmented) == 0:
             print(' '.join(src_augmented))
