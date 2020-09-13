@@ -85,6 +85,7 @@ class IndexFaiss:
         for i_query in range(len(query.vecs)): #### chunk in query
             for i_db in range(len(self.indexs)): #### chunk in db
 
+                logging.info('\t\tRunning search for [i_query={},i_db={}]'.format(i_query, i_db))
                 curr_db_index = self.indexs[i_db]
                 curr_query_vecs = query.vecs[i_query]
                 tstart = timer()
