@@ -10,7 +10,10 @@ def progress(n_line):
         else:
             sys.stderr.write(".")
 
-def get_range(score):
+def get_separator(use_range, score=0.0):
+    if not use_range:
+        return 'Ⓢ'
+
     if score < 0.5:
         return '⓪'
     elif score >= 0.5 and score < 0.55:
@@ -49,10 +52,9 @@ if __name__ == '__main__':
     fdb_tgt = None
     fq_src = None
     fq_tgt = None
-    sep = 'Ⓢ'
     sep_st = '\t'
     name = sys.argv.pop(0)
-    usage = '''usage: {} -db_src FILE -db_tgt FILE -q_src FILE -q_tgt FILE [-range] [-n INT] [-t FLOAT] < FSIM > FAUGMENTED
+    usage = '''usage: {} [-db_src FILE] -db_tgt FILE -q_src FILE [-q_tgt FILE] [-range] [-n INT] [-t FLOAT] < FSIM > FAUGMENTED
    -db_src FILE : db file with src strings to output
    -db_tgt FILE : db file with tgt strings to output
    -q_src  FILE : query file with src strings
@@ -87,8 +89,13 @@ if __name__ == '__main__':
             sys.stderr.write("{}".format(usage))
             sys.exit()
 
-    if fdb_src is None:
-        sys.stderr.write('error: missing -db_src option\n')
+#    if fdb_src is None:
+#        sys.stderr.write('error: missing -db_src option\n')
+#        sys.stderr.write("{}".format(usage))
+#        sys.exit()
+
+    if fdb_tgt is None:
+        sys.stderr.write('error: missing -db_tgt option\n')
         sys.stderr.write("{}".format(usage))
         sys.exit()
 
@@ -97,35 +104,50 @@ if __name__ == '__main__':
         sys.stderr.write("{}".format(usage))
         sys.exit()
 
-    sys.stderr.write('Reading {}\n'.format(fdb_src))
-    with open(fdb_src,'r') as f:
-        DB_src = [x.rstrip() for x in f]
-    sys.stderr.write('Read fdb={} with {} lines\n'.format(fdb_src, len(DB_src)))
+    ###################
+    ### read DB_tgt ###
+    ###################
+    sys.stderr.write('Reading {}\n'.format(fdb_tgt))
+    with open(fdb_tgt,'r') as f:
+        DB_tgt = [x.rstrip() for x in f]
+    sys.stderr.write('Read fdb_tgt={} with {} lines\n'.format(fdb_tgt, len(DB_tgt)))
 
-    if fdb_tgt is not None:
-        sys.stderr.write('Reading {}\n'.format(fdb_tgt))
-        with open(fdb_tgt,'r') as f:
-            DB_tgt = [x.rstrip() for x in f]
+    if fdb_src is not None:
+        ###################
+        ### read DB_src ###
+        ###################
+        sys.stderr.write('Reading {}\n'.format(fdb_src))
+        with open(fdb_src,'r') as f:
+            DB_src = [x.rstrip() for x in f]
         if len(DB_tgt) != len(DB_src):
-            sys.stderr.write('error: erroneous number of lines in fdb_tgt {}'.format(len(DB_tgt)))
+            sys.stderr.write('error: erroneous number of lines in fdb_src {}'.format(len(DB_src)))
             sys.exit()
-        sys.stderr.write('Read fdb={} with {} lines\n'.format(fdb_tgt, len(DB_tgt)))
+        sys.stderr.write('Read fdb_src={} with {} lines\n'.format(fdb_src, len(DB_src)))
 
+    ##################
+    ### read Q_src ###
+    ##################
     sys.stderr.write('Reading {}\n'.format(fq_src))
     with open(fq_src,'r') as f:
         Q_src = [x.rstrip() for x in f]
-    sys.stderr.write('Read fq={} with {} lines\n'.format(fq_src, len(Q_src)))
+    sys.stderr.write('Read fq_src={} with {} lines\n'.format(fq_src, len(Q_src)))
 
     if fq_tgt is not None:
+        ##################
+        ### read Q_tgt ###
+        ##################
         sys.stderr.write('Reading {}\n'.format(fq_tgt))
         with open(fq_tgt,'r') as f:
             Q_tgt = [x.rstrip() for x in f]
-        sys.stderr.write('Read fq={} with {} lines\n'.format(fq_tgt, len(Q_tgt)))
+        sys.stderr.write('Read fq_tgt={} with {} lines\n'.format(fq_tgt, len(Q_tgt)))
         if len(Q_tgt) != len(Q_src):
             sys.stderr.write('error: erroneous number of lines in fq_tgt {}'.format(len(Q_tgt)))
             sys.exit()
 
-    
+
+    #########################################################
+    ### augmenting Q_src and Q_tgt with DB_src and DB_tgt ###
+    #########################################################
     for n_query, line in enumerate(sys.stdin):
         line = line.rstrip()
 
@@ -133,13 +155,12 @@ if __name__ == '__main__':
             print('')
             continue
         
-        #print(line)
         toks = line.split('\t')
         if len(toks) % 2 != 0:
             sys.stderr.write('error: unparsed line {}'.format(line))
 
-        src_sentences = []
-        tgt_sentences = []
+        src_augmented = []
+        tgt_augmented = []
         while len(toks):
             score = float(toks.pop(0))
             n_db = int(toks.pop(0))
@@ -147,16 +168,13 @@ if __name__ == '__main__':
             if score < t:
                 break
 
-            if use_range:
-                tag = get_range(score)
-            else:
-                tag = sep
+            tag = get_separator(use_range, score)
 
-            src_sentences.append(tag + ' ' + DB_src[n_db])
+            src_augmented.append(tag + ' ' + DB_src[n_db])
             if fdb_tgt is not None:
-                tgt_sentences.append(tag + ' ' + DB_tgt[n_db])
+                tgt_augmented.append(tag + ' ' + DB_tgt[n_db])
 
-            if len(src_sentences) >= n:
+            if len(src_augmented) >= n:
                 break
 
         if len(src_sentences) == 0:
@@ -165,10 +183,10 @@ if __name__ == '__main__':
             
         ### add query sentence/s
         if fq_tgt is None:
-            src_sentences.append(sep + ' ' + Q_tgt[n_query])
+            src_sentences.append(get_separator(False) + ' ' + Q_tgt[n_query])
         else:
-            src_sentences.append(sep + ' ' + Q_src[n_query])
-            tgt_sentences.append(sep + ' ' + Q_tgt[n_query])
+            src_sentences.append(get_separator(False) + ' ' + Q_src[n_query])
+            tgt_sentences.append(get_separator(False) + ' ' + Q_tgt[n_query])
             
         if len(tgt_sentences) == 0:
             print(' '.join(src_sentences))
