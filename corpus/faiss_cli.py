@@ -59,13 +59,6 @@ class Infile:
             if norm:
                 faiss.normalize_L2(self.vecs[i])
 
-#    def __len__(self):
-#        return len(self.vec)
-
-#    def nvectors():
-#        return len(self.vec)
-
-
 
 class IndexFaiss:
 
@@ -132,7 +125,7 @@ if __name__ == '__main__':
     -k            INT : k-best to retrieve (default 1)
     -min_score  FLOAT : minimum distance to accept a match (default 0.0) 
     -max_score  FLOAT : maximum distance to accept a match (default 9.9) 
-    -max_vec     INT : maximum vector length (default 1000000)
+    -max_vec      INT : maximum vector length (default 1000000)
 
     -log_file    FILE : verbose output (default False)
     -log_level STRING : verbose output (default False)
