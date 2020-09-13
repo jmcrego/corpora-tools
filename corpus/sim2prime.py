@@ -176,7 +176,7 @@ ONLY augmented sentences are output!
             if len(src_augmented) >= n: ### already augmented with n similar sentences
                 break
 
-        if len(src_sentences) == 0: ### if not augmented not shown
+        if len(src_augmented) == 0: ### if not augmented not shown
             print('')
             continue
             
