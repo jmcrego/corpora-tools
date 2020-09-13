@@ -81,6 +81,8 @@ if __name__ == '__main__':
    -h           : this help
 
 ONLY augmented sentences are output!
+- use -q_tgt when preparing training pairs
+- use -db_src when priming
 '''.format(name)
 
     while len(sys.argv):
