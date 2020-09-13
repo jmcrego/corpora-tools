@@ -181,12 +181,12 @@ ONLY augmented sentences are output!
             continue
             
         ### add query sentence/s
-        src_sentences.append('✸' + ' ' + Q_src[n_query])
+        src_augmented.append('✸' + ' ' + Q_src[n_query])
         if fq_tgt is not None:
-            tgt_sentences.append('✸' + ' ' + Q_tgt[n_query])
+            tgt_augmented.append('✸' + ' ' + Q_tgt[n_query])
             
-        if len(tgt_sentences) == 0:
-            print(' '.join(src_sentences))
+        if len(tgt_augmented) == 0:
+            print(' '.join(src_augmented))
         else:
-            print(' '.join(src_sentences) + '\t' + ' '.join(tgt_sentences))
+            print(' '.join(src_augmented) + '\t' + ' '.join(tgt_augmented))
 
