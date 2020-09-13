@@ -10,6 +10,32 @@ def progress(n_line):
         else:
             sys.stderr.write(".")
 
+def get_range(score):
+    if score < 0.5:
+        return '⓪'
+    elif score >= 0.5 and score < 0.55:
+        return '①'
+    elif score >= 0.55 and score < 0.6
+        return '②'
+    elif score >= 0.6 and score < 0.65
+        return '③'
+    elif score >= 0.65 and score < 0.7
+        return '④'
+    elif score >= 0.7 and score < 0.75
+        return '⑤'
+    elif score >= 0.75 and score < 0.8
+        return '⑥'
+    elif score >= 0.8 and score < 0.85
+        return '⑦'
+    elif score >= 0.85 and score < 0.9
+        return '⑧'
+    elif score >= 0.9 and score < 0.95
+        return '⑨'
+    elif score >= 0.95 and score < 1.0
+        return '⑩'
+    else:
+        return 'ⓟ'
+
 #####################################################################
 ### MAIN ############################################################
 #####################################################################
@@ -18,20 +44,20 @@ if __name__ == '__main__':
 
     n = 1
     t = 0.5
-    ranges = False
+    use_range = False
     fdb_src = None
     fdb_tgt = None
     fq_src = None
     fq_tgt = None
-    sep = '<[sep]>'
+    sep = 'Ⓢ'
     sep_st = '\t'
     name = sys.argv.pop(0)
-    usage = '''usage: {} -db_src FILE -db_tgt FILE -q_src FILE -q_tgt FILE [-n INT] [-t FLOAT] < FSIM > FAUGMENTED
+    usage = '''usage: {} -db_src FILE -db_tgt FILE -q_src FILE -q_tgt FILE [-range] [-n INT] [-t FLOAT] < FSIM > FAUGMENTED
    -db_src FILE : db file with src strings to output
    -db_tgt FILE : db file with tgt strings to output
    -q_src  FILE : query file with src strings
    -q_tgt  FILE : query file with tgt strings
-   -ranges      : use score ranges
+   -range       : use score ranges to separate sentences
    -n       INT : max n-best similar to output (default 1)
    -t     FLOAT : min threshold to consider (default 0.5)
    -h           : this help
@@ -54,8 +80,8 @@ if __name__ == '__main__':
             n = int(sys.argv.pop(0))
         elif tok=="-t" and len(sys.argv):
             t = float(sys.argv.pop(0))
-        elif tok=="-ranges":
-            ranges = True
+        elif tok=="-range":
+            use_range = True
         else:
             sys.stderr.write('error: unparsed {} option\n'.format(tok))
             sys.stderr.write("{}".format(usage))
@@ -121,8 +147,8 @@ if __name__ == '__main__':
             if score < t:
                 break
 
-            if ranges:
-                tag = '<[{}]>'.format(str(score)[0:3])
+            if use_range:
+                tag = get_range(score)
             else:
                 tag = sep
 
