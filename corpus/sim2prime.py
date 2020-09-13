@@ -54,7 +54,7 @@ if __name__ == '__main__':
     fq_tgt = None
     sep_st = '\t'
     name = sys.argv.pop(0)
-    usage = '''usage: {} [-db_src FILE] -db_tgt FILE -q_src FILE [-q_tgt FILE] [-range] [-n INT] [-t FLOAT] < FSIM > FAUGMENTED
+    usage = '''usage: {} -db_tgt FILE [-db_src FILE] -q_src FILE [-q_tgt FILE] [-range] [-n INT] [-t FLOAT] < FSIM > FAUGMENTED
    -db_src FILE : db file with src strings to output
    -db_tgt FILE : db file with tgt strings to output
    -q_src  FILE : query file with src strings
@@ -88,11 +88,6 @@ if __name__ == '__main__':
             sys.stderr.write('error: unparsed {} option\n'.format(tok))
             sys.stderr.write("{}".format(usage))
             sys.exit()
-
-#    if fdb_src is None:
-#        sys.stderr.write('error: missing -db_src option\n')
-#        sys.stderr.write("{}".format(usage))
-#        sys.exit()
 
     if fdb_tgt is None:
         sys.stderr.write('error: missing -db_tgt option\n')
