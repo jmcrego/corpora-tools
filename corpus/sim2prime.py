@@ -3,6 +3,8 @@
 import sys
 import os
 
+augmented_sep = '⨷'  ### augmented sentence without range
+
 def progress(n_line):
     if n_line%10000 == 0:
         if n_line%100000 == 0:
@@ -12,7 +14,7 @@ def progress(n_line):
 
 def get_separator(use_range, score=0.0):
     if not use_range:
-        return 'Ⓢ'
+        return augmented_sep
 
     if score < 0.5:
         return '⓪'
@@ -37,7 +39,7 @@ def get_separator(use_range, score=0.0):
     elif score >= 0.95 and score < 1.0:
         return '⑩'
     else:
-        return 'ⓟ'
+        return 'ⓟ' ### perfect augmented sentence
 
 #####################################################################
 ### MAIN ############################################################
@@ -181,9 +183,9 @@ ONLY augmented sentences are output!
             continue
             
         ### add query sentence/s
-        src_augmented.append('✸' + ' ' + Q_src[n_query])
+        src_augmented.append('Ⓢ' + ' ' + Q_src[n_query])
         if fq_tgt is not None:
-            tgt_augmented.append('✸' + ' ' + Q_tgt[n_query])
+            tgt_augmented.append('Ⓣ' + ' ' + Q_tgt[n_query])
             
         if len(tgt_augmented) == 0:
             print(' '.join(src_augmented))
