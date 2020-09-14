@@ -3,21 +3,21 @@
 import sys
 import os
 
-augmented_sep = '◉'  ### augmented sentence without range
-augmented_wrong = '✖️' #'⓪'
-augmented_range0 = '⓪'
-augmented_range1 = '①'
-augmented_range2 = '②'
-augmented_range3 = '③'
-augmented_range4 = '④'
-augmented_range5 = '⑤'
-augmented_range6 = '⑥'
-augmented_range7 = '⑦'
-augmented_range8 = '⑧'
-augmented_range9 = '⑨'
-augmented_perfect = '✔️' #'ⓟ'
-augmented_src = '⒮'
-augmented_tgt = '⒯'
+augmented_sep     = '※'
+augmented_lowest  = '❎'
+augmented_range1  = '➊'
+augmented_range2  = '➋'
+augmented_range3  = '➌'
+augmented_range4  = '➍'
+augmented_range5  = '➎'
+augmented_range6  = '➏'
+augmented_range7  = '➐'
+augmented_range8  = '➑'
+augmented_range9  = '➒'
+augmented_range10 = '❿'
+augmented_perfect = '✅'
+augmented_src     = '⒮'
+augmented_tgt     = '⒯'
 
 def progress(n_line):
     if n_line%10000 == 0:
@@ -33,25 +33,25 @@ def get_separator(use_range, score=0.0):
     if score < 0.5:
         return augmented_wrong
     elif score >= 0.5 and score < 0.55:
-        return augmented_range0
-    elif score >= 0.55 and score < 0.6:
         return augmented_range1
-    elif score >= 0.6 and score < 0.65:
+    elif score >= 0.55 and score < 0.6:
         return augmented_range2
-    elif score >= 0.65 and score < 0.7:
+    elif score >= 0.6 and score < 0.65:
         return augmented_range3
-    elif score >= 0.7 and score < 0.75:
+    elif score >= 0.65 and score < 0.7:
         return augmented_range4
-    elif score >= 0.75 and score < 0.8:
+    elif score >= 0.7 and score < 0.75:
         return augmented_range5
-    elif score >= 0.8 and score < 0.85:
+    elif score >= 0.75 and score < 0.8:
         return augmented_range6
-    elif score >= 0.85 and score < 0.9:
+    elif score >= 0.8 and score < 0.85:
         return augmented_range7
-    elif score >= 0.9 and score < 0.95:
+    elif score >= 0.85 and score < 0.9:
         return augmented_range8
-    elif score >= 0.95 and score < 1.0:
+    elif score >= 0.9 and score < 0.95:
         return augmented_range9
+    elif score >= 0.95 and score < 1.0:
+        return augmented_range10
     else:
         return augmented_perfect
 
