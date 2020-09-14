@@ -176,6 +176,10 @@ if __name__ == '__main__':
 
         src_augmented = []
         tgt_augmented = []
+        
+        ###
+        ### add similar sentence/s
+        ###########################
         while len(toks):
             score = float(toks.pop(0))
             n_db = int(toks.pop(0))
@@ -198,13 +202,20 @@ if __name__ == '__main__':
             print('')
             continue
             
+        ###
         ### add query sentence/s
+        ###########################
         src_augmented.append(augmented_src + ' ' + Q_src[n_query])
         if fq_tgt is not None:
             tgt_augmented.append(augmented_tgt + ' ' + Q_tgt[n_query])
             
-        if len(tgt_augmented) == 0:
-            print(' '.join(src_augmented))
-        else:
+        ###
+        ### output
+        ###########################
+        if len(tgt_augmented): 
+            ### training ###
             print(' '.join(src_augmented) + '\t' + ' '.join(tgt_augmented))
+        else: 
+            ### inference ###
+            print(' '.join(src_augmented))
 
