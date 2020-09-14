@@ -2,6 +2,7 @@
 
 import sys
 import os
+import gzip
 
 augmented_sep     = '※'
 augmented_range1  = '➊'
@@ -15,8 +16,8 @@ augmented_range8  = '➑'
 augmented_range9  = '➒'
 augmented_range10 = '❿'
 augmented_perfect = '▣'
-augmented_src     = '‖' #'⒮'
-augmented_tgt     = '‖' #'⒯'
+augmented_src     = '‖'
+augmented_tgt     = '‖'
 
 def progress(n_line):
     if n_line%10000 == 0:
@@ -24,6 +25,25 @@ def progress(n_line):
             sys.stderr.write("{}".format(n_line))
         else:
             sys.stderr.write(".")
+
+def read_file(file):
+    if file.endswith('.gz'): 
+        f = gzip.open(file, 'rb')
+        is_gzip = True
+    else: 
+        f = io.open(file, 'r', encoding='utf-8', newline='\n', errors='ignore')
+        is_gzip = False
+
+    vstr = []
+    while True:
+        l = f.readline()
+        if not l:
+            break
+        if is_gzip:
+            l = l.decode('utf8')
+        l = l.strip(" \n")
+        vstr.append(l)
+    return vstr
 
 def get_separator(use_range, score=0.0):
     if not use_range:
@@ -79,6 +99,7 @@ if __name__ == '__main__':
    -t     FLOAT : min threshold to consider (default 0.5)
    -h           : this help
 
+- gzipped files are allowed
 - ONLY sentences effectively augmented are output. The rest are left empty
 - use -q_tgt when preparing training pairs
 - use -db_src for priming 
