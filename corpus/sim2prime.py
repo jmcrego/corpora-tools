@@ -2,6 +2,7 @@
 
 import sys
 import os
+import io
 import gzip
 
 augmented_sep     = '※'
