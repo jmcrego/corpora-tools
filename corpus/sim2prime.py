@@ -84,13 +84,14 @@ if __name__ == '__main__':
     n = 1
     t = 0.5
     use_range = False
+    fuzzymatch = False
     fdb_src = None
     fdb_tgt = None
     fq_src = None
     fq_tgt = None
     sep_st = '\t'
     name = sys.argv.pop(0)
-    usage = '''usage: {} -db_tgt FILE [-db_src FILE] -q_src FILE [-q_tgt FILE] [-range] [-n INT] [-t FLOAT] < FSIM > FAUGMENTED
+    usage = '''usage: {} -db_tgt FILE [-db_src FILE] -q_src FILE [-q_tgt FILE] [-range] [-fuzzymatch] [-n INT] [-t FLOAT] < FSIM > FAUGMENTED
    -db_src FILE : db file with src strings to output
    -db_tgt FILE : db file with tgt strings to output
    -q_src  FILE : query file with src strings
@@ -98,6 +99,7 @@ if __name__ == '__main__':
    -range       : use score ranges to separate sentences
    -n       INT : max n-best similar to output (default 1)
    -t     FLOAT : min threshold to consider (default 0.5)
+   -fuzzymatch  : indexs start by 1
    -h           : this help
 
 - gzipped files are allowed
@@ -126,6 +128,8 @@ if __name__ == '__main__':
             t = float(sys.argv.pop(0))
         elif tok=="-range":
             use_range = True
+        elif tok=="-fuzzymatch":
+            fuzzymatch = True
         else:
             sys.stderr.write('error: unparsed {} option\n'.format(tok))
             sys.stderr.write("{}".format(usage))
@@ -209,6 +213,8 @@ if __name__ == '__main__':
         while len(toks):
             score = float(toks.pop(0))
             n_db = int(toks.pop(0))
+            if fuzzymatch:
+                n_db -= 1 
 
             if score < t:
                 break
