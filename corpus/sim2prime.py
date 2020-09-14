@@ -4,7 +4,6 @@ import sys
 import os
 
 augmented_sep     = '※'
-augmented_lowest  = '▣'
 augmented_range1  = '➊'
 augmented_range2  = '➋'
 augmented_range3  = '➌'
@@ -15,7 +14,7 @@ augmented_range7  = '➐'
 augmented_range8  = '➑'
 augmented_range9  = '➒'
 augmented_range10 = '❿'
-augmented_perfect = '◉'
+augmented_perfect = '▣'
 augmented_src     = '⒮'
 augmented_tgt     = '⒯'
 
@@ -31,7 +30,7 @@ def get_separator(use_range, score=0.0):
         return augmented_sep
 
     if score < 0.5:
-        return augmented_wrong
+        return augmented_sep
     elif score >= 0.5 and score < 0.55:
         return augmented_range1
     elif score >= 0.55 and score < 0.6:
