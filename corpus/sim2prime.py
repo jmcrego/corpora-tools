@@ -4,7 +4,7 @@ import sys
 import os
 
 augmented_sep     = '※'
-augmented_lowest  = '❎'
+augmented_lowest  = '▣'
 augmented_range1  = '➊'
 augmented_range2  = '➋'
 augmented_range3  = '➌'
@@ -15,7 +15,7 @@ augmented_range7  = '➐'
 augmented_range8  = '➑'
 augmented_range9  = '➒'
 augmented_range10 = '❿'
-augmented_perfect = '✅'
+augmented_perfect = '◉'
 augmented_src     = '⒮'
 augmented_tgt     = '⒯'
 
