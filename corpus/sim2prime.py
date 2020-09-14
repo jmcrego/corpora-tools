@@ -144,8 +144,9 @@ if __name__ == '__main__':
     ### read DB_tgt ###
     ###################
     sys.stderr.write('Reading {}\n'.format(fdb_tgt))
-    with open(fdb_tgt,'r') as f:
-        DB_tgt = [x.rstrip() for x in f]
+    DB_tgt = read_file(fdb_tgt)
+#    with open(fdb_tgt,'r') as f:
+#        DB_tgt = [x.rstrip() for x in f]
     sys.stderr.write('Read fdb_tgt={} with {} lines\n'.format(fdb_tgt, len(DB_tgt)))
 
     if fdb_src is not None:
@@ -153,8 +154,9 @@ if __name__ == '__main__':
         ### read DB_src ###
         ###################
         sys.stderr.write('Reading {}\n'.format(fdb_src))
-        with open(fdb_src,'r') as f:
-            DB_src = [x.rstrip() for x in f]
+        DB_src = read_file(fdb_src)
+#        with open(fdb_src,'r') as f:
+#            DB_src = [x.rstrip() for x in f]
         if len(DB_tgt) != len(DB_src):
             sys.stderr.write('error: erroneous number of lines in fdb_src {}'.format(len(DB_src)))
             sys.exit()
@@ -164,8 +166,9 @@ if __name__ == '__main__':
     ### read Q_src ###
     ##################
     sys.stderr.write('Reading {}\n'.format(fq_src))
-    with open(fq_src,'r') as f:
-        Q_src = [x.rstrip() for x in f]
+    Q_src = read_file(fq_src)
+#    with open(fq_src,'r') as f:
+#        Q_src = [x.rstrip() for x in f]
     sys.stderr.write('Read fq_src={} with {} lines\n'.format(fq_src, len(Q_src)))
 
     if fq_tgt is not None:
@@ -173,8 +176,9 @@ if __name__ == '__main__':
         ### read Q_tgt ###
         ##################
         sys.stderr.write('Reading {}\n'.format(fq_tgt))
-        with open(fq_tgt,'r') as f:
-            Q_tgt = [x.rstrip() for x in f]
+        Q_tgt = read_file(fq_tgt)
+#        with open(fq_tgt,'r') as f:
+#            Q_tgt = [x.rstrip() for x in f]
         sys.stderr.write('Read fq_tgt={} with {} lines\n'.format(fq_tgt, len(Q_tgt)))
         if len(Q_tgt) != len(Q_src):
             sys.stderr.write('error: erroneous number of lines in fq_tgt {}'.format(len(Q_tgt)))
