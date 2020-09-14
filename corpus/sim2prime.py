@@ -4,6 +4,7 @@ import sys
 import os
 
 augmented_sep = '◉'  ### augmented sentence without range
+augmented_wrong = '✖️' #'⓪'
 augmented_range0 = '⓪'
 augmented_range1 = '①'
 augmented_range2 = '②'
@@ -14,8 +15,7 @@ augmented_range6 = '⑥'
 augmented_range7 = '⑦'
 augmented_range8 = '⑧'
 augmented_range9 = '⑨'
-augmented_range10 = '⑩'
-augmented_perfect = 'ⓟ'
+augmented_perfect = '✔️' #'ⓟ'
 augmented_src = '⒮'
 augmented_tgt = '⒯'
 
@@ -31,27 +31,27 @@ def get_separator(use_range, score=0.0):
         return augmented_sep
 
     if score < 0.5:
-        return augmented_range0
+        return augmented_wrong
     elif score >= 0.5 and score < 0.55:
-        return augmented_range1
+        return augmented_range0
     elif score >= 0.55 and score < 0.6:
-        return augmented_range2
+        return augmented_range1
     elif score >= 0.6 and score < 0.65:
-        return augmented_range3
+        return augmented_range2
     elif score >= 0.65 and score < 0.7:
-        return augmented_range4
+        return augmented_range3
     elif score >= 0.7 and score < 0.75:
-        return augmented_range5
+        return augmented_range4
     elif score >= 0.75 and score < 0.8:
-        return augmented_range6
+        return augmented_range5
     elif score >= 0.8 and score < 0.85:
-        return augmented_range7
+        return augmented_range6
     elif score >= 0.85 and score < 0.9:
-        return augmented_range8
+        return augmented_range7
     elif score >= 0.9 and score < 0.95:
-        return augmented_range9
+        return augmented_range8
     elif score >= 0.95 and score < 1.0:
-        return augmented_range10
+        return augmented_range9
     else:
         return augmented_perfect
 
