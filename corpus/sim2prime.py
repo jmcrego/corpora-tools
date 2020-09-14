@@ -184,7 +184,7 @@ if __name__ == '__main__':
             if score < t:
                 break
 
-            tag = get_separator(use_range, score) + str(score)
+            tag = get_separator(use_range, score) #+ str(score)
 
             if fdb_src is not None: ### augment source and target sides with DB_src and DB_tgt respectively
                 src_augmented.append(tag + ' ' + DB_src[n_db])
