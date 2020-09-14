@@ -3,7 +3,7 @@
 import sys
 import os
 
-augmented_sep = '⨷'  ### augmented sentence without range
+augmented_sep = '◉'  ### augmented sentence without range
 augmented_range0 = '⓪'
 augmented_range1 = '①'
 augmented_range2 = '②'
@@ -16,8 +16,8 @@ augmented_range8 = '⑧'
 augmented_range9 = '⑨'
 augmented_range10 = '⑩'
 augmented_perfect = 'ⓟ'
-augmented_src = 'ⓢ'
-augmented_tgt = 'ⓣ'
+augmented_src = '⒮'
+augmented_tgt = '⒯'
 
 def progress(n_line):
     if n_line%10000 == 0:
@@ -80,9 +80,10 @@ if __name__ == '__main__':
    -t     FLOAT : min threshold to consider (default 0.5)
    -h           : this help
 
-ONLY augmented sentences are output!
+- ONLY sentences effectively augmented are output. The rest are left empty
 - use -q_tgt when preparing training pairs
-- use -db_src when priming
+- use -db_src for priming 
+
 '''.format(name)
 
     while len(sys.argv):
