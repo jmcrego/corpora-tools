@@ -15,8 +15,8 @@ augmented_range8  = '➑'
 augmented_range9  = '➒'
 augmented_range10 = '❿'
 augmented_perfect = '▣'
-augmented_src     = '⒮'
-augmented_tgt     = '⒯'
+augmented_src     = '‖' #'⒮'
+augmented_tgt     = '‖' #'⒯'
 
 def progress(n_line):
     if n_line%10000 == 0:
@@ -176,7 +176,7 @@ if __name__ == '__main__':
 
         src_augmented = []
         tgt_augmented = []
-        
+
         ###
         ### add similar sentence/s
         ###########################
