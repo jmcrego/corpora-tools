@@ -79,14 +79,14 @@ def output_priming(src_similar, tgt_similar, curr_src, curr_tgt, max_length):
 
     assert len(src_similar) == len(tgt_similar)
     print('')
-    print('src_similar')
-    print('\n'.join(src_similar))
-    print('tgt_similar')
-    print('\n'.join(tgt_similar))
     print('curr_src')
     print(curr_src)
     print('curr_tgt')
     print(curr_tgt)
+    print('src_similar')
+    print('\n'.join(src_similar))
+    print('tgt_similar')
+    print('\n'.join(tgt_similar))
 
     if len(src_similar) == 0: ### if not similar print empty sentence
         print('')
