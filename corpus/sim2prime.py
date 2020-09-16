@@ -78,6 +78,7 @@ def get_separator(use_range, score=0.0):
 def output_priming(src_similar, tgt_similar, curr_src, curr_tgt, max_length):
 
     assert len(src_similar) == len(tgt_similar)
+    print('')
     print('src_similar')
     print('\n'.join(src_similar))
     print('tgt_similar')
