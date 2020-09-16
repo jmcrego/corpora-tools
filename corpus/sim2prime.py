@@ -5,20 +5,20 @@ import os
 import io
 import gzip
 
-augmented_sep     = '※'
-augmented_range1  = '➊'
-augmented_range2  = '➋'
-augmented_range3  = '➌'
-augmented_range4  = '➍'
-augmented_range5  = '➎'
-augmented_range6  = '➏'
-augmented_range7  = '➐'
-augmented_range8  = '➑'
-augmented_range9  = '➒'
-augmented_range10 = '❿'
-augmented_perfect = '▣'
-augmented_src     = '‖'
-augmented_tgt     = '‖'
+tok_augmented_sep     = '※'
+tok_augmented_range1  = '➊'
+tok_augmented_range2  = '➋'
+tok_augmented_range3  = '➌'
+tok_augmented_range4  = '➍'
+tok_augmented_range5  = '➎'
+tok_augmented_range6  = '➏'
+tok_augmented_range7  = '➐'
+tok_augmented_range8  = '➑'
+tok_augmented_range9  = '➒'
+tok_augmented_range10 = '❿'
+tok_augmented_perfect = '▣'
+tok_augmented_src     = '‖'
+tok_augmented_tgt     = '‖'
 
 def progress(n_line):
     if n_line%10000 == 0:
@@ -48,32 +48,56 @@ def read_file(file):
 
 def get_separator(use_range, score=0.0):
     if not use_range:
-        return augmented_sep
+        return tok_augmented_sep
 
     if score < 0.5:
-        return augmented_sep
+        return tok_augmented_sep
     elif score >= 0.5 and score < 0.55:
-        return augmented_range1
+        return tok_augmented_range1
     elif score >= 0.55 and score < 0.6:
-        return augmented_range2
+        return tok_augmented_range2
     elif score >= 0.6 and score < 0.65:
-        return augmented_range3
+        return tok_augmented_range3
     elif score >= 0.65 and score < 0.7:
-        return augmented_range4
+        return tok_augmented_range4
     elif score >= 0.7 and score < 0.75:
-        return augmented_range5
+        return tok_augmented_range5
     elif score >= 0.75 and score < 0.8:
-        return augmented_range6
+        return tok_augmented_range6
     elif score >= 0.8 and score < 0.85:
-        return augmented_range7
+        return tok_augmented_range7
     elif score >= 0.85 and score < 0.9:
-        return augmented_range8
+        return tok_augmented_range8
     elif score >= 0.9 and score < 0.95:
-        return augmented_range9
+        return tok_augmented_range9
     elif score >= 0.95 and score < 1.0:
-        return augmented_range10
+        return tok_augmented_range10
     else:
-        return augmented_perfect
+        return tok_augmented_perfect
+
+def output(src_augmented, tgt_augmented, curr_src, curr_tgt, max_length):
+
+    if len(src_augmented) == 0: ### if not augmented print empty sentence
+        print('')
+        continue
+
+    ###
+    ### add query sentence/s
+    ###########################
+    src_augmented.append(curr_src)
+    if curr_tgt is not None:
+        tgt_augmented.append(curr_tgt)
+            
+    ###
+    ### output
+    ###########################
+    if len(tgt_augmented): 
+        ### training ###
+        print(' '.join(src_augmented) + '\t' + ' '.join(tgt_augmented))
+    else: 
+        ### inference ###
+        print(' '.join(src_augmented))
+
 
 #####################################################################
 ### MAIN ############################################################
@@ -91,7 +115,7 @@ if __name__ == '__main__':
     fq_tgt = None
     sep_st = '\t'
     name = sys.argv.pop(0)
-    usage = '''usage: {} -db_tgt FILE [-db_src FILE] -q_src FILE [-q_tgt FILE] [-range] [-fuzzymatch] [-n INT] [-t FLOAT] < FSIM > FAUGMENTED
+    usage = '''usage: {} -db_tgt FILE [-db_src FILE] -q_src FILE [-q_tgt FILE] [-range] [-fuzzymatch] [-n INT] [-t FLOAT] [-l INT] < FSIM > FAUGMENTED
    -db_src FILE : db file with src strings to output
    -db_tgt FILE : db file with tgt strings to output
    -q_src  FILE : query file with src strings
@@ -99,6 +123,7 @@ if __name__ == '__main__':
    -range       : use score ranges to separate sentences
    -n       INT : max n-best similar to output (default 1)
    -t     FLOAT : min threshold to consider (default 0.5)
+   -l       INT : max sentence length (default 0)
    -fuzzymatch  : indexs start by 1
    -h           : this help
 
@@ -126,6 +151,8 @@ if __name__ == '__main__':
             n = int(sys.argv.pop(0))
         elif tok=="-t" and len(sys.argv):
             t = float(sys.argv.pop(0))
+        elif tok=="-l" and len(sys.argv):
+            l = int(sys.argv.pop(0))
         elif tok=="-range":
             use_range = True
         elif tok=="-fuzzymatch":
@@ -213,41 +240,23 @@ if __name__ == '__main__':
         while len(toks):
             score = float(toks.pop(0))
             n_db = int(toks.pop(0))
-            if fuzzymatch:
+            if fuzzymatch: ### fuzzymatch indexs start by 1
                 n_db -= 1 
 
             if score < t:
                 break
 
             tag = get_separator(use_range, score) #+ str(score)
-
-            if fdb_src is not None: ### augment source and target sides with DB_src and DB_tgt respectively
+            if fdb_src is not None: ### PRIMING: augment source and target sides
                 src_augmented.append(tag + ' ' + DB_src[n_db])
                 tgt_augmented.append(tag + ' ' + DB_tgt[n_db])
-            else: ### augment soruce side with DB_tgt
+            else: ### BULTE et al: augment source side with DB_tgt
                 src_augmented.append(tag + ' ' + DB_tgt[n_db])
 
             if len(src_augmented) >= n: ### already augmented with n similar sentences
                 break
 
-        if len(src_augmented) == 0: ### if not augmented not shown
-            print('')
-            continue
+        curr_src = tok_augmented_src + ' ' + Q_src[n_query]
+        curr_tgt = tok_augmented_tgt + ' ' + Q_tgt[n_query] if fq_tgt is not None else None
+        output(src_augmented, tgt_augmented, curr_src, curr_tgt, l)
             
-        ###
-        ### add query sentence/s
-        ###########################
-        src_augmented.append(augmented_src + ' ' + Q_src[n_query])
-        if fq_tgt is not None:
-            tgt_augmented.append(augmented_tgt + ' ' + Q_tgt[n_query])
-            
-        ###
-        ### output
-        ###########################
-        if len(tgt_augmented): 
-            ### training ###
-            print(' '.join(src_augmented) + '\t' + ' '.join(tgt_augmented))
-        else: 
-            ### inference ###
-            print(' '.join(src_augmented))
-
