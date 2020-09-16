@@ -81,7 +81,7 @@ def output_priming(src_augmented, tgt_augmented, curr_src, curr_tgt, max_length)
 
     if len(src_augmented) == 0: ### if not augmented print empty sentence
         print('')
-        continue
+        return
 
     src = curr_src.split()
     tgt = curr_tgt.split() if curr_tgt is not None else []
@@ -102,7 +102,7 @@ def output_bulte(src_augmented, curr_src, curr_tgt, max_length):
 
     if len(src_augmented) == 0: ### if not augmented print empty sentence
         print('')
-        continue
+        return
 
     src = curr_src.split()
     tgt = curr_tgt.split() if curr_tgt is not None else []
