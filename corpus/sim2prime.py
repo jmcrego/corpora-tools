@@ -100,17 +100,13 @@ def output_priming(src_similar, tgt_similar, curr_src, curr_tgt, max_length):
 
         if len(src_similar) == 0: ### no more similar, print even if it exceeds max_length
             print('')
-            print('last similar')
-            print('len_src={}'.format(len(src)))
-            print('len_tgt={}'.format(len(tgt)))
+            print('[last similar] lsrc={} ltgt={}'.format(len(src),len(tgt)))
             print(' '.join(src) + '\t' + ' '.join(tgt))
             return
 
         if len(src) + len(src_similar[0].split()) > max_length or len(tgt) + len(tgt_similar[0].split()) > max_length: ### adding another exceeds limits
             print('')
-            print('remain similar')
-            print('len_src={}'.format(len(src)))
-            print('len_tgt={}'.format(len(tgt)))
+            print('[remain similar] lsrc={} ltgt={}'.format(len(src),len(tgt)))
             print(' '.join(src) + '\t' + ' '.join(tgt))
             src = curr_src.split()
             tgt = curr_tgt.split() if curr_tgt is not None else []
