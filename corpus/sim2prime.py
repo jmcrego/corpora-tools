@@ -78,8 +78,6 @@ def get_separator(use_range, score=0.0):
 def output_priming(src_augmented, tgt_augmented, curr_src, curr_tgt, max_length):
 
     assert len(src_augmented) == len(tgt_augmented)
-    print('len_src_augmented={}'.format(len(src_augmented)))
-    print('len_tgt_augmented={}'.format(len(tgt_augmented)))
 
     if len(src_augmented) == 0: ### if not augmented print empty sentence
         print('')
@@ -90,11 +88,10 @@ def output_priming(src_augmented, tgt_augmented, curr_src, curr_tgt, max_length)
     while len(src_augmented):
         src = src_augmented.pop(0).split() + src
         tgt = tgt_augmented.pop(0).split() + tgt
-        print('src: {}'.format(src))
-        print('tgt: {}'.format(tgt))
 
         if len(src_augmented) == 0: ### no more augmented, print even if it exceeds max_length
             print(' '.join(src) + '\t' + ' '.join(tgt))
+            return
 
         if len(src) + len(src_augmented[0].split()) > max_length or len(tgt) + len(tgt_augmented[0].split()) > max_length: ### adding another exceeds limits
             print(' '.join(src) + '\t' + ' '.join(tgt))
