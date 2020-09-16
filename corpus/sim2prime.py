@@ -5,20 +5,20 @@ import os
 import io
 import gzip
 
-tok_augmented_sep     = '※'
-tok_augmented_range1  = '➊'
-tok_augmented_range2  = '➋'
-tok_augmented_range3  = '➌'
-tok_augmented_range4  = '➍'
-tok_augmented_range5  = '➎'
-tok_augmented_range6  = '➏'
-tok_augmented_range7  = '➐'
-tok_augmented_range8  = '➑'
-tok_augmented_range9  = '➒'
-tok_augmented_range10 = '❿'
-tok_augmented_perfect = '▣'
-tok_augmented_src     = '‖'
-tok_augmented_tgt     = '‖'
+tok_sep     = '※'
+tok_range1  = '➊'
+tok_range2  = '➋'
+tok_range3  = '➌'
+tok_range4  = '➍'
+tok_range5  = '➎'
+tok_range6  = '➏'
+tok_range7  = '➐'
+tok_range8  = '➑'
+tok_range9  = '➒'
+tok_range10 = '❿'
+tok_perfect = '▣'
+tok_src     = '‖'
+tok_tgt     = '‖'
 
 def progress(n_line):
     if n_line%10000 == 0:
@@ -48,72 +48,80 @@ def read_file(file):
 
 def get_separator(use_range, score=0.0):
     if not use_range:
-        return tok_augmented_sep
+        return tok_sep
 
     if score < 0.5:
-        return tok_augmented_sep
+        return tok_sep
     elif score >= 0.5 and score < 0.55:
-        return tok_augmented_range1
+        return tok_range1
     elif score >= 0.55 and score < 0.6:
-        return tok_augmented_range2
+        return tok_range2
     elif score >= 0.6 and score < 0.65:
-        return tok_augmented_range3
+        return tok_range3
     elif score >= 0.65 and score < 0.7:
-        return tok_augmented_range4
+        return tok_range4
     elif score >= 0.7 and score < 0.75:
-        return tok_augmented_range5
+        return tok_range5
     elif score >= 0.75 and score < 0.8:
-        return tok_augmented_range6
+        return tok_range6
     elif score >= 0.8 and score < 0.85:
-        return tok_augmented_range7
+        return tok_range7
     elif score >= 0.85 and score < 0.9:
-        return tok_augmented_range8
+        return tok_range8
     elif score >= 0.9 and score < 0.95:
-        return tok_augmented_range9
+        return tok_range9
     elif score >= 0.95 and score < 1.0:
-        return tok_augmented_range10
+        return tok_range10
     else:
-        return tok_augmented_perfect
+        return tok_perfect
 
-def output_priming(src_augmented, tgt_augmented, curr_src, curr_tgt, max_length):
+def output_priming(src_similar, tgt_similar, curr_src, curr_tgt, max_length):
 
-    assert len(src_augmented) == len(tgt_augmented)
+    assert len(src_similar) == len(tgt_similar)
+    print('src_similar')
+    print('\n'.join(src_similar))
+    print('tgt_similar')
+    print('\n'.join(tgt_similar))
+    print('curr_src')
+    print('\n'.join(curr_src))
+    print('curr_tgt')
+    print('\n'.join(curr_tgt))
 
-    if len(src_augmented) == 0: ### if not augmented print empty sentence
+    if len(src_similar) == 0: ### if not similar print empty sentence
         print('')
         return
 
     src = curr_src.split()
     tgt = curr_tgt.split() if curr_tgt is not None else []
-    while len(src_augmented):
-        src = src_augmented.pop(0).split() + src
-        tgt = tgt_augmented.pop(0).split() + tgt
+    while len(src_similar):
+        src = src_similar.pop(0).split() + src
+        tgt = tgt_similar.pop(0).split() + tgt
 
-        if len(src_augmented) == 0: ### no more augmented, print even if it exceeds max_length
+        if len(src_similar) == 0: ### no more similar, print even if it exceeds max_length
             print(' '.join(src) + '\t' + ' '.join(tgt))
             return
 
-        if len(src) + len(src_augmented[0].split()) > max_length or len(tgt) + len(tgt_augmented[0].split()) > max_length: ### adding another exceeds limits
+        if len(src) + len(src_similar[0].split()) > max_length or len(tgt) + len(tgt_similar[0].split()) > max_length: ### adding another exceeds limits
             print(' '.join(src) + '\t' + ' '.join(tgt))
             src = curr_src.split()
             tgt = curr_tgt.split() if curr_tgt is not None else []
 
 
-def output_bulte(src_augmented, curr_src, curr_tgt, max_length):
+def output_augment(src_similar, curr_src, curr_tgt, max_length):
 
-    if len(src_augmented) == 0: ### if not augmented print empty sentence
+    if len(src_similar) == 0: ### if not similar print empty sentence
         print('')
         return
 
     src = curr_src.split()
     tgt = curr_tgt.split() if curr_tgt is not None else []
-    while len(src_augmented):
-        src = src_augmented.pop(0).split() + src
+    while len(src_similar):
+        src = src_similar.pop(0).split() + src
 
-        if len(src_augmented) == 0: ### no more augmented, print even if it exceeds max_length
+        if len(src_similar) == 0: ### no more similar, print even if it exceeds max_length
             print(' '.join(src) + '\t' + ' '.join(tgt))
 
-        if len(src) + len(src_augmented[0].split()) > max_length: ### adding another exceeds limits
+        if len(src) + len(src_similar[0].split()) > max_length: ### adding another exceeds limits
             print(' '.join(src) + '\t' + ' '.join(tgt))
             src = curr_src.split()
             tgt = curr_tgt.split() if curr_tgt is not None else []
@@ -276,12 +284,12 @@ if __name__ == '__main__':
             if len(src_augmented) >= n: ### already augmented with n similar sentences
                 break
 
-        curr_src = tok_augmented_src + ' ' + Q_src[n_query]
-        curr_tgt = tok_augmented_tgt + ' ' + Q_tgt[n_query] if fq_tgt is not None else None
+        curr_src = tok_src + ' ' + Q_src[n_query]
+        curr_tgt = tok_tgt + ' ' + Q_tgt[n_query] if fq_tgt is not None else None
         if fdb_src is not None:
             output_priming(src_augmented, tgt_augmented, curr_src, curr_tgt, l)
         else:
-            output_bulte(src_augmented, curr_src, curr_tgt, l)
+            output_augment(src_augmented, curr_src, curr_tgt, l)
 
 
 
