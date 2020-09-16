@@ -79,6 +79,7 @@ def output_priming(src_similar, tgt_similar, curr_src, curr_tgt, max_length):
 
     assert len(src_similar) == len(tgt_similar)
     print('')
+    print('n_similar={}'.format(len(src_similar)))
     print('curr_src')
     print(curr_src)
     print('curr_tgt')
