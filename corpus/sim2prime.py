@@ -118,35 +118,6 @@ def output_bulte(src_augmented, curr_src, curr_tgt, max_length):
             tgt = curr_tgt.split() if curr_tgt is not None else []
 
 
-
-def output(src_augmented, tgt_augmented, curr_src, curr_tgt):
-
-    if len(src_augmented) == 0: ### if not augmented print empty sentence
-        print('')
-        continue
-
-    for s in range(len(src_augmented)):
-        add_src = src_augmented[i].split()
-        if len(tgt_augmented):
-
-    ###
-    ### add query sentence/s
-    ###########################
-    src_augmented.append(curr_src)
-    if curr_tgt is not None:
-        tgt_augmented.append(curr_tgt)
-            
-    ###
-    ### output
-    ###########################
-    if len(tgt_augmented): 
-        ### training ###
-        print(' '.join(src_augmented) + '\t' + ' '.join(tgt_augmented))
-    else: 
-        ### inference ###
-        print(' '.join(src_augmented))
-
-
 #####################################################################
 ### MAIN ############################################################
 #####################################################################
