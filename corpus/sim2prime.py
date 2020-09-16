@@ -75,11 +75,59 @@ def get_separator(use_range, score=0.0):
     else:
         return tok_augmented_perfect
 
-def output(src_augmented, tgt_augmented, curr_src, curr_tgt, max_length):
+def output_priming(src_augmented, tgt_augmented, curr_src, curr_tgt, max_length):
+
+    assert len(src_augmented) == len(tgt_augmented)
 
     if len(src_augmented) == 0: ### if not augmented print empty sentence
         print('')
         continue
+
+    src = curr_src.split()
+    tgt = curr_tgt.split() if curr_tgt is not None else []
+    while len(src_augmented):
+        src = src_augmented.pop(0).split() + src
+        tgt = tgt_augmented.pop(0).split() + tgt
+
+        if len(src_augmented) == 0: ### no more augmented, print even if it exceeds max_length
+            print ' '.join(src) + '\t' ' '.join(tgt) 
+
+        if len(src) + len(src_augmented.[0].split()) > max_length or len(tgt) + len(tgt_augmented.[0].split()) > max_length: ### adding another exceeds limits
+            print ' '.join(src) + '\t' ' '.join(tgt) 
+            src = curr_src.split()
+            tgt = curr_tgt.split() if curr_tgt is not None else []
+
+
+def output_bulte(src_augmented, curr_src, curr_tgt, max_length):
+
+    if len(src_augmented) == 0: ### if not augmented print empty sentence
+        print('')
+        continue
+
+    src = curr_src.split()
+    tgt = curr_tgt.split() if curr_tgt is not None else []
+    while len(src_augmented):
+        src = src_augmented.pop(0).split() + src
+
+        if len(src_augmented) == 0: ### no more augmented, print even if it exceeds max_length
+            print ' '.join(src) + '\t' ' '.join(tgt) 
+
+        if len(src) + len(src_augmented.[0].split()) > max_length: ### adding another exceeds limits
+            print ' '.join(src) + '\t' ' '.join(tgt) 
+            src = curr_src.split()
+            tgt = curr_tgt.split() if curr_tgt is not None else []
+
+
+
+def output(src_augmented, tgt_augmented, curr_src, curr_tgt):
+
+    if len(src_augmented) == 0: ### if not augmented print empty sentence
+        print('')
+        continue
+
+    for s in range(len(src_augmented)):
+        add_src = src_augmented[i].split()
+        if len(tgt_augmented):
 
     ###
     ### add query sentence/s
@@ -238,7 +286,7 @@ if __name__ == '__main__':
         ### add similar sentence/s
         ###########################
         while len(toks):
-            score = float(toks.pop(0))
+            score = float(toks.pop(0)) ### similar sentences are sorted by similarity (most similar first)
             n_db = int(toks.pop(0))
             if fuzzymatch: ### fuzzymatch indexs start by 1
                 n_db -= 1 
@@ -248,15 +296,21 @@ if __name__ == '__main__':
 
             tag = get_separator(use_range, score) #+ str(score)
             if fdb_src is not None: ### PRIMING: augment source and target sides
-                src_augmented.append(tag + ' ' + DB_src[n_db])
-                tgt_augmented.append(tag + ' ' + DB_tgt[n_db])
+                src_augmented.insert(0,tag + ' ' + DB_src[n_db])
+                tgt_augmented.insert(0,tag + ' ' + DB_tgt[n_db])
             else: ### BULTE et al: augment source side with DB_tgt
-                src_augmented.append(tag + ' ' + DB_tgt[n_db])
+                src_augmented.insert(0,tag + ' ' + DB_tgt[n_db])
 
             if len(src_augmented) >= n: ### already augmented with n similar sentences
                 break
 
         curr_src = tok_augmented_src + ' ' + Q_src[n_query]
         curr_tgt = tok_augmented_tgt + ' ' + Q_tgt[n_query] if fq_tgt is not None else None
-        output(src_augmented, tgt_augmented, curr_src, curr_tgt, l)
+        if fdb_src is not None:
+            output_priming(src_augmented, tgt_augmented, curr_src, curr_tgt, l)
+        else:
+            output_bulte(src_augmented, curr_src, curr_tgt, l)
+
+
+
             
