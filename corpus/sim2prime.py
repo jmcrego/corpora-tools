@@ -90,10 +90,10 @@ def output_priming(src_augmented, tgt_augmented, curr_src, curr_tgt, max_length)
         tgt = tgt_augmented.pop(0).split() + tgt
 
         if len(src_augmented) == 0: ### no more augmented, print even if it exceeds max_length
-            print ' '.join(src) + '\t' + ' '.join(tgt) 
+            print(' '.join(src) + '\t' + ' '.join(tgt))
 
         if len(src) + len(src_augmented.[0].split()) > max_length or len(tgt) + len(tgt_augmented.[0].split()) > max_length: ### adding another exceeds limits
-            print ' '.join(src) + '\t' + ' '.join(tgt) 
+            print(' '.join(src) + '\t' + ' '.join(tgt))
             src = curr_src.split()
             tgt = curr_tgt.split() if curr_tgt is not None else []
 
@@ -110,10 +110,10 @@ def output_bulte(src_augmented, curr_src, curr_tgt, max_length):
         src = src_augmented.pop(0).split() + src
 
         if len(src_augmented) == 0: ### no more augmented, print even if it exceeds max_length
-            print ' '.join(src) + '\t' + ' '.join(tgt) 
+            print(' '.join(src) + '\t' + ' '.join(tgt))
 
         if len(src) + len(src_augmented.[0].split()) > max_length: ### adding another exceeds limits
-            print ' '.join(src) + '\t' + ' '.join(tgt) 
+            print(' '.join(src) + '\t' + ' '.join(tgt))
             src = curr_src.split()
             tgt = curr_tgt.split() if curr_tgt is not None else []
 
