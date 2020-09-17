@@ -20,6 +20,18 @@ tok_perfect = '▣'
 tok_src     = '‖'
 tok_tgt     = '‖'
 
+tok_range1  = 'FM_range[0.5,0.55)'
+tok_range2  = 'FM_range[0.55,0.6)'
+tok_range3  = 'FM_range[0.6,0.65)'
+tok_range4  = 'FM_range[0.65,0.7)'
+tok_range5  = 'FM_range[0.7,0.75)'
+tok_range6  = 'FM_range[0.75,0.8)'
+tok_range7  = 'FM_range[0.8,0.85)'
+tok_range8  = 'FM_range[0.85,0.9)'
+tok_range9  = 'FM_range[0.9,0.95)'
+tok_range10 = 'FM_range[0.95,1.0)'
+tok_perfect = 'FM_range_perfect'
+
 def progress(n_line):
     if n_line%10000 == 0:
         if n_line%100000 == 0:
@@ -77,6 +89,7 @@ def get_separator(use_range, score=0.0):
 
 def output_priming(src_similar, tgt_similar, curr_src, curr_tgt, max_length, verbose):
 
+    ### the last src_similar is the most similar to curr_src
     assert len(src_similar) == len(tgt_similar)
     if len(src_similar) == 0: ### if not similar print empty sentence
         print('')
