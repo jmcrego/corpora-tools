@@ -5,7 +5,12 @@ import os
 import io
 import gzip
 
+sep_st      = '\t'
+
 tok_sep     = '※'
+tok_src     = '‖'
+tok_tgt     = '‖'
+
 tok_range1  = '➊'
 tok_range2  = '➋'
 tok_range3  = '➌'
@@ -17,20 +22,18 @@ tok_range8  = '➑'
 tok_range9  = '➒'
 tok_range10 = '❿'
 tok_perfect = '▣'
-tok_src     = '‖'
-tok_tgt     = '‖'
 
-tok_range1  = 'FM_range[0.5,0.55)'
-tok_range2  = 'FM_range[0.55,0.6)'
-tok_range3  = 'FM_range[0.6,0.65)'
-tok_range4  = 'FM_range[0.65,0.7)'
-tok_range5  = 'FM_range[0.7,0.75)'
-tok_range6  = 'FM_range[0.75,0.8)'
-tok_range7  = 'FM_range[0.8,0.85)'
-tok_range8  = 'FM_range[0.85,0.9)'
-tok_range9  = 'FM_range[0.9,0.95)'
-tok_range10 = 'FM_range[0.95,1.0)'
-tok_perfect = 'FM_range_perfect'
+tok_range1  = 'sim_range_[0.5,0.55)'
+tok_range2  = 'sim_range_[0.55,0.6)'
+tok_range3  = 'sim_range_[0.6,0.65)'
+tok_range4  = 'sim_range_[0.65,0.7)'
+tok_range5  = 'sim_range_[0.7,0.75)'
+tok_range6  = 'sim_range_[0.75,0.8)'
+tok_range7  = 'sim_range_[0.8,0.85)'
+tok_range8  = 'sim_range_[0.85,0.9)'
+tok_range9  = 'sim_range_[0.9,0.95)'
+tok_range10 = 'sim_range_[0.95,1.0)'
+tok_perfect = 'sim_range_perfect'
 
 def progress(n_line):
     if n_line%10000 == 0:
@@ -115,7 +118,7 @@ def output_priming(src_similar, tgt_similar, curr_src, curr_tgt, max_length, ver
                 print('')
                 print('[last similar] lsrc={} ltgt={}'.format(len(src),len(tgt)))
 
-            print(' '.join(src) + '\t' + ' '.join(tgt))
+            print(' '.join(src) + sep_st + ' '.join(tgt))
             return
 
         if len(src) + len(src_similar[0].split()) > max_length or len(tgt) + len(tgt_similar[0].split()) > max_length: ### adding another exceeds limits
@@ -124,7 +127,7 @@ def output_priming(src_similar, tgt_similar, curr_src, curr_tgt, max_length, ver
                 print('')
                 print('[remain similar] lsrc={} ltgt={}'.format(len(src),len(tgt)))
 
-            print(' '.join(src) + '\t' + ' '.join(tgt))
+            print(' '.join(src) + sep_st + ' '.join(tgt))
             src = curr_src.split()
             tgt = curr_tgt.split() if curr_tgt is not None else []
 
@@ -156,7 +159,7 @@ def output_augment(src_similar, curr_src, curr_tgt, max_length, verbose):
                 print('')
                 print('[last similar] lsrc={} ltgt={}'.format(len(src),len(tgt)))
 
-            print(' '.join(src) + '\t' + ' '.join(tgt))
+            print(' '.join(src) + sep_st + ' '.join(tgt))
 
         if len(src) + len(src_similar[0].split()) > max_length: ### adding another exceeds limits
 
@@ -164,7 +167,7 @@ def output_augment(src_similar, curr_src, curr_tgt, max_length, verbose):
                 print('')
                 print('[remain similar] lsrc={} ltgt={}'.format(len(src),len(tgt)))
 
-            print(' '.join(src) + '\t' + ' '.join(tgt))
+            print(' '.join(src) + sep_st + ' '.join(tgt))
             src = curr_src.split()
             tgt = curr_tgt.split() if curr_tgt is not None else []
 
@@ -185,7 +188,6 @@ if __name__ == '__main__':
     fdb_tgt = None
     fq_src = None
     fq_tgt = None
-    sep_st = '\t'
     name = sys.argv.pop(0)
     usage = '''usage: {} -db_tgt FILE [-db_src FILE] -q_src FILE [-q_tgt FILE] [-range] [-fuzzymatch] [-n INT] [-t FLOAT] [-l INT] [-v] < FSIM > FAUGMENTED
    -db_src FILE : db file with src strings to output
