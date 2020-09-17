@@ -75,8 +75,7 @@ def get_separator(use_range, score=0.0):
     else:
         return tok_perfect
 
-def output_priming(src_similar, tgt_similar, curr_src, curr_tgt, max_length):
-    verbose = False
+def output_priming(src_similar, tgt_similar, curr_src, curr_tgt, max_length, verbose):
 
     assert len(src_similar) == len(tgt_similar)
     if len(src_similar) == 0: ### if not similar print empty sentence
@@ -85,15 +84,11 @@ def output_priming(src_similar, tgt_similar, curr_src, curr_tgt, max_length):
 
     if verbose:
         print('')
+        print('*** curr_src: {}'.format(curr_src))
+        print('*** curr_tgt: {}'.format(curr_tgt))
         print('n_similar={}'.format(len(src_similar)))
-        print('*** curr_src ***')
-        print(curr_src)
-        print('*** curr_tgt ***')
-        print(curr_tgt)
-        print('*** src_similar ***')
-        print('\n'.join(src_similar))
-        print('*** tgt_similar ***')
-        print('\n'.join(tgt_similar))
+        print('\n*** src_sim: '.join(src_similar))
+        print('\n*** tgt_sim: '.join(tgt_similar))
 
     src = curr_src.split()
     tgt = curr_tgt.split() if curr_tgt is not None else []
@@ -121,8 +116,7 @@ def output_priming(src_similar, tgt_similar, curr_src, curr_tgt, max_length):
             tgt = curr_tgt.split() if curr_tgt is not None else []
 
 
-def output_augment(src_similar, curr_src, curr_tgt, max_length):
-    verbose = False
+def output_augment(src_similar, curr_src, curr_tgt, max_length, verbose):
 
     if len(src_similar) == 0: ### if not similar print empty sentence
         print('')
@@ -170,6 +164,8 @@ if __name__ == '__main__':
 
     n = 1
     t = 0.5
+    l = 0
+    v = False
     use_range = False
     fuzzymatch = False
     fdb_src = None
@@ -178,16 +174,17 @@ if __name__ == '__main__':
     fq_tgt = None
     sep_st = '\t'
     name = sys.argv.pop(0)
-    usage = '''usage: {} -db_tgt FILE [-db_src FILE] -q_src FILE [-q_tgt FILE] [-range] [-fuzzymatch] [-n INT] [-t FLOAT] [-l INT] < FSIM > FAUGMENTED
+    usage = '''usage: {} -db_tgt FILE [-db_src FILE] -q_src FILE [-q_tgt FILE] [-range] [-fuzzymatch] [-n INT] [-t FLOAT] [-l INT] [-v] < FSIM > FAUGMENTED
    -db_src FILE : db file with src strings to output
    -db_tgt FILE : db file with tgt strings to output
    -q_src  FILE : query file with src strings
    -q_tgt  FILE : query file with tgt strings
    -range       : use score ranges to separate sentences
+   -fuzzymatch  : indexs start by 1
    -n       INT : max n-best similar to output (default 1)
    -t     FLOAT : min threshold to consider (default 0.5)
    -l       INT : max sentence length (default 0)
-   -fuzzymatch  : indexs start by 1
+   -v           : verbose
    -h           : this help
 
 - gzipped files are allowed
@@ -216,6 +213,8 @@ if __name__ == '__main__':
             t = float(sys.argv.pop(0))
         elif tok=="-l" and len(sys.argv):
             l = int(sys.argv.pop(0))
+        elif tok=="-v":
+            v = True
         elif tok=="-range":
             use_range = True
         elif tok=="-fuzzymatch":
@@ -322,9 +321,9 @@ if __name__ == '__main__':
         curr_src = tok_src + ' ' + Q_src[n_query]
         curr_tgt = tok_tgt + ' ' + Q_tgt[n_query] if fq_tgt is not None else None
         if fdb_src is not None:
-            output_priming(src_augmented, tgt_augmented, curr_src, curr_tgt, l)
+            output_priming(src_augmented, tgt_augmented, curr_src, curr_tgt, l, v)
         else:
-            output_augment(src_augmented, curr_src, curr_tgt, l)
+            output_augment(src_augmented, curr_src, curr_tgt, l, v)
 
 
 
