@@ -87,8 +87,8 @@ def output_priming(src_similar, tgt_similar, curr_src, curr_tgt, max_length, ver
         print('*** curr_src: {}'.format(curr_src))
         print('*** curr_tgt: {}'.format(curr_tgt))
         print('n_similar={}'.format(len(src_similar)))
-        print('\n*** src_sim: '.join(src_similar))
-        print('\n*** tgt_sim: '.join(tgt_similar))
+        print('*** src_sim: ' + '\n*** src_sim: '.join(src_similar))
+        print('*** tgt_sim: ' + '\n*** tgt_sim: '.join(tgt_similar))
 
     src = curr_src.split()
     tgt = curr_tgt.split() if curr_tgt is not None else []
