@@ -8,8 +8,7 @@ import gzip
 sep_st      = '\t'
 
 tok_sep     = '※'
-tok_src     = '‖'
-tok_tgt     = '‖'
+tok_curr    = '‖'
 
 tok_range1  = '➊'
 tok_range2  = '➋'
@@ -333,8 +332,8 @@ if __name__ == '__main__':
             if len(src_augmented) >= n: ### already augmented with n similar sentences
                 break
 
-        curr_src = tok_src + ' ' + Q_src[n_query]
-        curr_tgt = tok_tgt + ' ' + Q_tgt[n_query] if fq_tgt is not None else None
+        curr_src = tok_curr + ' ' + Q_src[n_query]
+        curr_tgt = tok_curr + ' ' + Q_tgt[n_query] if fq_tgt is not None else None
         if fdb_src is not None:
             output_priming(src_augmented, tgt_augmented, curr_src, curr_tgt, l, v)
         else:
