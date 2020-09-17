@@ -91,11 +91,11 @@ def get_separator(use_range, score=0.0):
     else:
         return tok_perfect
 
-def output_priming(src_similar, tgt_similar, curr_src, curr_tgt, max_length, verbose):
+def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, max_length, verbose):
 
-    ### the last src_similar is the most similar to curr_src
-    assert len(src_similar) == len(tgt_similar)
-    if len(src_similar) == 0: ### if not similar print empty sentence
+    ### the last src_similars is the most similar to curr_src
+    assert len(src_similars) == len(tgt_similars)
+    if len(src_similars) == 0: ### if not similar print empty sentence
         print('')
         return
 
@@ -103,17 +103,17 @@ def output_priming(src_similar, tgt_similar, curr_src, curr_tgt, max_length, ver
         print('')
         print('*** curr_src: {}'.format(curr_src))
         print('*** curr_tgt: {}'.format(curr_tgt))
-        print('n_similar={}'.format(len(src_similar)))
-        print('*** src_sim: ' + '\n*** src_sim: '.join(src_similar))
-        print('*** tgt_sim: ' + '\n*** tgt_sim: '.join(tgt_similar))
+        print('n_similars={}'.format(len(src_similars)))
+        print('*** src_sim: ' + '\n*** src_sim: '.join(src_similars))
+        print('*** tgt_sim: ' + '\n*** tgt_sim: '.join(tgt_similars))
 
     src = curr_src.split()
     tgt = curr_tgt.split() if curr_tgt is not None else []
-    while len(src_similar):
-        src = src_similar.pop(0).split() + src
-        tgt = tgt_similar.pop(0).split() + tgt
+    while len(src_similars):
+        src = src_similars.pop(0).split() + src
+        tgt = tgt_similars.pop(0).split() + tgt
 
-        if len(src_similar) == 0: ### no more similar, print even if it exceeds max_length
+        if len(src_similars) == 0: ### no more similar, print even if it exceeds max_length
 
             if verbose:
                 print('')
@@ -122,7 +122,7 @@ def output_priming(src_similar, tgt_similar, curr_src, curr_tgt, max_length, ver
             print(' '.join(src) + sep_st + ' '.join(tgt))
             return
 
-        if len(src) + len(src_similar[0].split()) > max_length or len(tgt) + len(tgt_similar[0].split()) > max_length: ### adding another exceeds limits
+        if len(src) + len(src_similars[0].split()) > max_length or len(tgt) + len(tgt_similars[0].split()) > max_length: ### adding another exceeds limits
 
             if verbose:
                 print('')
@@ -133,28 +133,28 @@ def output_priming(src_similar, tgt_similar, curr_src, curr_tgt, max_length, ver
             tgt = curr_tgt.split() if curr_tgt is not None else []
 
 
-def output_augment(src_similar, curr_src, curr_tgt, max_length, verbose):
+def output_augment(src_similars, curr_src, curr_tgt, max_length, verbose):
 
-    if len(src_similar) == 0: ### if not similar print empty sentence
+    if len(src_similars) == 0: ### if not similar print empty sentence
         print('')
         return
 
     if verbose:
         print('')
-        print('n_similar={}'.format(len(src_similar)))
+        print('n_similars={}'.format(len(src_similars)))
         print('*** curr_src ***')
         print(curr_src)
         print('*** curr_tgt ***')
         print(curr_tgt)
-        print('*** src_similar ***')
-        print('\n'.join(src_similar))
+        print('*** src_similars ***')
+        print('\n'.join(src_similars))
 
     src = curr_src.split()
     tgt = curr_tgt.split() if curr_tgt is not None else []
-    while len(src_similar):
-        src = src_similar.pop(0).split() + src
+    while len(src_similars):
+        src = src_similars.pop(0).split() + src
 
-        if len(src_similar) == 0: ### no more similar, print even if it exceeds max_length
+        if len(src_similars) == 0: ### no more similar, print even if it exceeds max_length
 
             if verbose:
                 print('')
@@ -162,7 +162,7 @@ def output_augment(src_similar, curr_src, curr_tgt, max_length, verbose):
 
             print(' '.join(src) + sep_st + ' '.join(tgt))
 
-        if len(src) + len(src_similar[0].split()) > max_length: ### adding another exceeds limits
+        if len(src) + len(src_similars[0].split()) > max_length: ### adding another exceeds limits
 
             if verbose:
                 print('')
@@ -309,8 +309,8 @@ if __name__ == '__main__':
         if len(toks) % 2 != 0:
             sys.stderr.write('error: unparsed line {}'.format(line))
 
-        src_augmented = []
-        tgt_augmented = []
+        src_similars = []
+        tgt_similars = []
 
         ###
         ### add similar sentence/s
@@ -326,20 +326,20 @@ if __name__ == '__main__':
 
             tag = get_separator(use_range, score) #+ str(score)
             if fdb_src is not None: ### PRIMING: augment source and target sides
-                src_augmented.insert(0,tag + ' ' + DB_src[n_db])
-                tgt_augmented.insert(0,tag + ' ' + DB_tgt[n_db])
+                src_similars.insert(0,tag + ' ' + DB_src[n_db])
+                tgt_similars.insert(0,tag + ' ' + DB_tgt[n_db])
             else: ### BULTE et al: augment source side with DB_tgt
-                src_augmented.insert(0,tag + ' ' + DB_tgt[n_db])
+                src_similars.insert(0,tag + ' ' + DB_tgt[n_db])
 
-            if len(src_augmented) >= n: ### already augmented with n similar sentences
+            if len(src_similars) >= n: ### already augmented with n similar sentences
                 break
 
         curr_src = tok_curr + ' ' + Q_src[n_query]
         curr_tgt = tok_curr + ' ' + Q_tgt[n_query] if fq_tgt is not None else None
         if fdb_src is not None:
-            output_priming(src_augmented, tgt_augmented, curr_src, curr_tgt, l, v)
+            output_priming(src_similars, tgt_similars, curr_src, curr_tgt, l, v)
         else:
-            output_augment(src_augmented, curr_src, curr_tgt, l, v)
+            output_augment(src_similars, curr_src, curr_tgt, l, v)
 
 
 
