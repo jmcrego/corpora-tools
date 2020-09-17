@@ -22,6 +22,7 @@ tok_range9  = '➒'
 tok_range10 = '❿'
 tok_perfect = '▣'
 
+'''
 tok_range1  = 'sim_range_[0.5,0.55)'
 tok_range2  = 'sim_range_[0.55,0.6)'
 tok_range3  = 'sim_range_[0.6,0.65)'
@@ -33,6 +34,7 @@ tok_range8  = 'sim_range_[0.85,0.9)'
 tok_range9  = 'sim_range_[0.9,0.95)'
 tok_range10 = 'sim_range_[0.95,1.0)'
 tok_perfect = 'sim_range_perfect'
+'''
 
 def progress(n_line):
     if n_line%10000 == 0:
