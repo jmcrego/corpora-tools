@@ -120,9 +120,8 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, max_length, v
                 print('[last similar] lsrc={} ltgt={}'.format(len(src),len(tgt)))
 
             print(' '.join(src) + sep_st + ' '.join(tgt))
-            return
 
-        if len(src) + len(src_similars[0].split()) > max_length or len(tgt) + len(tgt_similars[0].split()) > max_length: ### adding another exceeds limits
+        elif len(src) + len(src_similars[0].split()) > max_length or len(tgt) + len(tgt_similars[0].split()) > max_length: ### adding another exceeds limits
 
             if verbose:
                 print('')
@@ -162,7 +161,7 @@ def output_augment(src_similars, curr_src, curr_tgt, max_length, verbose):
 
             print(' '.join(src) + sep_st + ' '.join(tgt))
 
-        if len(src) + len(src_similars[0].split()) > max_length: ### adding another exceeds limits
+        elif len(src) + len(src_similars[0].split()) > max_length: ### adding another exceeds limits
 
             if verbose:
                 print('')
