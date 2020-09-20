@@ -95,9 +95,6 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, only_similars
 
     ### the last src_similars is the most similar to curr_src
     assert len(src_similars) == len(tgt_similars)
-    if len(src_similars) == 0 and only_similars: ### if not similar print empty sentence
-        print('')
-        return
 
     if verbose:
         print('')
@@ -110,12 +107,16 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, only_similars
     src = curr_src.split()
     tgt = curr_tgt.split() if curr_tgt is not None else []
 
+
     if len(src_similars) == 0:
         if verbose:
             print('')
             print('[no similar] lsrc={} ltgt={}'.format(len(src),len(tgt)))
 
-        print(' '.join(src) + sep_st + ' '.join(tgt))
+        if only_similars: ### if not similar print empty sentence
+            print('')
+        else:
+            print(' '.join(src) + sep_st + ' '.join(tgt))
 
     while len(src_similars):
         src = src_similars.pop(0).split() + src
@@ -142,9 +143,6 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, only_similars
 
 def output_augment(src_similars, curr_src, curr_tgt, only_similars, max_length, verbose):
 
-    if len(src_similars) == 0 and only_similars: ### if not similar print empty sentence
-        print('')
-        return
 
     if verbose:
         print('')
@@ -165,9 +163,12 @@ def output_augment(src_similars, curr_src, curr_tgt, only_similars, max_length, 
             print('')
             print('[no similar] lsrc={} ltgt={}'.format(len(src),len(tgt)))
 
-        print(' '.join(src) + sep_st + ' '.join(tgt))
+        if only_similars: ### if not similar print empty sentence
+            print('')
+        else:
+            print(' '.join(src) + sep_st + ' '.join(tgt))
 
-    
+
     while len(src_similars):
         src = src_similars.pop(0).split() + src
 
