@@ -144,13 +144,10 @@ def output_augment(src_similars, curr_src, curr_tgt, only_similars, max_length, 
 
     if verbose:
         print('+++++++++++++++++++++++++++++++++')
+        print('*** curr_src: {}'.format(curr_src))
+        print('*** curr_tgt: {}'.format(curr_tgt))
         print('n_similars={}'.format(len(src_similars)))
-        print('*** curr_src ***')
-        print(curr_src)
-        print('*** curr_tgt ***')
-        print(curr_tgt)
-        print('*** src_similars ***')
-        print('\n'.join(src_similars))
+        print('*** src_sim: ' + '\n*** src_sim: '.join(src_similars))
 
     src = curr_src.split()
     tgt = curr_tgt.split() if curr_tgt is not None else []
