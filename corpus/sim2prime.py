@@ -321,10 +321,12 @@ if __name__ == '__main__':
 #            print('')
 #            continue
         
-        toks = line.split('\t')
-        print('TOKS: {}'.format(toks))
+        if line == '':
+            toks = []
+        else:
+            toks = line.split('\t')
 
-        if len(toks) and len(toks) % 2 != 0:
+        if len(toks) % 2 != 0:
             sys.stderr.write('error: unparsed line {}'.format(line))
 
         src_similars = []
