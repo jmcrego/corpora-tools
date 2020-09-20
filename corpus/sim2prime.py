@@ -183,6 +183,7 @@ def output_augment(src_similars, curr_src, curr_tgt, only_similars, max_length, 
             src = curr_src.split()
             tgt = curr_tgt.split() if curr_tgt is not None else []
 
+    print('finished')
 
 #####################################################################
 ### MAIN ############################################################
