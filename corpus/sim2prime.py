@@ -317,12 +317,14 @@ if __name__ == '__main__':
     for n_query, line in enumerate(sys.stdin):
         line = line.rstrip()
 
-        if line == '':
-            print('')
-            continue
+#        if line == '':
+#            print('')
+#            continue
         
         toks = line.split('\t')
-        if len(toks) % 2 != 0:
+        print(toks)
+
+        if len(toks) and len(toks) % 2 != 0:
             sys.stderr.write('error: unparsed line {}'.format(line))
 
         src_similars = []
