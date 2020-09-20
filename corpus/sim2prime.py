@@ -322,7 +322,7 @@ if __name__ == '__main__':
 #            continue
         
         toks = line.split('\t')
-        print(toks)
+        print('TOKS: {}'.format(toks))
 
         if len(toks) and len(toks) % 2 != 0:
             sys.stderr.write('error: unparsed line {}'.format(line))
