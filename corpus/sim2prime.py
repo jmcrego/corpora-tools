@@ -91,11 +91,11 @@ def get_separator(use_range, score=0.0):
     else:
         return tok_perfect
 
-def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, max_length, verbose):
+def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, only_similars, max_length, verbose):
 
     ### the last src_similars is the most similar to curr_src
     assert len(src_similars) == len(tgt_similars)
-    if len(src_similars) == 0: ### if not similar print empty sentence
+    if len(src_similars) == 0 and only_similars: ### if not similar print empty sentence
         print('')
         return
 
@@ -109,6 +109,14 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, max_length, v
 
     src = curr_src.split()
     tgt = curr_tgt.split() if curr_tgt is not None else []
+
+    if len(src_similars) == 0:
+        if verbose:
+            print('')
+            print('[no similar] lsrc={} ltgt={}'.format(len(src),len(tgt)))
+
+        print(' '.join(src) + sep_st + ' '.join(tgt))
+
     while len(src_similars):
         src = src_similars.pop(0).split() + src
         tgt = tgt_similars.pop(0).split() + tgt
@@ -132,9 +140,9 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, max_length, v
             tgt = curr_tgt.split() if curr_tgt is not None else []
 
 
-def output_augment(src_similars, curr_src, curr_tgt, max_length, verbose):
+def output_augment(src_similars, curr_src, curr_tgt, only_similars, max_length, verbose):
 
-    if len(src_similars) == 0: ### if not similar print empty sentence
+    if len(src_similars) == 0 and only_similars: ### if not similar print empty sentence
         print('')
         return
 
@@ -150,6 +158,16 @@ def output_augment(src_similars, curr_src, curr_tgt, max_length, verbose):
 
     src = curr_src.split()
     tgt = curr_tgt.split() if curr_tgt is not None else []
+
+
+    if len(src_similars) == 0:
+        if verbose:
+            print('')
+            print('[no similar] lsrc={} ltgt={}'.format(len(src),len(tgt)))
+
+        print(' '.join(src) + sep_st + ' '.join(tgt))
+
+    
     while len(src_similars):
         src = src_similars.pop(0).split() + src
 
@@ -184,23 +202,25 @@ if __name__ == '__main__':
     v = False
     use_range = False
     fuzzymatch = False
+    only_similars = False
     fdb_src = None
     fdb_tgt = None
     fq_src = None
     fq_tgt = None
     name = sys.argv.pop(0)
     usage = '''usage: {} -db_tgt FILE [-db_src FILE] -q_src FILE [-q_tgt FILE] [-range] [-fuzzymatch] [-n INT] [-t FLOAT] [-l INT] [-v] < FSIM > FAUGMENTED
-   -db_src FILE : db file with src strings to output
-   -db_tgt FILE : db file with tgt strings to output
-   -q_src  FILE : query file with src strings
-   -q_tgt  FILE : query file with tgt strings
-   -range       : use score ranges to separate sentences
-   -fuzzymatch  : indexs start by 1
-   -n       INT : max n-best similar to output (default 1)
-   -t     FLOAT : min threshold to consider (default 0.5)
-   -l       INT : max sentence length (default 0)
-   -v           : verbose
-   -h           : this help
+   -db_src   FILE : db file with src strings to output
+   -db_tgt   FILE : db file with tgt strings to output
+   -q_src    FILE : query file with src strings
+   -q_tgt    FILE : query file with tgt strings
+   -range         : use score ranges to separate sentences
+   -fuzzymatch    : indexs start by 1
+   -only_similars : print empty sentence when no similars found
+   -n         INT : max n-best similar to output (default 1)
+   -t       FLOAT : min threshold to consider (default 0.5)
+   -l         INT : max sentence length (default 0)
+   -v             : verbose
+   -h             : this help
 
 - gzipped files are allowed
 - ONLY sentences effectively augmented are output. The rest are left empty
@@ -232,6 +252,8 @@ if __name__ == '__main__':
             v = True
         elif tok=="-range":
             use_range = True
+        elif tok=="-only_similars":
+            only_similars = True
         elif tok=="-fuzzymatch":
             fuzzymatch = True
         else:
@@ -336,9 +358,9 @@ if __name__ == '__main__':
         curr_src = tok_curr + ' ' + Q_src[n_query]
         curr_tgt = tok_curr + ' ' + Q_tgt[n_query] if fq_tgt is not None else None
         if fdb_src is not None:
-            output_priming(src_similars, tgt_similars, curr_src, curr_tgt, l, v)
+            output_priming(src_similars, tgt_similars, curr_src, curr_tgt, only_similars, l, v)
         else:
-            output_augment(src_similars, curr_src, curr_tgt, l, v)
+            output_augment(src_similars, curr_src, curr_tgt, only_similars, l, v)
 
 
 
