@@ -92,7 +92,7 @@ def get_separator(use_range, score=0.0):
         return tok_perfect
 
 def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, only_similars, max_length, verbose):
-
+    print('only_similars={}'.format(only_similars))
     ### the last src_similars is the most similar to curr_src
     assert len(src_similars) == len(tgt_similars)
 
