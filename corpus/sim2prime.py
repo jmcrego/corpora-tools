@@ -97,7 +97,7 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, only_similars
     assert len(src_similars) == len(tgt_similars)
 
     if verbose:
-        print('')
+        print('+++++++++++++++++++++++++++++++++')
         print('*** curr_src: {}'.format(curr_src))
         print('*** curr_tgt: {}'.format(curr_tgt))
         print('n_similars={}'.format(len(src_similars)))
@@ -110,7 +110,6 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, only_similars
 
     if len(src_similars) == 0:
         if verbose:
-            print('')
             print('[no similar] lsrc={} ltgt={}'.format(len(src),len(tgt)))
 
         if only_similars: ### if not similar print empty sentence
@@ -125,7 +124,6 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, only_similars
         if len(src_similars) == 0: ### no more similar, print even if it exceeds max_length
 
             if verbose:
-                print('')
                 print('[last similar] lsrc={} ltgt={}'.format(len(src),len(tgt)))
 
             print(' '.join(src) + sep_st + ' '.join(tgt))
@@ -133,10 +131,10 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, only_similars
         elif len(src) + len(src_similars[0].split()) > max_length or len(tgt) + len(tgt_similars[0].split()) > max_length: ### adding another exceeds limits
 
             if verbose:
-                print('')
                 print('[remain similar] lsrc={} ltgt={}'.format(len(src),len(tgt)))
 
             print(' '.join(src) + sep_st + ' '.join(tgt))
+
             src = curr_src.split()
             tgt = curr_tgt.split() if curr_tgt is not None else []
 
@@ -145,7 +143,7 @@ def output_augment(src_similars, curr_src, curr_tgt, only_similars, max_length, 
 
 
     if verbose:
-        print('')
+        print('+++++++++++++++++++++++++++++++++')
         print('n_similars={}'.format(len(src_similars)))
         print('*** curr_src ***')
         print(curr_src)
@@ -160,7 +158,6 @@ def output_augment(src_similars, curr_src, curr_tgt, only_similars, max_length, 
 
     if len(src_similars) == 0:
         if verbose:
-            print('')
             print('[no similar] lsrc={} ltgt={}'.format(len(src),len(tgt)))
 
         if only_similars: ### if not similar print empty sentence
@@ -175,7 +172,6 @@ def output_augment(src_similars, curr_src, curr_tgt, only_similars, max_length, 
         if len(src_similars) == 0: ### no more similar, print even if it exceeds max_length
 
             if verbose:
-                print('')
                 print('[last similar] lsrc={} ltgt={}'.format(len(src),len(tgt)))
 
             print(' '.join(src) + sep_st + ' '.join(tgt))
@@ -183,10 +179,10 @@ def output_augment(src_similars, curr_src, curr_tgt, only_similars, max_length, 
         elif len(src) + len(src_similars[0].split()) > max_length: ### adding another exceeds limits
 
             if verbose:
-                print('')
                 print('[remain similar] lsrc={} ltgt={}'.format(len(src),len(tgt)))
 
             print(' '.join(src) + sep_st + ' '.join(tgt))
+
             src = curr_src.split()
             tgt = curr_tgt.split() if curr_tgt is not None else []
 
