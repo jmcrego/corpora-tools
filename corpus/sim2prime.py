@@ -275,6 +275,9 @@ if __name__ == '__main__':
         ###
         ### add similar sentence/s
         ###########################
+        if v:
+            print('*** {}'.format('t'.join(toks)))
+
         while len(toks):
             score = float(toks.pop(0)) ### similar sentences are sorted by similarity (most similar first)
             n_db = int(toks.pop(0))
@@ -290,8 +293,6 @@ if __name__ == '__main__':
                 tgt_similars.append([tag] + DB_tgt[n_db].split())
             else: ### BULTE et al: augment source side with DB_tgt
                 src_similars.append([tag] + DB_tgt[n_db].split())
-
-            print(src_similars[-1])
 
             if len(src_similars) >= n: ### already augmented with n similar sentences
                 break
