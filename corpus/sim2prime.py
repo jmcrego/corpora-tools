@@ -275,8 +275,6 @@ if __name__ == '__main__':
         ###
         ### add similar sentence/s
         ###########################
-        if v:
-            print('+++ {}'.format('\t'.join(toks)))
 
         while len(toks):
             score = float(toks.pop(0)) ### similar sentences are sorted by similarity (most similar first)
