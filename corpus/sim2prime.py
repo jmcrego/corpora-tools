@@ -90,10 +90,10 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, max_length, v
     src = curr_src
     tgt = curr_tgt if not is_inference else []
     while len(src_similars) and len(tgt_similars) and len(src) <= max_length and len(tgt) <= max_length:
-        if verbose:
-            print('*** added')
         if len(src)+len(src_similars[0]) > max_length or len(tgt)+len(tgt_similars[0]) > max_length:
             break    
+        if verbose:
+            print('*** added')
         src = src_similars.pop(0) + src
         tgt = tgt_similars.pop(0) + tgt
         with_similars = True
