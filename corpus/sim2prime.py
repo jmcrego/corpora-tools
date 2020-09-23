@@ -286,26 +286,21 @@ if __name__ == '__main__':
 
             tag = get_separator(use_range, score) #+ str(score)
             if fdb_src is not None: ### PRIMING: augment source and target sides
-                src_similar = [tag] + DB_src[n_db].split() #['※', 'the', 'house']
-                print('bla',src_similar)
-                src_similars.append(src_similar) #src_similars[0] is the closest to curr_src
-
-                tgt_similar = [tag] + DB_tgt[n_db].split() #['※', 'la', 'maison']
-                print(tgt_similar)
-                tgt_similars.append(tgt_similar)
+                src_similars.append([tag] + DB_src[n_db].split()) #src_similars[0] is the closest to curr_src
+                tgt_similars.append([tag] + DB_tgt[n_db].split())
             else: ### BULTE et al: augment source side with DB_tgt
-                tgt_similar = [tag] + DB_tgt[n_db].split() #['※', 'la', 'maison']
-                src_similars.append(tgt_similar)
+                src_similars.append([tag] + DB_tgt[n_db].split())
+
+            print(src_similars[-1])
 
             if len(src_similars) >= n: ### already augmented with n similar sentences
                 break
 
-        curr_src = Q_src[n_query].split()
-        curr_src.insert(0,tok_curr)
-        curr_tgt = None
+        curr_src = [curr_tok] + Q_src[n_query].split()
         if fq_tgt is not None:
-            curr_tgt = Q_tgt[n_query].split()
-            curr_tgt.insert(0,tok_curr)
+            curr_tgt = [tok_curr] + Q_tgt[n_query].split()
+        else:
+            curr_tgt = None
 
         if fdb_src is not None:
             output_priming(src_similars, tgt_similars, curr_src, curr_tgt, l, v)
