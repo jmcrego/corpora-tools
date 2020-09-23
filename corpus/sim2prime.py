@@ -109,6 +109,9 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, max_length, v
         else: #training w/o similars (empty sentence)
             print('')
 
+    if verbose:
+        print('---------------------------------')
+
 
 def output_augment(src_similars, curr_src, curr_tgt, max_length, verbose):
 
@@ -144,6 +147,8 @@ def output_augment(src_similars, curr_src, curr_tgt, max_length, verbose):
         else: #training w/o similars (empty sentence)
             print('')
 
+    if verbose:
+        print('---------------------------------')
 
 #####################################################################
 ### MAIN ############################################################
