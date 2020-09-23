@@ -286,12 +286,13 @@ if __name__ == '__main__':
 
             tag = get_separator(use_range, score) #+ str(score)
             if fdb_src is not None: ### PRIMING: augment source and target sides
-                src_similar = (DB_src[n_db].split()).insert(0,tag) #['※', 'the', 'house']
-                tgt_similar = (DB_tgt[n_db].split()).insert(0,tag) #['※', 'la', 'maison']
+                src_similar = tag + DB_src[n_db].split() #['※', 'the', 'house']
                 src_similars.append(src_similar) #src_similars[0] is the closest to curr_src
+
+                tgt_similar = tag + DB_tgt[n_db].split() #['※', 'la', 'maison']
                 tgt_similars.append(tgt_similar)
             else: ### BULTE et al: augment source side with DB_tgt
-                tgt_similar = (DB_tgt[n_db].split()).insert(0,tag) #['※', 'la', 'maison']
+                tgt_similar = tag + DB_tgt[n_db].split() #['※', 'la', 'maison']
                 src_similars.append(tgt_similar)
 
             if len(src_similars) >= n: ### already augmented with n similar sentences
