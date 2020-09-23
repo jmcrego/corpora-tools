@@ -79,8 +79,10 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, max_length, v
         print('*** curr_src: {}'.format(curr_src))
         print('*** curr_tgt: {}'.format(curr_tgt))
         print('*** n_similars={}'.format(len(src_similars)))
-        print('*** src_sim: ' + '\n*** src_sim: '.join(src_similars))
-        print('*** tgt_sim: ' + '\n*** tgt_sim: '.join(tgt_similars))
+        for src_similar in src_similars:
+            print('*** src_sim: {}'.format(src_similar))
+        for tgt_similar in tgt_similars:
+            print('*** tgt_sim: {}'.format(tgt_similar))
 
     is_inference = True if curr_tgt is None else False
     with_similars = False
@@ -115,7 +117,8 @@ def output_augment(src_similars, curr_src, curr_tgt, max_length, verbose):
         print('*** curr_src: {}'.format(curr_src))
         print('*** curr_tgt: {}'.format(curr_tgt))
         print('*** n_similars={}'.format(len(src_similars)))
-        print('*** src_sim: ' + '\n*** src_sim: '.join(src_similars))
+        for src_similar in src_similars:
+            print('*** src_sim: {}'.format(src_similar))
 
     is_inference = True if curr_tgt is None else False
     with_similars = False
