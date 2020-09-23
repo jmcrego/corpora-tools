@@ -95,6 +95,8 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, max_length, v
         src = src_similars.pop(0) + src
         tgt = tgt_similars.pop(0) + tgt
         with_similars = True
+        if verbose:
+            print('*** added')
 
     if with_similars:
         if verbose:
