@@ -75,7 +75,7 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, max_length, v
     assert len(src_similars) == len(tgt_similars)
 
     if verbose:
-        print('+++++++++++++++++++++++++++++++++')
+        print('++++++++++++priming++++++++++++++')
         print('*** curr_src: {}'.format(curr_src))
         print('*** curr_tgt: {}'.format(curr_tgt))
         print('*** n_similars={}'.format(len(src_similars)))
@@ -116,7 +116,7 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, max_length, v
 def output_augment(src_similars, curr_src, curr_tgt, max_length, verbose):
 
     if verbose:
-        print('+++++++++++++++++++++++++++++++++')
+        print('++++++++++++augment++++++++++++++')
         print('*** curr_src: {}'.format(curr_src))
         print('*** curr_tgt: {}'.format(curr_tgt))
         print('*** n_similars={}'.format(len(src_similars)))
