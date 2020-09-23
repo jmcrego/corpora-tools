@@ -287,7 +287,7 @@ if __name__ == '__main__':
             tag = get_separator(use_range, score) #+ str(score)
             if fdb_src is not None: ### PRIMING: augment source and target sides
                 src_similar = [tag] + DB_src[n_db].split() #['※', 'the', 'house']
-                print(src_similar)
+                print('bla',src_similar)
                 src_similars.append(src_similar) #src_similars[0] is the closest to curr_src
 
                 tgt_similar = [tag] + DB_tgt[n_db].split() #['※', 'la', 'maison']
