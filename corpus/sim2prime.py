@@ -88,7 +88,8 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, max_length, v
     with_similars = False
 
     src = curr_src
-    tgt = curr_tgt if not is_inference else []
+    tgt = curr_tgt if not is_inference else [ tok_curr ]
+
     while len(src_similars) and len(tgt_similars) and len(src) <= max_length and len(tgt) <= max_length:
         if len(src)+len(src_similars[0]) > max_length or len(tgt)+len(tgt_similars[0]) > max_length:
             break    
@@ -129,7 +130,8 @@ def output_augment(src_similars, curr_src, curr_tgt, max_length, verbose):
     with_similars = False
 
     src = curr_src
-    tgt = curr_tgt if not is_inference else []
+    tgt = curr_tgt if not is_inference else [ ]
+    
     while len(src_similars) and len(src) <= max_length:
         if len(src)+len(src_similars[0]) > max_length:
             break    
