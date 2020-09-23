@@ -296,7 +296,7 @@ if __name__ == '__main__':
             if len(src_similars) >= n: ### already augmented with n similar sentences
                 break
 
-        curr_src = [curr_tok] + Q_src[n_query].split()
+        curr_src = [tok_curr] + Q_src[n_query].split()
         if fq_tgt is not None:
             curr_tgt = [tok_curr] + Q_tgt[n_query].split()
         else:
