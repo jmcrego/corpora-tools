@@ -297,10 +297,10 @@ if __name__ == '__main__':
             if len(src_similars) >= n: ### already augmented with n similar sentences
                 break
 
-        print("q_src", Q_src[n_query].split())
-        print("q_tgt", Q_tgt[n_query].split())
         curr_src = (Q_src[n_query].split()).insert(0,tok_curr)
         curr_tgt = (Q_tgt[n_query].split()).insert(0,tok_curr) if fq_tgt is not None else None
+        print("curr_src", curr_src)
+        print("curr_tgt", curr_tgt)
         if fdb_src is not None:
             output_priming(src_similars, tgt_similars, curr_src, curr_tgt, l, v)
         else:
