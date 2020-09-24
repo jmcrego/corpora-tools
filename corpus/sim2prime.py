@@ -311,6 +311,9 @@ if __name__ == '__main__':
         else:
             curr_tgt = None
 
+        print('curr_src',curr_src)
+        print('curr_tgt',curr_tgt)
+
         if fdb_src is not None:
             output_priming(src_similars, tgt_similars, curr_src, curr_tgt, l, v)
         else:
