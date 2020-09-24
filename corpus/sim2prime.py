@@ -44,7 +44,7 @@ def read_file(file):
 def get_separator(use_range, score=0.0):
     if not use_range:
         return tok_sep
-    if score < 0.5:
+    elif score < 0.5:
         return tok_sep
     elif score >= 0.5 and score < 0.6:
         return tok_range5
@@ -76,78 +76,76 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, max_length, v
 
     if verbose:
         print('++++++++++++priming++++++++++++++')
-        print('*** curr_src: {}'.format(curr_src))
-        print('*** curr_tgt: {}'.format(curr_tgt))
-        print('*** n_similars={}'.format(len(src_similars)))
+        print('+++ curr_src: {}'.format(curr_src))
+        print('+++ curr_tgt: {}'.format(curr_tgt))
+        print('+++ n_similars={}'.format(len(src_similars)))
         for src_similar in src_similars:
-            print('*** src_sim: {}'.format(src_similar))
+            print('+++ src_sim: {}'.format(src_similar))
         for tgt_similar in tgt_similars:
-            print('*** tgt_sim: {}'.format(tgt_similar))
+            print('+++ tgt_sim: {}'.format(tgt_similar))
 
     is_inference = True if curr_tgt is None else False
     with_similars = False
 
     src = curr_src
-    tgt = curr_tgt if not is_inference else [ tok_curr ]
+    tgt = [ tok_curr ] if is_inference else curr_tgt
 
     while len(src_similars) and len(tgt_similars) and len(src) <= max_length and len(tgt) <= max_length:
-        if len(src)+len(src_similars[0]) > max_length or len(tgt)+len(tgt_similars[0]) > max_length:
+        if len(src)+len(src_similars[0]) > max_length or len(tgt)+len(tgt_similars[0]) > max_length: ### adding the next similar would exceed max_length
             break    
-        if verbose:
-            print('*** added')
         src = src_similars.pop(0) + src
         tgt = tgt_similars.pop(0) + tgt
         with_similars = True
 
     if with_similars:
         if verbose:
-            print('*** [w similars] lsrc={} ltgt={}'.format(len(src),len(tgt)))
+            print('+++ [w similars] lsrc={} ltgt={}'.format(len(src),len(tgt)))
         print(' '.join(src) + sep_st + ' '.join(tgt))
 
     else: #without_similars
         if verbose:
-            print('*** [w/o similars] lsrc={} ltgt={}'.format(len(src),len(tgt)))
+            print('+++ [w/o similars] lsrc={} ltgt={}'.format(len(src),len(tgt)))
         if is_inference: 
-            print(' '.join(src[1:]) + sep_st)
+            print(' '.join(src[1:]) + sep_st) ### remove tok_sep
         else: #training w/o similars (empty sentence)
             print('')
 
     if verbose:
-        print('---------------------------------')
+        print('+++++++++++++++++++++++++++++++++')
 
 
 def output_augment(src_similars, curr_src, curr_tgt, max_length, verbose):
 
     if verbose:
-        print('++++++++++++augment++++++++++++++')
-        print('*** curr_src: {}'.format(curr_src))
-        print('*** curr_tgt: {}'.format(curr_tgt))
-        print('*** n_similars={}'.format(len(src_similars)))
+        print('------------augment--------------')
+        print('--- curr_src: {}'.format(curr_src))
+        print('--- curr_tgt: {}'.format(curr_tgt))
+        print('--- n_similars={}'.format(len(src_similars)))
         for src_similar in src_similars:
-            print('*** src_sim: {}'.format(src_similar))
+            print('--- src_sim: {}'.format(src_similar))
 
     is_inference = True if curr_tgt is None else False
     with_similars = False
 
     src = curr_src
-    tgt = curr_tgt if not is_inference else [ ]
-    
+    tgt = [] if is_inference else curr_tgt
+
     while len(src_similars) and len(src) <= max_length:
-        if len(src)+len(src_similars[0]) > max_length:
+        if len(src)+len(src_similars[0]) > max_length: ### adding the next similar would exceed max_length
             break    
         src = src_similars.pop(0) + src
         with_similars = True
 
     if with_similars:
         if verbose:
-            print('*** [w similars] lsrc={} ltgt={}'.format(len(src),len(tgt)))
+            print('--- [w similars] lsrc={} ltgt={}'.format(len(src),len(tgt)))
         print(' '.join(src) + sep_st + ' '.join(tgt))
 
     else: #without_similars
         if verbose:
-            print('*** [w/o similars] lsrc={} ltgt={}'.format(len(src),len(tgt)))
+            print('--- [w/o similars] lsrc={} ltgt={}'.format(len(src),len(tgt)))
         if is_inference: 
-            print(' '.join(src[1:]) + sep_st)
+            print(' '.join(src[1:]) + sep_st) ### remove tok_sep
         else: #training w/o similars (empty sentence)
             print('')
 
@@ -178,15 +176,15 @@ if __name__ == '__main__':
    -q_tgt    FILE : query file with tgt strings 
    -range         : use score ranges to separate sentences
    -fuzzymatch    : indexs start by 1
-   -n         INT : max n-best similar to output (default 1)
-   -t       FLOAT : min threshold to consider (default 0.5)
+   -n         INT : up to n-best similar sentences (default 1)
+   -t       FLOAT : min similarity threshold (default 0.5)
    -l         INT : max sentence length (default 0)
    -v             : verbose
    -h             : this help
 
-- gzipped files are allowed
 - use -q_tgt when preparing training pairs otherwise inference is assumed
-- use -db_src for priming 
+- use -db_src for priming otherwise augmentation is assumed
+- gzipped files are allowed
 
 '''.format(name)
 
