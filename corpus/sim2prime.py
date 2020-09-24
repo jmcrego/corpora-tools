@@ -311,9 +311,6 @@ if __name__ == '__main__':
         else:
             curr_tgt = None
 
-        print('Q_src[n_query] is ', Q_src[n_query].split())
-        print('curr_src is ', curr_src)
-
         if fdb_src is not None:
             output_priming(src_similars, tgt_similars, curr_src, curr_tgt, l, v)
         else:
