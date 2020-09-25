@@ -60,20 +60,22 @@ def get_separator(use_range, score=0.0):
         return tok_range10
 
 
-def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, n_similars, verbose):
+def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, verbose):
+
+    is_inference = True if curr_tgt is None else False
+    with_similars = True if len(src_similars) else False
 
     if verbose:
         print('++++++++++++priming++++++++++++++')
         print('+++ curr_src: {}'.format(curr_src))
         print('+++ curr_tgt: {}'.format(curr_tgt))
-        print('+++ n_similars: {}'.format(n_similars))
+        print('+++ w_similars={}'.format(with_similars))
         print('+++ src_sim: {}'.format(src_similars))
         for tgt_similar in tgt_similars:
             print('+++ tgt_sim: {}'.format(tgt_similars))
 
-    is_inference = True if curr_tgt is None else False
 
-    if n_similars:
+    if with_similars:
         if is_inference: #inference w/ similars
             print(' '.join(src_similars+curr_src) + sep_st + tok_curr)
         else: #training w/ similars
@@ -85,18 +87,20 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, n_similars, v
             print('')
 
 
-def output_augment(src_similars, curr_src, curr_tgt, n_similars, verbose):
+def output_augment(src_similars, curr_src, curr_tgt, verbose):
+
+    is_inference = True if curr_tgt is None else False
+    with_similars = True if len(src_similars) else False
 
     if verbose:
         print('------------augment--------------')
         print('--- curr_src: {}'.format(curr_src))
         print('--- curr_tgt: {}'.format(curr_tgt))
-        print('--- n_similars={}'.format(n_similars))
+        print('--- w_similars={}'.format(with_similars))
         print('--- src_sim: {}'.format(src_similars))
 
-    is_inference = True if curr_tgt is None else False
 
-    if n_similars:
+    if with_similars:
         if is_inference: #inference w/ similars
             print(' '.join(src_similars+curr_src) + sep_st)
         else: #training w/ similars
@@ -292,9 +296,9 @@ if __name__ == '__main__':
 
         ### output
         if is_priming:
-            output_priming(src_similars, tgt_similars, curr_src, curr_tgt, n_similars, v)
+            output_priming(src_similars, tgt_similars, curr_src, curr_tgt, v)
         else:
-            output_augment(src_similars, curr_src, curr_tgt, n_similars, v)
+            output_augment(src_similars, curr_src, curr_tgt, v)
 
 
 
