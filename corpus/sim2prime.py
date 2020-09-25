@@ -71,8 +71,7 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, verbose):
         print('+++ curr_tgt: {}'.format(curr_tgt))
         print('+++ w_similars: {}'.format(with_similars))
         print('+++ src_sim: {}'.format(src_similars))
-        for tgt_similar in tgt_similars:
-            print('+++ tgt_sim: {}'.format(tgt_similars))
+        print('+++ tgt_sim: {}'.format(tgt_similars))
 
 
     if with_similars:
