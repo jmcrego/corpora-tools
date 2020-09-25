@@ -246,10 +246,13 @@ if __name__ == '__main__':
 
 
         curr_src = [tok_curr] + Q_src[n_query].split()
+        len_curr_src = len(curr_src)
         if is_inference:
             curr_tgt = None
+            len_curr_tgt = 0
         else:
             curr_tgt = [tok_curr] + Q_tgt[n_query].split()
+            len_curr_tgt = len(curr_tgt)
 
         src_similars = []
         tgt_similars = []
@@ -281,14 +284,14 @@ if __name__ == '__main__':
             if is_priming: ### PRIMING: augment source and target sides
                 src_similar = [tag] + DB_src[n_db].split()
                 tgt_similar = [tag] + DB_tgt[n_db].split()
-                if len(src_similars)+len(src_similar)+len(curr_src) > l or len(tgt_similars)+len(tgt_similar)+len(curr_tgt) > l: #exceeds max_length
+                if len(src_similars)+len(src_similar)+len_curr_src > l or len(tgt_similars)+len(tgt_similar)+len_curr_tgt > l: #exceeds max_length
                     continue
                 src_similars = src_similar + src_similars
                 tgt_similars = tgt_similar + tgt_similars
 
             else: ### AUGMENT: augment source side with DB_tgt (Bulté et al, 2019)
                 src_similar = [tag] + DB_tgt[n_db].split()
-                if len(src_similars)+len(src_similar)+len(curr_src) > l: #exceeds max_length
+                if len(src_similars)+len(src_similar)+len_curr_src > l: #exceeds max_length
                     continue
                 src_similars = src_similar + src_similars
 
