@@ -115,8 +115,8 @@ def output_augment(src_similars, curr_src, curr_tgt, n_similars, verbose):
 
 if __name__ == '__main__':
 
-    n = 1
-    t = 0.5
+    n = 999
+    t = 0.0
     l = 0
     v = False
     use_range = False
@@ -127,20 +127,20 @@ if __name__ == '__main__':
     fq_tgt = None
     name = sys.argv.pop(0)
     usage = '''usage: {} -db_tgt FILE [-db_src FILE] -q_src FILE [-q_tgt FILE] [-range] [-fuzzymatch] [-n INT] [-t FLOAT] [-l INT] [-v] < FSIM > FAUGMENTED
-   -db_src   FILE : db file with src strings to output
+   -db_src   FILE : db file with src strings to output (PRIMING)
    -db_tgt   FILE : db file with tgt strings to output
    -q_src    FILE : query file with src strings
-   -q_tgt    FILE : query file with tgt strings 
+   -q_tgt    FILE : query file with tgt strings        (TRAINING)
    -range         : use score ranges to separate sentences
    -fuzzymatch    : indexs start by 1
-   -n         INT : up to n-best similar sentences (default 1)
-   -t       FLOAT : min similarity threshold (default 0.5)
+   -n         INT : up to n-best similar sentences (default 999)
+   -t       FLOAT : min similarity threshold (default 0.0)
    -l         INT : max sentence length (default 0)
    -v             : verbose
    -h             : this help
 
-- use -q_tgt when preparing training pairs otherwise inference is assumed
-- use -db_src for priming otherwise augmentation is assumed
+- use -q_tgt when preparing TRAINING pairs otherwise INFERENCE is assumed
+- use -db_src for PRIMING otherwise AUGMENTATION is assumed
 - gzipped files are allowed
 
 '''.format(name)
