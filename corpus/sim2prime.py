@@ -69,7 +69,7 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, verbose):
         print('++++++++++++priming++++++++++++++')
         print('+++ curr_src: {}'.format(curr_src))
         print('+++ curr_tgt: {}'.format(curr_tgt))
-        print('+++ w_similars={}'.format(with_similars))
+        print('+++ w_similars: {}'.format(with_similars))
         print('+++ src_sim: {}'.format(src_similars))
         for tgt_similar in tgt_similars:
             print('+++ tgt_sim: {}'.format(tgt_similars))
@@ -96,7 +96,7 @@ def output_augment(src_similars, curr_src, curr_tgt, verbose):
         print('------------augment--------------')
         print('--- curr_src: {}'.format(curr_src))
         print('--- curr_tgt: {}'.format(curr_tgt))
-        print('--- w_similars={}'.format(with_similars))
+        print('--- w_similars: {}'.format(with_similars))
         print('--- src_sim: {}'.format(src_similars))
 
 
@@ -121,7 +121,7 @@ if __name__ == '__main__':
 
     n = 999
     t = 0.0
-    l = 0
+    l = 999
     v = False
     use_range = False
     fuzzymatch = False
@@ -130,7 +130,7 @@ if __name__ == '__main__':
     fq_src = None
     fq_tgt = None
     name = sys.argv.pop(0)
-    usage = '''usage: {} -db_tgt FILE [-db_src FILE] -q_src FILE [-q_tgt FILE] [-range] [-fuzzymatch] [-n INT] [-t FLOAT] [-l INT] [-v] < FSIM > FAUGMENTED
+    usage = '''usage: {} -db_tgt FILE [-db_src FILE] -q_src FILE [-q_tgt FILE] [-range] [-fuzzymatch] [-n INT] [-l INT] [-t FLOAT] [-v] < FSIM > FAUGMENTED
    -db_src   FILE : db file with src strings to output (PRIMING)
    -db_tgt   FILE : db file with tgt strings to output
    -q_src    FILE : query file with src strings
@@ -138,8 +138,8 @@ if __name__ == '__main__':
    -range         : use score ranges to separate sentences
    -fuzzymatch    : indexs start by 1
    -n         INT : up to n-best similar sentences (default 999)
+   -l         INT : max sentence length (default 999)
    -t       FLOAT : min similarity threshold (default 0.0)
-   -l         INT : max sentence length (default 0)
    -v             : verbose
    -h             : this help
 
