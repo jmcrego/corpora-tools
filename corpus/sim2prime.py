@@ -60,89 +60,51 @@ def get_separator(use_range, score=0.0):
         return tok_range10
 
 
-def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, max_length, verbose):
-
-    #case training w/ similars
-    #    ※ s'1 s'2 ※ s'1 s'2 s'3 ‖ s1 s2      \t     ※ t'1 t'2 ※ t'1 t'2 t'3 ‖ t1 t2
-    #case training w/o similars
-    #    <empty sentence>
-    #case inference w/ similars
-    #    ※ s'1 s'2 ※ s'1 s'2 s'3 ‖ s1 s2      \t     ※ t'1 t'2 ※ t'1 t'2 t'3 ‖
-    #case inference w/o similars
-    #    s1 s2      \t      
-
-    ### the last src_similars is the most similar to curr_src
-    assert len(src_similars) == len(tgt_similars)
+def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, n_similars, verbose):
 
     if verbose:
         print('++++++++++++priming++++++++++++++')
         print('+++ curr_src: {}'.format(curr_src))
         print('+++ curr_tgt: {}'.format(curr_tgt))
-        print('+++ n_similars={}'.format(len(src_similars)))
-        for src_similar in src_similars:
-            print('+++ src_sim: {}'.format(src_similar))
+        print('+++ n_similars: {}'.format(n_similars))
+        print('+++ src_sim: {}'.format(src_similars))
         for tgt_similar in tgt_similars:
-            print('+++ tgt_sim: {}'.format(tgt_similar))
+            print('+++ tgt_sim: {}'.format(tgt_similars))
 
     is_inference = True if curr_tgt is None else False
-    with_similars = False
 
-    src = curr_src
-    tgt = [ tok_curr ] if is_inference else curr_tgt
-
-    while len(src_similars) and len(tgt_similars) and len(src) <= max_length and len(tgt) <= max_length:
-        if len(src)+len(src_similars[0]) > max_length or len(tgt)+len(tgt_similars[0]) > max_length: ### adding the next similar would exceed max_length
-            break    
-        src = src_similars.pop(0) + src
-        tgt = tgt_similars.pop(0) + tgt
-        with_similars = True
-
-    if with_similars:
-        if verbose:
-            print('+++ [w similars] lsrc={} ltgt={}'.format(len(src),len(tgt)))
-        print(' '.join(src) + sep_st + ' '.join(tgt))
-
-    else: #without_similars
-        if verbose:
-            print('+++ [w/o similars] lsrc={} ltgt={}'.format(len(src),len(tgt)))
-        if is_inference: 
-            print(' '.join(src[1:]) + sep_st) ### remove tok_sep
+    if n_similars:
+        if is_inference: #inference w/ similars
+            print(' '.join(src_similars+curr_src) + sep_st + tok_curr)
+        else: #training w/ similars
+            print(' '.join(src_similars+curr_src) + sep_st + ' '.join(tgt_similars + curr_tgt))
+    else: 
+        if is_inference: #inference w/o similars
+            print(' '.join(curr_src[1:]) + sep_st) ### remove tok_sep
         else: #training w/o similars (empty sentence)
             print('')
 
 
-def output_augment(src_similars, curr_src, curr_tgt, max_length, verbose):
+def output_augment(src_similars, curr_src, curr_tgt, n_similars, verbose):
 
     if verbose:
         print('------------augment--------------')
         print('--- curr_src: {}'.format(curr_src))
         print('--- curr_tgt: {}'.format(curr_tgt))
-        print('--- n_similars={}'.format(len(src_similars)))
-        for src_similar in src_similars:
-            print('--- src_sim: {}'.format(src_similar))
+        print('--- n_similars={}'.format(n_similars))
+        print('--- src_sim: {}'.format(src_similars))
 
     is_inference = True if curr_tgt is None else False
-    with_similars = False
 
-    src = curr_src
-    tgt = [] if is_inference else curr_tgt
+    if n_similars:
+        if is_inference: #inference w/ similars
+            print(' '.join(src_similars+curr_src) + sep_st)
+        else: #training w/ similars
+            print(' '.join(src_similars+curr_src) + sep_st + ' '.join(curr_tgt))
 
-    while len(src_similars) and len(src) <= max_length:
-        if len(src)+len(src_similars[0]) > max_length: ### adding the next similar would exceed max_length
-            break    
-        src = src_similars.pop(0) + src
-        with_similars = True
-
-    if with_similars:
-        if verbose:
-            print('--- [w similars] lsrc={} ltgt={}'.format(len(src),len(tgt)))
-        print(' '.join(src) + sep_st + ' '.join(tgt))
-
-    else: #without_similars
-        if verbose:
-            print('--- [w/o similars] lsrc={} ltgt={}'.format(len(src),len(tgt)))
-        if is_inference: 
-            print(' '.join(src[1:]) + sep_st) ### remove tok_sep
+    else: 
+        if is_inference: #inference w/o similars
+            print(' '.join(curr_src[1:]) + sep_st) ### remove tok_sep
         else: #training w/o similars (empty sentence)
             print('')
 
@@ -230,7 +192,9 @@ if __name__ == '__main__':
     DB_tgt = read_file(fdb_tgt)
     sys.stderr.write('Read fdb_tgt={} with {} lines\n'.format(fdb_tgt, len(DB_tgt)))
 
+    is_priming = False
     if fdb_src is not None:
+        is_priming = True
         ###################
         ### read DB_src ###
         ###################
@@ -248,7 +212,9 @@ if __name__ == '__main__':
     Q_src = read_file(fq_src)
     sys.stderr.write('Read fq_src={} with {} lines\n'.format(fq_src, len(Q_src)))
 
+    is_inference = True
     if fq_tgt is not None:
+        is_inference = False
         ##################
         ### read Q_tgt ###
         ##################
@@ -274,8 +240,16 @@ if __name__ == '__main__':
         if len(toks) % 2 != 0:
             sys.stderr.write('error: unparsed line {}'.format(line))
 
+
+        curr_src = [tok_curr] + Q_src[n_query].split()
+        if is_inference:
+            curr_tgt = None
+        else:
+            curr_tgt = [tok_curr] + Q_tgt[n_query].split()
+
         src_similars = []
         tgt_similars = []
+        n_similars = 0
 
         ###
         ### add similar sentence/s
@@ -284,32 +258,43 @@ if __name__ == '__main__':
         while len(toks):
             score = float(toks.pop(0)) ### similar sentences are sorted by similarity (most similar first)
             n_db = int(toks.pop(0))
-            if fuzzymatch: ### fuzzymatch indexs start by 1
-                n_db -= 1 
 
             if score < t:
                 break
 
-            tag = get_separator(use_range, score) #+ str(score)
-            if fdb_src is not None: ### PRIMING: augment source and target sides
-                src_similars.append([tag] + DB_src[n_db].split()) #src_similars[0] is the closest to curr_src
-                tgt_similars.append([tag] + DB_tgt[n_db].split())
-            else: ### BULTE et al: augment source side with DB_tgt
-                src_similars.append([tag] + DB_tgt[n_db].split())
-
-            if len(src_similars) >= n: ### already augmented with n similar sentences
+            if n_similars >= n: ### already augmented n similar sentences
                 break
 
-        curr_src = [tok_curr] + Q_src[n_query].split()
-        if fq_tgt is not None:
-            curr_tgt = [tok_curr] + Q_tgt[n_query].split()
-        else:
-            curr_tgt = None
+            if fuzzymatch: ### fuzzymatch indexs start by 1
+                n_db -= 1 
 
-        if fdb_src is not None:
-            output_priming(src_similars, tgt_similars, curr_src, curr_tgt, l, v)
+            if n_db < 0 or n_db >= len(DB_tgt):
+                sys.stderr.write('error: index n_db={} out of bounds'.format(n_db))
+                sys.exit()
+
+            tag = get_separator(use_range, score)
+
+            if is_priming: ### PRIMING: augment source and target sides
+                src_similar = [tag] + DB_src[n_db].split()
+                tgt_similar = [tag] + DB_tgt[n_db].split()
+                if len(src_similars)+len(src_similar)+len(curr_src) > l or len(tgt_similars)+len(tgt_similar)+len(curr_tgt) > l: #exceeds max_length
+                    continue
+                src_similars = src_similar + src_similars
+                tgt_similars = tgt_similar + tgt_similars
+
+            else: ### AUGMENT: augment source side with DB_tgt (Bulté et al, 2019)
+                src_similar = [tag] + DB_tgt[n_db].split()
+                if len(src_similars)+len(src_similar)+len(curr_src) > l: #exceeds max_length
+                    continue
+                src_similars = src_similar + src_similars
+
+            n_similars += 1
+
+        ### output
+        if is_priming:
+            output_priming(src_similars, tgt_similars, curr_src, curr_tgt, n_similars, v)
         else:
-            output_augment(src_similars, curr_src, curr_tgt, l, v)
+            output_augment(src_similars, curr_src, curr_tgt, n_similars, v)
 
 
 
