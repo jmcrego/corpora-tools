@@ -66,7 +66,7 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, verbose):
     with_similars = True if len(src_similars) else False
 
     if verbose:
-        print('+++ PRIMING inference={} +++'.format(is_inference))
+        print('+++ PRIMING inference={} +++++++++++++'.format(is_inference))
         print('+++ curr_src: {}'.format(curr_src))
         print('+++ curr_tgt: {}'.format(curr_tgt))
         print('+++ w_similars: {}'.format(with_similars))
@@ -92,7 +92,7 @@ def output_augment(src_similars, curr_src, curr_tgt, verbose):
     with_similars = True if len(src_similars) else False
 
     if verbose:
-        print('--- AUGMENT inference={} ---'.format(is_inference))
+        print('--- AUGMENT inference={} -------------'.format(is_inference))
         print('--- curr_src: {}'.format(curr_src))
         print('--- curr_tgt: {}'.format(curr_tgt))
         print('--- w_similars: {}'.format(with_similars))
