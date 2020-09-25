@@ -76,7 +76,7 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, verbose):
 
     if with_similars:
         if is_inference: #inference w/ similars
-            print(' '.join(src_similars+curr_src) + sep_st + tok_curr)
+            print(' '.join(src_similars+curr_src) + sep_st + ' '.join(tgt_similars + [tok_curr]))
         else: #training w/ similars
             print(' '.join(src_similars+curr_src) + sep_st + ' '.join(tgt_similars + curr_tgt))
     else: 
