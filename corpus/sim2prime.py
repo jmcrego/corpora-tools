@@ -91,7 +91,7 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fou
             fout_tgt.write(' '.join(curr_tgt[1:]) + '\n')
         if fout_pref is not None:
             fout_pref.write('\n')
-            
+
         #if is_inference: #inference w/o similars
         #    print(' '.join(curr_src[1:]) + sep_st) ### remove tok_sep
         #else: #training w/o similars (empty sentence)
@@ -340,7 +340,7 @@ if __name__ == '__main__':
             output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, v)
 
     fout_src.close()
-    if not is inference:
+    if not is_inference:
         fout_tgt.close()
     if is_priming:
         fout_pref.close()
