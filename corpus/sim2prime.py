@@ -228,6 +228,7 @@ if __name__ == '__main__':
             sys.stderr.write('error: erroneous number of lines in fq_tgt {}'.format(len(Q_tgt)))
             sys.exit()
 
+    length2n = {}
 
     #########################################################
     ### augmenting Q_src and Q_tgt with DB_src and DB_tgt ###
@@ -296,12 +297,15 @@ if __name__ == '__main__':
 
             n_similars += 1
 
+        length2n{n_similars} += 1
         ### output
         if is_priming:
             output_priming(src_similars, tgt_similars, curr_src, curr_tgt, v)
         else:
             output_augment(src_similars, curr_src, curr_tgt, v)
 
-
+        sys.stderr.write('Done\n')
+        for l, n in length2n.items():
+            sys.stderr.write('length {} => {}\n'.format(l,n))
 
             
