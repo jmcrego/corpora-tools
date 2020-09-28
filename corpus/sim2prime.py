@@ -297,7 +297,9 @@ if __name__ == '__main__':
 
             n_similars += 1
 
-        length2n{n_similars} += 1
+        if n_similars not in length2n:
+            length2n[n_similars] = 0
+        length2n[n_similars] += 1
         ### output
         if is_priming:
             output_priming(src_similars, tgt_similars, curr_src, curr_tgt, v)
