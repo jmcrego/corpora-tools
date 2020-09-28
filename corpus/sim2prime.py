@@ -308,6 +308,6 @@ if __name__ == '__main__':
 
     sys.stderr.write('Done\n')
     for l, n in sorted(length2n.items()):
-        sys.stderr.write('length {} => {}\n'.format(l,n))
+        sys.stderr.write('{}-similars => {}\n'.format(l,n))
 
             
