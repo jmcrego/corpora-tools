@@ -306,8 +306,8 @@ if __name__ == '__main__':
         else:
             output_augment(src_similars, curr_src, curr_tgt, v)
 
-        sys.stderr.write('Done\n')
-        for l, n in length2n.items():
-            sys.stderr.write('length {} => {}\n'.format(l,n))
+    sys.stderr.write('Done\n')
+    for l, n in length2n.items():
+        sys.stderr.write('length {} => {}\n'.format(l,n))
 
             
