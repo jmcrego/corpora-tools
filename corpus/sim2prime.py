@@ -60,7 +60,7 @@ def get_separator(use_range, score=0.0):
         return tok_range10
 
 
-def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, verbose):
+def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fout_tgt, fout_pref, verbose):
 
     is_inference = True if curr_tgt is None else False
     with_similars = True if len(src_similars) else False
@@ -73,20 +73,32 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, verbose):
         print('+++ src_sim: {}'.format(src_similars))
         print('+++ tgt_sim: {}'.format(tgt_similars))
 
-
     if with_similars:
-        if is_inference: #inference w/ similars
-            print(' '.join(src_similars+curr_src) + sep_st + ' '.join(tgt_similars + [tok_curr]))
-        else: #training w/ similars
-            print(' '.join(src_similars+curr_src) + sep_st + ' '.join(tgt_similars + curr_tgt))
-    else: 
-        if is_inference: #inference w/o similars
-            print(' '.join(curr_src[1:]) + sep_st) ### remove tok_sep
-        else: #training w/o similars (empty sentence)
-            print('')
+        fout_src.write(' '.join(src_similars+curr_src) + '\n')
+        if fout_tgt is not None:
+            fout_tgt.write(' '.join(tgt_similars + curr_tgt) + '\n')
+        if fout_pref is not None:
+            fout_pref.write(' '.join(tgt_similars + [tok_curr]) + '\n')
+
+        #if is_inference: #inference w/ similars
+        #    print(' '.join(src_similars+curr_src) + sep_st + ' '.join(tgt_similars + [tok_curr]))
+        #else: #training w/ similars
+        #    print(' '.join(src_similars+curr_src) + sep_st + ' '.join(tgt_similars + curr_tgt))
+
+    else: #### standard sentence w/o priming
+        fout_src.write(' '.join(curr_src[1:]) + '\n')
+        if fout_tgt is not None:
+            fout_tgt.write(' '.join(curr_tgt[1:]) + '\n')
+        if fout_pref is not None:
+            fout_pref.write('\n')
+            
+        #if is_inference: #inference w/o similars
+        #    print(' '.join(curr_src[1:]) + sep_st) ### remove tok_sep
+        #else: #training w/o similars (empty sentence)
+        #    print('')
 
 
-def output_augment(src_similars, curr_src, curr_tgt, verbose):
+def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, verbose):
 
     is_inference = True if curr_tgt is None else False
     with_similars = True if len(src_similars) else False
@@ -100,16 +112,24 @@ def output_augment(src_similars, curr_src, curr_tgt, verbose):
 
 
     if with_similars:
-        if is_inference: #inference w/ similars
-            print(' '.join(src_similars+curr_src) + sep_st)
-        else: #training w/ similars
-            print(' '.join(src_similars+curr_src) + sep_st + ' '.join(curr_tgt))
+        fout_src.write(' '.join(src_similars+curr_src) + '\n')
+        if fout_tgt is not None:
+            fout_tgt.write(' '.join(curr_tgt) + '\n')        
+
+        #if is_inference: #inference w/ similars
+        #    print(' '.join(src_similars+curr_src) + sep_st)
+        #else: #training w/ similars
+        #    print(' '.join(src_similars+curr_src) + sep_st + ' '.join(curr_tgt))
 
     else: 
-        if is_inference: #inference w/o similars
-            print(' '.join(curr_src[1:]) + sep_st) ### remove tok_sep
-        else: #training w/o similars (empty sentence)
-            print('')
+        fout_src.write(' '.join(curr_src[1:]) + '\n')
+        if fout_tgt is not None:
+            fout_tgt.write(' '.join(curr_tgt[1:]) + '\n')
+
+        #if is_inference: #inference w/o similars
+        #    print(' '.join(curr_src[1:]) + sep_st) ### remove tok_sep
+        #else: #training w/o similars (empty sentence)
+        #    print('')
 
 
 #####################################################################
@@ -128,8 +148,10 @@ if __name__ == '__main__':
     fdb_tgt = None
     fq_src = None
     fq_tgt = None
+    fout = None
     name = sys.argv.pop(0)
-    usage = '''usage: {} -db_tgt FILE [-db_src FILE] -q_src FILE [-q_tgt FILE] [-range] [-fuzzymatch] [-n INT] [-l INT] [-t FLOAT] [-v] < FSIM > FAUGMENTED
+    usage = '''usage: {} -db_tgt FILE [-db_src FILE] -q_src FILE [-q_tgt FILE] [-o FILE] [-range] [-fuzzymatch] [-n INT] [-l INT] [-t FLOAT] [-v] < FSIM 
+   -o        FILE : o.src o.pref o.tgt files are built
    -db_src   FILE : db file with src strings to output (PRIMING)
    -db_tgt   FILE : db file with tgt strings to output
    -q_src    FILE : query file with src strings
@@ -161,6 +183,8 @@ if __name__ == '__main__':
             fq_src = sys.argv.pop(0)
         elif tok=="-q_tgt" and len(sys.argv):
             fq_tgt = sys.argv.pop(0)
+        elif tok=="-o" and len(sys.argv):
+            fout = sys.argv.pop(0)
         elif tok=="-n" and len(sys.argv):
             n = int(sys.argv.pop(0))
         elif tok=="-t" and len(sys.argv):
@@ -177,6 +201,11 @@ if __name__ == '__main__':
             sys.stderr.write('error: unparsed {} option\n'.format(tok))
             sys.stderr.write("{}".format(usage))
             sys.exit()
+
+    if fout is None:
+        sys.stderr.write('error: missing -o option\n')
+        sys.stderr.write("{}".format(usage))
+        sys.exit()
 
     if fdb_tgt is None:
         sys.stderr.write('error: missing -db_tgt option\n')
@@ -227,6 +256,10 @@ if __name__ == '__main__':
         if len(Q_tgt) != len(Q_src):
             sys.stderr.write('error: erroneous number of lines in fq_tgt {}'.format(len(Q_tgt)))
             sys.exit()
+
+    fout_src = open(fout + ".src", "w")
+    fout_tgt = None if is_inference else open(fout + ".tgt", "w")
+    fout_pref = open(fout + ".pref", "w") if is_priming else None
 
     length2n = {}
 
@@ -302,9 +335,15 @@ if __name__ == '__main__':
         length2n[n_similars] += 1
         ### output
         if is_priming:
-            output_priming(src_similars, tgt_similars, curr_src, curr_tgt, v)
+            output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fout_tgt, fout_pref, v)
         else:
-            output_augment(src_similars, curr_src, curr_tgt, v)
+            output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, v)
+
+    fout_src.close()
+    if not is inference:
+        fout_tgt.close()
+    if is_priming:
+        fout_pref.close()
 
     sys.stderr.write('Done\n')
     for l, n in sorted(length2n.items()):
