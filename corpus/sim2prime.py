@@ -7,19 +7,19 @@ import gzip
 from collections import defaultdict
 
 sep_st      = '\t'
-tok_sep     = '※'
-tok_curr    = '‖'
-tok_range0  = '※.0※'
-tok_range1  = '※.1※'
-tok_range2  = '※.2※'
-tok_range3  = '※.3※'
-tok_range4  = '※.4※'
-tok_range5  = '※.5※'
-tok_range6  = '※.6※'
-tok_range7  = '※.7※'
-tok_range8  = '※.8※'
-tok_range9  = '※.9※'
-tok_range10 = '※1.※'
+tok_sep     = '⸨sep⸩'
+tok_curr    = '⸨cur⸩'
+tok_range0  = '⸨0.0⸩'
+tok_range1  = '⸨0.1⸩'
+tok_range2  = '⸨0.2⸩'
+tok_range3  = '⸨0.3⸩'
+tok_range4  = '⸨0.4⸩'
+tok_range5  = '⸨0.5⸩'
+tok_range6  = '⸨0.6⸩'
+tok_range7  = '⸨0.7⸩'
+tok_range8  = '⸨0.8⸩'
+tok_range9  = '⸨0.9⸩'
+tok_range10 = '⸨1.0⸩'
 
 def progress(n_line):
     if n_line%10000 == 0:
