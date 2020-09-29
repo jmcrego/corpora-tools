@@ -297,7 +297,6 @@ if __name__ == '__main__':
             r = random.random()
             if r < pp: ### add perfect match
                 tag = get_tag(use_range, 1.0)
-                print("r={}".format(r))
                 if is_priming: ### PRIMING: augment source and target sides
                     src_similar = [tag] + curr_src
                     tgt_similar = [tag] + curr_tgt
@@ -325,7 +324,6 @@ if __name__ == '__main__':
                 sys.exit()
 
             tag = get_tag(use_range, score)
-            print('tag is {}'.format(tag))
             if is_priming: ### PRIMING: augment source and target sides
                 src_similar = [tag] + DB_src[n_db].split()
                 tgt_similar = [tag] + DB_tgt[n_db].split()
