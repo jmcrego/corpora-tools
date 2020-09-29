@@ -258,6 +258,7 @@ if __name__ == '__main__':
     #########################################################
     length2n = defaultdict(int)
     tag2n = defaultdict(int)
+    random.seed(12345)
 
     for n_query, line in enumerate(sys.stdin):
         line = line.rstrip()
@@ -287,19 +288,20 @@ if __name__ == '__main__':
         ### add similar sentence/s
         ###########################
 
-        if not is_inference and random.random() < pp: ### add perfect match
-            tag = get_tag(use_range, 1.0)
-            if is_priming: ### PRIMING: augment source and target sides
-                src_similar = [tag] + curr_src
-                tgt_similar = [tag] + curr_tgt
-                src_similars = src_similar + src_similars
-                tgt_similars = tgt_similar + tgt_similars
-                tag2n[tag] += 1
-            else: ### AUGMENT: augment source side with DB_tgt (Bulté et al, 2019)
-                src_similar = [tag] + curr_tgt
-                src_similars = src_similar + src_similars
-                tag2n[tag] += 1
-            n_similars += 1            
+        if not is_inference:
+            if random.random() < pp: ### add perfect match
+                tag = get_tag(use_range, 1.0)
+                if is_priming: ### PRIMING: augment source and target sides
+                    src_similar = [tag] + curr_src
+                    tgt_similar = [tag] + curr_tgt
+                    src_similars = src_similar + src_similars
+                    tgt_similars = tgt_similar + tgt_similars
+                    tag2n[tag] += 1
+                else: ### AUGMENT: augment source side with DB_tgt (Bulté et al, 2019)
+                    src_similar = [tag] + curr_tgt
+                    src_similars = src_similar + src_similars
+                    tag2n[tag] += 1
+                n_similars += 1            
 
         while len(toks):
             score = float(toks.pop(0)) ### similar sentences are sorted by similarity (most similar first)
