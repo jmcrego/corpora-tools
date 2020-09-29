@@ -295,9 +295,9 @@ if __name__ == '__main__':
 
         if not is_inference:
             r = random.random()
-            print("r={}".format(r))
             if r < pp: ### add perfect match
                 tag = get_tag(use_range, 1.0)
+                print("r={}".format(r))
                 if is_priming: ### PRIMING: augment source and target sides
                     src_similar = [tag] + curr_src
                     tgt_similar = [tag] + curr_tgt
