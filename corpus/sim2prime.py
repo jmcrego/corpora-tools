@@ -9,12 +9,17 @@ from collections import defaultdict
 sep_st      = '\t'
 tok_sep     = '※'
 tok_curr    = '‖'
-tok_range5  = '➎'
-tok_range6  = '➏'
-tok_range7  = '➐'
-tok_range8  = '➑'
-tok_range9  = '➒'
-tok_range10 = '❿'
+tok_range0  = '<SIM_0.0>' #'𝟘'
+tok_range1  = '<SIM_0.1>' #'𝟙'
+tok_range2  = '<SIM_0.2>' #'𝟚'
+tok_range3  = '<SIM_0.3>' #'𝟛'
+tok_range4  = '<SIM_0.4>' #'𝟜'
+tok_range5  = '<SIM_0.5>' #'𝟝'
+tok_range6  = '<SIM_0.6>' #'𝟞'
+tok_range7  = '<SIM_0.7>' #'𝟟'
+tok_range8  = '<SIM_0.8>' #'𝟠'
+tok_range9  = '<SIM_0.9>' #'𝟡'
+tok_range10 = '<SIM_1.0>' #'ⓟ'
 
 def progress(n_line):
     if n_line%10000 == 0:
@@ -42,22 +47,30 @@ def read_file(file):
         vstr.append(l)
     return vstr
 
-def get_separator(use_range, score=0.0):
+def get_tag(use_range, score=0.0):
     if not use_range:
         return tok_sep
+    elif score < 0.1:
+        return tok_range0
+    elif score < 0.2:
+        return tok_range1
+    elif score < 0.3:
+        return tok_range2
+    elif score < 0.4:
+        return tok_range3
     elif score < 0.5:
-        return tok_sep
-    elif score >= 0.5 and score < 0.6:
+        return tok_range4
+    elif score < 0.6:
         return tok_range5
-    elif score >= 0.6 and score < 0.7:
+    elif score < 0.7:
         return tok_range6
-    elif score >= 0.7 and score < 0.8:
+    elif score < 0.8:
         return tok_range7
-    elif score >= 0.8 and score < 0.9:
+    elif score < 0.9:
         return tok_range8
-    elif score >= 0.9 and score < 1.0:
+    elif score < 1.0:
         return tok_range9
-    else: #score >= 1.0:
+    else: 
         return tok_range10
 
 
@@ -313,7 +326,7 @@ if __name__ == '__main__':
                 sys.stderr.write('error: index n_db={} out of bounds'.format(n_db))
                 sys.exit()
 
-            tag = get_separator(use_range, score)
+            tag = get_tag(use_range, score)
             if is_priming: ### PRIMING: augment source and target sides
                 src_similar = [tag] + DB_src[n_db].split()
                 tgt_similar = [tag] + DB_tgt[n_db].split()
