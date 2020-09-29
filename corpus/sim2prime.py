@@ -113,7 +113,7 @@ def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, verbose
 
 
     if with_similars:
-        fout_src.write(' '.join(src_similars + curr_src) + '\n')
+        fout_src.write(' '.join(src_similars + [tok_curr] + curr_src) + '\n')
         if fout_tgt is not None:
             fout_tgt.write(' '.join(curr_tgt) + '\n')        
 
@@ -123,9 +123,9 @@ def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, verbose
         #    print(' '.join(src_similars+curr_src) + sep_st + ' '.join(curr_tgt))
 
     else: 
-        fout_src.write(' '.join(curr_src[1:]) + '\n')
+        fout_src.write(' '.join(curr_src) + '\n')
         if fout_tgt is not None:
-            fout_tgt.write(' '.join(curr_tgt[1:]) + '\n')
+            fout_tgt.write(' '.join(curr_tgt) + '\n')
 
         #if is_inference: #inference w/o similars
         #    print(' '.join(curr_src[1:]) + sep_st) ### remove tok_sep
