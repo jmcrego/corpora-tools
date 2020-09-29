@@ -263,6 +263,7 @@ if __name__ == '__main__':
     length2n = defaultdict(int)
     tag2n = defaultdict(int)
     random.seed(seed)
+    print("pp={}".format(pp))
 
     for n_query, line in enumerate(sys.stdin):
         line = line.rstrip()
