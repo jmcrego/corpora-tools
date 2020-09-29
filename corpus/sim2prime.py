@@ -353,6 +353,6 @@ if __name__ == '__main__':
     for l, n in sorted(length2n.items()):
         sys.stderr.write('{}-similars => {}\n'.format(l,n))
     for l, n in sorted(tag2n.items()):
-        sys.stderr.write('{}-tag => {}\n'.format(l,n))
+        sys.stderr.write('{}-tags => {}\n'.format(l,n))
 
             
