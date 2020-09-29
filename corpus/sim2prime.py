@@ -325,6 +325,7 @@ if __name__ == '__main__':
                 sys.exit()
 
             tag = get_tag(use_range, score)
+            print('tag is {}'.format(tag))
             if is_priming: ### PRIMING: augment source and target sides
                 src_similar = [tag] + DB_src[n_db].split()
                 tgt_similar = [tag] + DB_tgt[n_db].split()
