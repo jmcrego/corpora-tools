@@ -351,7 +351,7 @@ if __name__ == '__main__':
     if is_priming:
         fout_pref.close()
 
-    sys.stderr.write('Done\nSentences => {}\n'.format(n_query))
+    sys.stderr.write('Done\nSentences => {}\n'.format(n_query+1))
     for l, n in sorted(length2n.items()):
         sys.stderr.write('{}-similars => {}\n'.format(l,n))
     for l, n in sorted(tag2n.items()):
