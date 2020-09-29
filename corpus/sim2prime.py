@@ -290,13 +290,13 @@ if __name__ == '__main__':
         if random.random() < pp: ### add perfect match
             tag = get_tag(use_range, 1.0)
             if is_priming: ### PRIMING: augment source and target sides
-                src_similar = [tag] + curr_src.split()
-                tgt_similar = [tag] + curr_tgt.split()
+                src_similar = [tag] + curr_src
+                tgt_similar = [tag] + curr_tgt
                 src_similars = src_similar + src_similars
                 tgt_similars = tgt_similar + tgt_similars
                 tag2n[tag] += 1
             else: ### AUGMENT: augment source side with DB_tgt (Bulté et al, 2019)
-                src_similar = [tag] + curr_tgt.split()
+                src_similar = [tag] + curr_tgt
                 src_similars = src_similar + src_similars
                 tag2n[tag] += 1
             n_similars += 1            
