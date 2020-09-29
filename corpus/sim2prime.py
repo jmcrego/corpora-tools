@@ -75,9 +75,9 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fou
         print('+++ tgt_sim: {}'.format(tgt_similars))
 
     if with_similars:
-        fout_src.write(' '.join(src_similars + curr_src) + '\n')
+        fout_src.write(' '.join(src_similars + [tok_curr] + curr_src) + '\n')
         if fout_tgt is not None:
-            fout_tgt.write(' '.join(tgt_similars + curr_tgt) + '\n')
+            fout_tgt.write(' '.join(tgt_similars + [tok_curr] + curr_tgt) + '\n')
         if fout_pref is not None:
             fout_pref.write(' '.join(tgt_similars + [tok_curr]) + '\n')
 
@@ -87,9 +87,9 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fou
         #    print(' '.join(src_similars+curr_src) + sep_st + ' '.join(tgt_similars + curr_tgt))
 
     else: #### standard sentence w/o priming
-        fout_src.write(' '.join(curr_src[1:]) + '\n')
+        fout_src.write(' '.join(curr_src) + '\n')
         if fout_tgt is not None:
-            fout_tgt.write(' '.join(curr_tgt[1:]) + '\n')
+            fout_tgt.write(' '.join(curr_tgt) + '\n')
         if fout_pref is not None:
             fout_pref.write('\n')
 
