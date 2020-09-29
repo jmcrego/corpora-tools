@@ -127,6 +127,7 @@ if __name__ == '__main__':
     t = 0.0
     l = 999
     pp = 0.0
+    seed = 1234
     v = False
     use_range = False
     fuzzymatch = False
@@ -148,6 +149,7 @@ if __name__ == '__main__':
    -n         INT : up to n-best similar sentences (default 999)
    -l         INT : max sentence length (default 999)
    -t       FLOAT : min similarity threshold (default 0.0)
+   -seed    FLOAT : seed for randomness (default 1234)
    -v             : verbose
    -h             : this help
 
@@ -178,6 +180,8 @@ if __name__ == '__main__':
             t = float(sys.argv.pop(0))
         elif tok=="-l" and len(sys.argv):
             l = int(sys.argv.pop(0))
+        elif tok=="-seed" and len(sys.argv):
+            seed = int(sys.argv.pop(0))
         elif tok=="-perfect" and len(sys.argv):
             pp = float(sys.argv.pop(0))
         elif tok=="-v":
@@ -258,7 +262,7 @@ if __name__ == '__main__':
     #########################################################
     length2n = defaultdict(int)
     tag2n = defaultdict(int)
-    random.seed(12345)
+    random.seed(seed)
 
     for n_query, line in enumerate(sys.stdin):
         line = line.rstrip()
