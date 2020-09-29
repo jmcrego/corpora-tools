@@ -287,7 +287,7 @@ if __name__ == '__main__':
         ### add similar sentence/s
         ###########################
 
-        if random.random() < pp: ### add perfect match
+        if not is_inference and random.random() < pp: ### add perfect match
             tag = get_tag(use_range, 1.0)
             if is_priming: ### PRIMING: augment source and target sides
                 src_similar = [tag] + curr_src
