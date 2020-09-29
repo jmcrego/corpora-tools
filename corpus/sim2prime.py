@@ -4,6 +4,7 @@ import sys
 import os
 import io
 import gzip
+from collections import defaultdict
 
 sep_st      = '\t'
 tok_sep     = '※'
@@ -74,7 +75,7 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fou
         print('+++ tgt_sim: {}'.format(tgt_similars))
 
     if with_similars:
-        fout_src.write(' '.join(src_similars+curr_src) + '\n')
+        fout_src.write(' '.join(src_similars + curr_src) + '\n')
         if fout_tgt is not None:
             fout_tgt.write(' '.join(tgt_similars + curr_tgt) + '\n')
         if fout_pref is not None:
@@ -112,7 +113,7 @@ def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, verbose
 
 
     if with_similars:
-        fout_src.write(' '.join(src_similars+curr_src) + '\n')
+        fout_src.write(' '.join(src_similars + curr_src) + '\n')
         if fout_tgt is not None:
             fout_tgt.write(' '.join(curr_tgt) + '\n')        
 
@@ -150,13 +151,13 @@ if __name__ == '__main__':
     fq_tgt = None
     fout = None
     name = sys.argv.pop(0)
-    usage = '''usage: {} -db_tgt FILE [-db_src FILE] -q_src FILE [-q_tgt FILE] [-o FILE] [-range] [-fuzzymatch] [-n INT] [-l INT] [-t FLOAT] [-v] < FSIM 
-   -o        FILE : o.src o.pref o.tgt files are built
-   -db_src   FILE : db file with src strings to output (PRIMING)
-   -db_tgt   FILE : db file with tgt strings to output
+    usage = '''usage: {} -o FILE -db_tgt FILE [-db_src FILE] -q_src FILE [-q_tgt FILE] [-range] [-fuzzymatch] [-n INT] [-l INT] [-t FLOAT] [-v] < FILE_SIM 
+   -o        FILE : FILE.src FILE.pref FILE.tgt files are built
+   -db_src   FILE : db file with src strings (PRIMING)
+   -db_tgt   FILE : db file with tgt strings
    -q_src    FILE : query file with src strings
-   -q_tgt    FILE : query file with tgt strings        (TRAINING)
-   -range         : use score ranges to separate sentences
+   -q_tgt    FILE : query file with tgt strings (TRAINING)
+   -range         : use score ranges to separate similar sentences
    -fuzzymatch    : indexs start by 1
    -n         INT : up to n-best similar sentences (default 999)
    -l         INT : max sentence length (default 999)
@@ -224,9 +225,7 @@ if __name__ == '__main__':
     DB_tgt = read_file(fdb_tgt)
     sys.stderr.write('Read fdb_tgt={} with {} lines\n'.format(fdb_tgt, len(DB_tgt)))
 
-    is_priming = False
     if fdb_src is not None:
-        is_priming = True
         ###################
         ### read DB_src ###
         ###################
@@ -236,6 +235,9 @@ if __name__ == '__main__':
             sys.stderr.write('error: erroneous number of lines in fdb_src {}'.format(len(DB_src)))
             sys.exit()
         sys.stderr.write('Read fdb_src={} with {} lines\n'.format(fdb_src, len(DB_src)))
+        is_priming = True
+    else:
+        is_priming = False
 
     ##################
     ### read Q_src ###
@@ -244,9 +246,7 @@ if __name__ == '__main__':
     Q_src = read_file(fq_src)
     sys.stderr.write('Read fq_src={} with {} lines\n'.format(fq_src, len(Q_src)))
 
-    is_inference = True
     if fq_tgt is not None:
-        is_inference = False
         ##################
         ### read Q_tgt ###
         ##################
@@ -256,16 +256,19 @@ if __name__ == '__main__':
         if len(Q_tgt) != len(Q_src):
             sys.stderr.write('error: erroneous number of lines in fq_tgt {}'.format(len(Q_tgt)))
             sys.exit()
+        is_inference = False
+    else:
+        is_inference = True
+
 
     fout_src = open(fout + ".src", "w")
     fout_tgt = None if is_inference else open(fout + ".tgt", "w")
     fout_pref = open(fout + ".pref", "w") if is_priming else None
 
-    length2n = {}
-
     #########################################################
     ### augmenting Q_src and Q_tgt with DB_src and DB_tgt ###
     #########################################################
+    length2n = defaultdict(int)
     for n_query, line in enumerate(sys.stdin):
         line = line.rstrip()
 
@@ -277,14 +280,15 @@ if __name__ == '__main__':
         if len(toks) % 2 != 0:
             sys.stderr.write('error: unparsed line {}'.format(line))
 
-
-        curr_src = [tok_curr] + Q_src[n_query].split()
+        #curr_src = [tok_curr] + Q_src[n_query].split()
+        curr_src = Q_src[n_query].split()
         len_curr_src = len(curr_src)
         if is_inference:
             curr_tgt = None
             len_curr_tgt = 0
         else:
-            curr_tgt = [tok_curr] + Q_tgt[n_query].split()
+            #curr_tgt = [tok_curr] + Q_tgt[n_query].split()
+            curr_tgt = Q_tgt[n_query].split()
             len_curr_tgt = len(curr_tgt)
 
         src_similars = []
@@ -301,37 +305,33 @@ if __name__ == '__main__':
 
             if score < t:
                 break
-
             if n_similars >= n: ### already augmented n similar sentences
                 break
-
             if fuzzymatch: ### fuzzymatch indexs start by 1
                 n_db -= 1 
-
             if n_db < 0 or n_db >= len(DB_tgt):
                 sys.stderr.write('error: index n_db={} out of bounds'.format(n_db))
                 sys.exit()
 
             tag = get_separator(use_range, score)
-
             if is_priming: ### PRIMING: augment source and target sides
                 src_similar = [tag] + DB_src[n_db].split()
                 tgt_similar = [tag] + DB_tgt[n_db].split()
-                if len(src_similars)+len(src_similar)+len_curr_src > l or len(tgt_similars)+len(tgt_similar)+len_curr_tgt > l: #exceeds max_length
+                if len(src_similars)+len(src_similar)+len_curr_src+1 > l or len(tgt_similars)+len(tgt_similar)+len_curr_tgt+1 > l: #exceeds max_length
                     continue
                 src_similars = src_similar + src_similars
                 tgt_similars = tgt_similar + tgt_similars
 
             else: ### AUGMENT: augment source side with DB_tgt (Bulté et al, 2019)
                 src_similar = [tag] + DB_tgt[n_db].split()
-                if len(src_similars)+len(src_similar)+len_curr_src > l: #exceeds max_length
+                if len(src_similars)+len(src_similar)+len_curr_src+1 > l: #exceeds max_length
                     continue
                 src_similars = src_similar + src_similars
 
             n_similars += 1
 
-        if n_similars not in length2n:
-            length2n[n_similars] = 0
+        #if n_similars not in length2n:
+        #    length2n[n_similars] = 0
         length2n[n_similars] += 1
         ### output
         if is_priming:
