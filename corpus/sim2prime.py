@@ -144,7 +144,7 @@ if __name__ == '__main__':
    -q_tgt    FILE : query file with tgt strings (TRAINING)
    -range         : use score ranges to separate similar sentences
    -fuzzymatch    : indexs start by 1
-   -perfect FLOAT : probability of adding perfect matchs (default 0.0)
+   -perfect FLOAT : probability of injecting perfect matchs (default 0.0)
    -n         INT : up to n-best similar sentences (default 999)
    -l         INT : max sentence length (default 999)
    -t       FLOAT : min similarity threshold (default 0.0)
@@ -349,7 +349,7 @@ if __name__ == '__main__':
     if is_priming:
         fout_pref.close()
 
-    sys.stderr.write('Done\n')
+    sys.stderr.write('Done\nSentences => {}'.format(n_query))
     for l, n in sorted(length2n.items()):
         sys.stderr.write('{}-similars => {}\n'.format(l,n))
     for l, n in sorted(tag2n.items()):
