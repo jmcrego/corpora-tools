@@ -74,51 +74,61 @@ def get_tag(use_range, score=0.0):
     else: 
         return tok_range10
 
-def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fout_tgt, fout_pref, verbose):
-    with_similars = True if len(src_similars) else False
+def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fout_tgt, fout_pref, maxl, verbose):
     if verbose:
-        print('+++++++++++++ PRIMING +++++++++++++')
+        print('+++ PRIMING ++++++++++++++++++++++++++++++++++++++')
         print('+++ curr_src: {}'.format(curr_src))
         print('+++ curr_tgt: {}'.format(curr_tgt))
-        print('+++ w_similars: {}'.format(with_similars))
-        print('+++ src_sim: {}'.format(src_similars))
-        print('+++ tgt_sim: {}'.format(tgt_similars))
+        print('+++ nsimilar: {}'.format(len(src_similars)))
+        print('+++ src_sims: {}'.format('\t'.join(src_similars)))
+        print('+++ tgt_sims: {}'.format('\t'.join(tgt_similars)))
 
-    if with_similars:
-        fout_src.write(' '.join(src_similars + [tok_curr] + curr_src) + '\n')
-        if fout_tgt is not None:
-            fout_tgt.write(' '.join(tgt_similars + [tok_curr] + curr_tgt) + '\n')
-        if fout_pref is not None:
-            fout_pref.write(' '.join(tgt_similars + [tok_curr]) + '\n')
-
-    else: #### standard sentence w/o priming
+    if len(src_similars) == 0: ### normal sentence (no priming)
         fout_src.write(' '.join(curr_src) + '\n')
-        if fout_tgt is not None:
-            fout_tgt.write(' '.join(curr_tgt) + '\n')
-        if fout_pref is not None:
-            fout_pref.write('\n')
+        fout_tgt.write(' '.join(curr_tgt) + '\n') if fout_tgt is not None ### learning
+        fout_pref.write('\n')
+        return
 
-def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, verbose):
-    with_similars = True if len(src_similars) else False
+    while len(src_similars):
+        example_src = src_similars.pop(0)
+        example_tgt = tgt_similars.pop(0)
+
+        while len(src_similars) and len(example_src) + len(src_similars[0]) + len(curr_src) <= maxl and len(example_tgt) + len(tgt_similars[0]) + len(curr_tgt) <= maxl:
+            example_src = src_similars.pop(0) + example_src
+            example_tgt = tgt_similars.pop(0) + example_tgt
+
+        fout_src.write(' '.join(example_src + [tok_curr] + curr_src))
+        fout_tgt.write(' '.join(example_tgt + [tok_curr] + curr_tgt)) if fout_tgt is not None ### learning
+        fout_pref.write(' '.join(example_tgt + [tok_curr]))
+
+
+def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, maxl, verbose):
     if verbose:
-        print('------------- AUGMENT -------------')
+        print('--- AUGMENT --------------------------------------')
         print('--- curr_src: {}'.format(curr_src))
         print('--- curr_tgt: {}'.format(curr_tgt))
-        print('--- w_similars: {}'.format(with_similars))
-        print('--- src_sim: {}'.format(src_similars))
+        print('--- nsimilar: {}'.format(len(src_similars)))
+        print('--- src_sims: {}'.format('\t'.join(src_similars)))
 
-    if with_similars:
-        fout_src.write(' '.join(src_similars + [tok_curr] + curr_src) + '\n')
-        if fout_tgt is not None:
-            fout_tgt.write(' '.join(curr_tgt) + '\n')        
-
-    else: 
+    if len(src_similars) == 0: ### normal sentence (no priming)
         fout_src.write(' '.join(curr_src) + '\n')
-        if fout_tgt is not None:
-            fout_tgt.write(' '.join(curr_tgt) + '\n')
+        fout_tgt.write(' '.join(curr_tgt) + '\n') if fout_tgt is not None ### learning
+        return
+
+    while len(src_similars):
+        example_src = src_similars.pop(0)
+
+        while len(src_similars) and len(example_src) + len(src_similars[0]) + len(curr_src) <= maxl:
+            example_src = src_similars.pop(0) + example_src
+
+        fout_src.write(' '.join(example_src + [tok_curr] + curr_src))
+        fout_tgt.write(' '.join(example_tgt + [tok_curr] + curr_tgt)) if fout_tgt is not None ### learning
+
+
+
 
 #####################################################################
-### MAIN ############################################################
+### PARS ############################################################
 #####################################################################
 
 if __name__ == '__main__':
@@ -210,6 +220,10 @@ if __name__ == '__main__':
         sys.stderr.write("{}".format(usage))
         sys.exit()
 
+    #####################################################################
+    ### MAIN ############################################################
+    #####################################################################
+
     ###################
     ### read DB_tgt ###
     ###################
@@ -260,7 +274,6 @@ if __name__ == '__main__':
     #########################################################
     ### augmenting Q_src and Q_tgt with DB_src and DB_tgt ###
     #########################################################
-    length2n = defaultdict(int)
     tag2n = defaultdict(int)
     random.seed(seed)
     print("pp={}".format(pp))
@@ -287,27 +300,23 @@ if __name__ == '__main__':
 
         src_similars = []
         tgt_similars = []
-        n_similars = 0
 
         ###
         ### add similar sentence/s
         ###########################
-
         if not is_inference:
             r = random.random()
             if r < pp: ### add perfect match
                 tag = get_tag(use_range, 1.0)
+                tag2n[tag] += 1
                 if is_priming: ### PRIMING: augment source and target sides
                     src_similar = [tag] + curr_src
                     tgt_similar = [tag] + curr_tgt
-                    src_similars = src_similar + src_similars
-                    tgt_similars = tgt_similar + tgt_similars
-                    tag2n[tag] += 1
+                    src_similars.append(src_similar)
+                    tgt_similars.append(tgt_similar)
                 else: ### AUGMENT: augment source side with DB_tgt (Bulté et al, 2019)
                     src_similar = [tag] + curr_tgt
-                    src_similars = src_similar + src_similars
-                    tag2n[tag] += 1
-                n_similars += 1            
+                    src_similars.append(src_similar)
 
         while len(toks):
             score = float(toks.pop(0)) ### similar sentences are sorted by similarity (most similar first)
@@ -315,7 +324,7 @@ if __name__ == '__main__':
 
             if score < t:
                 break
-            if n_similars >= n: ### already augmented n similar sentences
+            if len(src_similars) >= n: ### already augmented n similar sentences
                 break
             if fuzzymatch: ### fuzzymatch indexs start by 1
                 n_db -= 1 
@@ -324,32 +333,23 @@ if __name__ == '__main__':
                 sys.exit()
 
             tag = get_tag(use_range, score)
+            tag2n[tag] += 1
             if is_priming: ### PRIMING: augment source and target sides
                 src_similar = [tag] + DB_src[n_db].split()
                 tgt_similar = [tag] + DB_tgt[n_db].split()
-                if len(src_similars)+len(src_similar)+len_curr_src+1 > l or len(tgt_similars)+len(tgt_similar)+len_curr_tgt+1 > l: #exceeds max_length
-                    continue
-                src_similars = src_similar + src_similars
-                tgt_similars = tgt_similar + tgt_similars
-                tag2n[tag] += 1
-
+                src_similars.append(src_similar)
+                tgt_similars.append(tgt_similar)
             else: ### AUGMENT: augment source side with DB_tgt (Bulté et al, 2019)
                 src_similar = [tag] + DB_tgt[n_db].split()
-                if len(src_similars)+len(src_similar)+len_curr_src+1 > l: #exceeds max_length
-                    continue
-                src_similars = src_similar + src_similars
-                tag2n[tag] += 1
+                src_similars.append(src_similar)
 
-            n_similars += 1
-
-        #if n_similars not in length2n:
-        #    length2n[n_similars] = 0
-        length2n[n_similars] += 1
+        ###
         ### output
+        ###########################
         if is_priming:
-            output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fout_tgt, fout_pref, v)
+            output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fout_tgt, fout_pref, l, v)
         else:
-            output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, v)
+            output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, l, v)
 
     fout_src.close()
     if not is_inference:
@@ -358,8 +358,6 @@ if __name__ == '__main__':
         fout_pref.close()
 
     sys.stderr.write('Done\nSentences => {}\n'.format(n_query+1))
-    for l, n in sorted(length2n.items()):
-        sys.stderr.write('{}-similars => {}\n'.format(l,n))
     for l, n in sorted(tag2n.items()):
         sys.stderr.write('{}-tags => {}\n'.format(l,n))
 
