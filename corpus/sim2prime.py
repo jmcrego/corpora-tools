@@ -80,8 +80,8 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fou
         print('+++ curr_src: {}'.format(curr_src))
         print('+++ curr_tgt: {}'.format(curr_tgt))
         print('+++ nsimilar: {}'.format(len(src_similars)))
-        print('+++ src_sims: {}'.format('\t'.join(src_similars)))
-        print('+++ tgt_sims: {}'.format('\t'.join(tgt_similars)))
+        print('+++ src_sims: {}'.format(src_similars))
+        print('+++ tgt_sims: {}'.format(tgt_similars))
 
     if len(src_similars) == 0: ### normal sentence (no priming)
         fout_src.write(' '.join(curr_src) + '\n')
@@ -110,7 +110,7 @@ def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, maxl, v
         print('--- curr_src: {}'.format(curr_src))
         print('--- curr_tgt: {}'.format(curr_tgt))
         print('--- nsimilar: {}'.format(len(src_similars)))
-        print('--- src_sims: {}'.format('\t'.join(src_similars)))
+        print('--- src_sims: {}'.format(src_similars))
 
     if len(src_similars) == 0: ### normal sentence (no priming)
         fout_src.write(' '.join(curr_src) + '\n')
