@@ -85,7 +85,8 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fou
 
     if len(src_similars) == 0: ### normal sentence (no priming)
         fout_src.write(' '.join(curr_src) + '\n')
-        fout_tgt.write(' '.join(curr_tgt) + '\n') if fout_tgt is not None ### learning
+        if fout_tgt is not None: ### learning
+            fout_tgt.write(' '.join(curr_tgt) + '\n') 
         fout_pref.write('\n')
         return
 
@@ -98,7 +99,8 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fou
             example_tgt = tgt_similars.pop(0) + example_tgt
 
         fout_src.write(' '.join(example_src + [tok_curr] + curr_src))
-        fout_tgt.write(' '.join(example_tgt + [tok_curr] + curr_tgt)) if fout_tgt is not None ### learning
+        if fout_tgt is not None: ### learning
+            fout_tgt.write(' '.join(example_tgt + [tok_curr] + curr_tgt)) 
         fout_pref.write(' '.join(example_tgt + [tok_curr]))
 
 
@@ -112,7 +114,8 @@ def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, maxl, v
 
     if len(src_similars) == 0: ### normal sentence (no priming)
         fout_src.write(' '.join(curr_src) + '\n')
-        fout_tgt.write(' '.join(curr_tgt) + '\n') if fout_tgt is not None ### learning
+        if fout_tgt is not None: ### learning
+            fout_tgt.write(' '.join(curr_tgt) + '\n') 
         return
 
     while len(src_similars):
@@ -122,7 +125,8 @@ def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, maxl, v
             example_src = src_similars.pop(0) + example_src
 
         fout_src.write(' '.join(example_src + [tok_curr] + curr_src))
-        fout_tgt.write(' '.join(example_tgt + [tok_curr] + curr_tgt)) if fout_tgt is not None ### learning
+        if fout_tgt is not None: ### learning
+            fout_tgt.write(' '.join(example_tgt + [tok_curr] + curr_tgt)) 
 
 
 
