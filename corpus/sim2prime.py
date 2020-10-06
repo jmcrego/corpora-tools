@@ -74,6 +74,7 @@ def get_tag(use_range, score=0.0):
     else: 
         return tok_range10
 
+
 def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fout_tgt, fout_pref, maxl, verbose):
     if verbose:
         print('+++ PRIMING ++++++++++++++++++++++++++++++++++++++')
@@ -83,7 +84,7 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fou
         print('+++ src_sims: {}'.format(src_similars))
         print('+++ tgt_sims: {}'.format(tgt_similars))
 
-    len_curr_src = len(curr_src) if curr_src is not None else 0
+    len_curr_tgt = len(curr_tgt) if curr_tgt is not None else 0
 
     if len(src_similars) == 0: ### normal sentence (no priming)
         fout_src.write(' '.join(curr_src) + '\n')
