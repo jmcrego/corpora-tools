@@ -102,16 +102,21 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fou
             example_src = src_similars.pop(0) + example_src
             example_tgt = tgt_similars.pop(0) + example_tgt
 
-        fout_src.write(' '.join(example_src + [tok_curr] + curr_src))
+        osrc = example_src + [tok_curr] + curr_src
+        fout_src.write(' '.join(osrc))
         if verbose:
-            print('+++ src: {}'.format(' '.join(example_src + [tok_curr] + curr_src)))
+            print('+++ src {}: {}'.format(len(osrc), ' '.join(osrc)))
+
         if fout_tgt is not None: ### learning
-            fout_tgt.write(' '.join(example_tgt + [tok_curr] + curr_tgt)) 
+            otgt = example_tgt + [tok_curr] + curr_tgt
+            fout_tgt.write(' '.join(otgt)) 
             if verbose:
-                print('+++ tgt: {}'.format(' '.join(example_tgt + [tok_curr] + curr_tgt)))
-        fout_pref.write(' '.join(example_tgt + [tok_curr]))
+                print('+++ tgt {}: {}'.format(len(otgt), ' '.join(otgt)))
+
+        opref = example_tgt + [tok_curr]
+        fout_pref.write(' '.join(opref))
         if verbose:
-            print('+++ ref: {}'.format(' '.join(example_tgt + [tok_curr])))
+            print('+++ ref {}: {}'.format(len(opref), ' '.join(opref)))
 
 
 def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, maxl, verbose):
@@ -134,13 +139,16 @@ def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, maxl, v
         while len(src_similars) and len(example_src) + len(src_similars[0]) + len(curr_src) <= maxl:
             example_src = src_similars.pop(0) + example_src
 
-        fout_src.write(' '.join(example_src + [tok_curr] + curr_src))
+        osrc = example_src + [tok_curr] + curr_src
+        fout_src.write(' '.join(osrc))
         if verbose:
-            print('+++ src: {}'.format(' '.join(example_src + [tok_curr] + curr_src)))
+            print('+++ src {}: {}'.format(len(osrc), ' '.join(osrc)))
+
         if fout_tgt is not None: ### learning
-            fout_tgt.write(' '.join([tok_curr] + curr_tgt)) 
+            otgt = [tok_curr] + curr_tgt
+            fout_tgt.write(' '.join(otgt)) 
             if verbose:
-                print('+++ tgt: {}'.format(' '.join([tok_curr] + curr_tgt)))
+                print('+++ tgt {}: {}'.format(len(otgt), ' '.join(otgt)))
 
 
 
