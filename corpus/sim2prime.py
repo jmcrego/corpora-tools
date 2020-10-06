@@ -75,6 +75,7 @@ def get_tag(use_range, score=0.0):
         return tok_range10
 
 
+
 def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fout_tgt, fout_pref, maxl, verbose):
     if verbose:
         print('+++ PRIMING ++++++++++++++++++++++++++++++++++++++')
@@ -102,9 +103,15 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fou
             example_tgt = tgt_similars.pop(0) + example_tgt
 
         fout_src.write(' '.join(example_src + [tok_curr] + curr_src))
+        if verbose:
+            print('+++ src: {}'.format(' '.join(example_src + [tok_curr] + curr_src)))
         if fout_tgt is not None: ### learning
             fout_tgt.write(' '.join(example_tgt + [tok_curr] + curr_tgt)) 
+            if verbose:
+                print('+++ tgt: {}'.format(' '.join(example_tgt + [tok_curr] + curr_tgt)))
         fout_pref.write(' '.join(example_tgt + [tok_curr]))
+        if verbose:
+            print('+++ ref: {}'.format(' '.join(example_tgt + [tok_curr])))
 
 
 def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, maxl, verbose):
@@ -128,8 +135,13 @@ def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, maxl, v
             example_src = src_similars.pop(0) + example_src
 
         fout_src.write(' '.join(example_src + [tok_curr] + curr_src))
+        if verbose:
+            print('+++ src: {}'.format(' '.join(example_src + [tok_curr] + curr_src)))
         if fout_tgt is not None: ### learning
             fout_tgt.write(' '.join([tok_curr] + curr_tgt)) 
+            if verbose:
+                print('+++ tgt: {}'.format(' '.join([tok_curr] + curr_tgt)))
+
 
 
 #####################################################################
