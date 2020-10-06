@@ -126,7 +126,7 @@ def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, maxl, v
 
         fout_src.write(' '.join(example_src + [tok_curr] + curr_src))
         if fout_tgt is not None: ### learning
-            fout_tgt.write(' '.join(example_tgt + [tok_curr] + curr_tgt)) 
+            fout_tgt.write(' '.join([tok_curr] + curr_tgt)) 
 
 
 
