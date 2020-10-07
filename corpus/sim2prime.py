@@ -103,12 +103,10 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fou
         example_tgt = tgt_similars.pop(0)
         nsim = 1
 
-        while len(src_similars) and len(example_src) + len(src_similars[0]) + len(curr_src) <= maxl and len(example_tgt) + len(tgt_similars[0]) + len_curr_tgt <= maxl:
+        while len(src_similars) and nsim < maxn and len(example_src) + len(src_similars[0]) + len(curr_src) <= maxl and len(example_tgt) + len(tgt_similars[0]) + len_curr_tgt <= maxl:
             example_src = src_similars.pop(0) + example_src
             example_tgt = tgt_similars.pop(0) + example_tgt
             nsim += 1
-            if nsim >= maxn:
-                break
 
         osrc = example_src + [tok_curr] + curr_src
         opref = example_tgt + [tok_curr]
@@ -148,11 +146,9 @@ def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, maxl, m
         example_src = src_similars.pop(0)
         nsim = 1
 
-        while len(src_similars) and len(example_src) + len(src_similars[0]) + len(curr_src) <= maxl:
+        while len(src_similars) and nsim < maxn and len(example_src) + len(src_similars[0]) + len(curr_src) <= maxl:
             example_src = src_similars.pop(0) + example_src
             nsim += 1
-            if nsim >= maxn:
-                break
 
         osrc = example_src + [tok_curr] + curr_src
         fout_src.write(' '.join(osrc) + '\n')
