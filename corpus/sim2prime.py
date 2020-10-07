@@ -403,8 +403,10 @@ if __name__ == '__main__':
     sys.stderr.write('Sentences => {}\n'.format(n_query+1))
     for l, n in sorted(tag2n.items()):
         sys.stderr.write('{}-tags => {}\n'.format(l,n))
+    nexamples = 0
     for n, N in sorted(nsim2n.items()):
         sys.stderr.write('{}-similars => {}\n'.format(n,N))
-
+        nexamples += N
+    sys.stderr.write('Examples => {}\n'.format(nexamples))
 
             
