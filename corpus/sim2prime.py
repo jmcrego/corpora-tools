@@ -404,7 +404,7 @@ if __name__ == '__main__':
     for l, n in sorted(tag2n.items()):
         sys.stderr.write('{}-tags => {}\n'.format(l,n))
     for n, N in sorted(nsim2n.items()):
-        sys.stderr.write('{}-sims => {}\n'.format(n,N))
+        sys.stderr.write('{}-similars => {}\n'.format(n,N))
 
 
             
