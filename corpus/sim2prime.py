@@ -22,6 +22,8 @@ tok_range8  = '⸨0.8⸩'
 tok_range9  = '⸨0.9⸩'
 tok_range10 = '⸨1.0⸩'
 
+tag2n = defaultdict(int)
+
 def progress(n_line):
     if n_line%10000 == 0:
         if n_line%100000 == 0:
@@ -307,7 +309,6 @@ if __name__ == '__main__':
     #########################################################
     ### augmenting Q_src and Q_tgt with DB_src and DB_tgt ###
     #########################################################
-    tag2n = defaultdict(int)
     random.seed(seed)
 
     for n_query, line in enumerate(sys.stdin):
