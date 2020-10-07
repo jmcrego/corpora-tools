@@ -23,6 +23,7 @@ tok_range9  = '⸨0.9⸩'
 tok_range10 = '⸨1.0⸩'
 
 tag2n = defaultdict(int)
+nsim2n = defaultdict(int)
 
 def progress(n_line):
     if n_line%10000 == 0:
@@ -94,21 +95,25 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fou
         fout_pref.write('\n')
         if fout_tgt is not None: ### learning
             fout_tgt.write(' '.join(curr_tgt) + '\n') 
+        nsim2n[0] += 1
         return
 
     while len(src_similars):
         example_src = src_similars.pop(0)
         example_tgt = tgt_similars.pop(0)
+        nsim = 1
 
         while len(src_similars) and len(example_src) + len(src_similars[0]) + len(curr_src) <= maxl and len(example_tgt) + len(tgt_similars[0]) + len_curr_tgt <= maxl:
             example_src = src_similars.pop(0) + example_src
             example_tgt = tgt_similars.pop(0) + example_tgt
+            nsim += 1
 
         osrc = example_src + [tok_curr] + curr_src
         opref = example_tgt + [tok_curr]
 
         fout_src.write(' '.join(osrc) + '\n')
         fout_pref.write(' '.join(opref) + '\n')
+        nsim2n[nsim] += 1
 
         if verbose:
             print('+++ src {}: {}'.format(len(osrc), ' '.join(osrc)))
@@ -134,16 +139,20 @@ def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, maxl, v
         fout_src.write(' '.join(curr_src) + '\n')
         if fout_tgt is not None: ### learning
             fout_tgt.write(' '.join(curr_tgt) + '\n') 
+        nsim2n[0] += 1
         return
 
     while len(src_similars):
         example_src = src_similars.pop(0)
+        nsim = 1
 
         while len(src_similars) and len(example_src) + len(src_similars[0]) + len(curr_src) <= maxl:
             example_src = src_similars.pop(0) + example_src
+            nsim += 1
 
         osrc = example_src + [tok_curr] + curr_src
         fout_src.write(' '.join(osrc) + '\n')
+        nsim2n[nsim] += 1
         if verbose:
             print('+++ src {}: {}'.format(len(osrc), ' '.join(osrc)))
 
@@ -390,8 +399,12 @@ if __name__ == '__main__':
     if is_priming:
         fout_pref.close()
 
-    sys.stderr.write('Done\nSentences => {}\n'.format(n_query+1))
+    sys.stderr.write('Done\n')
+    sys.stderr.write('Sentences => {}\n'.format(n_query+1))
     for l, n in sorted(tag2n.items()):
         sys.stderr.write('{}-tags => {}\n'.format(l,n))
+    for n, N in sorted(nsim2n.items()):
+        sys.stderr.write('{}-sims => {}\n'.format(n,N))
+
 
             
