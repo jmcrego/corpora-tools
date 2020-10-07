@@ -212,20 +212,27 @@ if __name__ == '__main__':
             fout = sys.argv.pop(0)
         elif tok=="-n" and len(sys.argv):
             n = int(sys.argv.pop(0))
+            print("n={}".format(n))
         elif tok=="-t" and len(sys.argv):
             t = float(sys.argv.pop(0))
+            print("t={}".format(t))
         elif tok=="-l" and len(sys.argv):
             l = int(sys.argv.pop(0))
+            print("l={}".format(l))
         elif tok=="-seed" and len(sys.argv):
             seed = int(sys.argv.pop(0))
+            print("seed={}".format(seed))
         elif tok=="-perfect" and len(sys.argv):
             pp = float(sys.argv.pop(0))
+            print("perfect")
         elif tok=="-v":
             v = True
         elif tok=="-range":
             use_range = True
+            print("range")
         elif tok=="-fuzzymatch":
             fuzzymatch = True
+            print("fuzzymatch")
         else:
             sys.stderr.write('error: unparsed {} option\n'.format(tok))
             sys.stderr.write("{}".format(usage))
@@ -302,7 +309,6 @@ if __name__ == '__main__':
     #########################################################
     tag2n = defaultdict(int)
     random.seed(seed)
-    print("pp={}".format(pp))
 
     for n_query, line in enumerate(sys.stdin):
         line = line.rstrip()
