@@ -224,7 +224,7 @@ if __name__ == '__main__':
             print("seed={}".format(seed))
         elif tok=="-perfect" and len(sys.argv):
             pp = float(sys.argv.pop(0))
-            print("perfect")
+            print("perfect={}".format(pp))
         elif tok=="-v":
             v = True
         elif tok=="-range":
