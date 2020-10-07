@@ -79,7 +79,7 @@ def get_tag(use_range, score=0.0):
 
 
 
-def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fout_tgt, fout_pref, maxl, verbose):
+def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fout_tgt, fout_pref, maxl, maxn, verbose):
     if verbose:
         print('+++ PRIMING ++++++++++++++++++++++++++++++++++++++')
         print('+++ curr_src: {}'.format(curr_src))
@@ -107,6 +107,8 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fou
             example_src = src_similars.pop(0) + example_src
             example_tgt = tgt_similars.pop(0) + example_tgt
             nsim += 1
+            if nsim >= maxn:
+                break
 
         osrc = example_src + [tok_curr] + curr_src
         opref = example_tgt + [tok_curr]
@@ -127,7 +129,7 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fou
 
 
 
-def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, maxl, verbose):
+def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, maxl, maxn, verbose):
     if verbose:
         print('--- AUGMENT --------------------------------------')
         print('--- curr_src: {}'.format(curr_src))
@@ -149,6 +151,8 @@ def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, maxl, v
         while len(src_similars) and len(example_src) + len(src_similars[0]) + len(curr_src) <= maxl:
             example_src = src_similars.pop(0) + example_src
             nsim += 1
+            if nsim >= maxn:
+                break
 
         osrc = example_src + [tok_curr] + curr_src
         fout_src.write(' '.join(osrc) + '\n')
@@ -366,8 +370,8 @@ if __name__ == '__main__':
 
             if score < t:
                 break
-            if len(src_similars) >= n: ### already augmented n similar sentences
-                break
+#            if len(src_similars) >= n: ### already augmented n similar sentences
+#                break
             if fuzzymatch: ### fuzzymatch indexs start by 1
                 n_db -= 1 
             if n_db < 0 or n_db >= len(DB_tgt):
@@ -389,9 +393,9 @@ if __name__ == '__main__':
         ### output
         ###########################
         if is_priming:
-            output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fout_tgt, fout_pref, l, v)
+            output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fout_tgt, fout_pref, l, n, v)
         else:
-            output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, l, v)
+            output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, l, n, v)
 
     fout_src.close()
     if not is_inference:
