@@ -25,6 +25,9 @@ tok_range10 = '⸨1.0⸩'
 
 tag2n = defaultdict(int)
 nsim2n = defaultdict(int)
+slen2n = defaultdict(int)
+tlen2n = defaultdict(int)
+plen2n = defaultdict(int)
 
 def progress(n_line):
     if n_line%10000 == 0:
@@ -109,7 +112,9 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fou
         opref = example_tgt + [tok_curr]
 
         printed = True
+        slen2n[len(osrc)] += 1
         fout_src.write(' '.join(osrc) + '\n')
+        plen2n[len(opref)] += 1
         fout_pref.write(' '.join(opref) + '\n')
         nsim2n[nsim] += 1
 
@@ -119,6 +124,7 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fou
 
         if fout_tgt is not None: ### learning
             otgt = example_tgt + [tok_curr] + curr_tgt
+            tlen2n[len(otgt)] += 1
             fout_tgt.write(' '.join(otgt) + '\n') 
             if verbose:
                 print('+++ tgt {}: {}'.format(len(otgt), ' '.join(otgt)))
@@ -126,9 +132,12 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fou
             break
 
     if not printed: ### normal sentence (no priming)
+        slen2n[len(curr_src)] += 1
         fout_src.write(' '.join(curr_src) + '\n')
+        plen2n[0] += 1
         fout_pref.write('\n')
         if fout_tgt is not None: ### learning
+            tlen2n[len(curr_tgt)] += 1
             fout_tgt.write(' '.join(curr_tgt) + '\n') 
         nsim2n[0] += 1
         return
@@ -157,6 +166,7 @@ def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, maxl, m
 
         printed = True
         osrc = example_src + [tok_curr] + curr_src
+        slen2n[len(osrc)] += 1
         fout_src.write(' '.join(osrc) + '\n')
         nsim2n[nsim] += 1
         if verbose:
@@ -164,6 +174,7 @@ def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, maxl, m
 
         if fout_tgt is not None: ### learning
             otgt = [tok_curr] + curr_tgt
+            tlen2n[len(otgt)] += 1
             fout_tgt.write(' '.join(otgt) + '\n') 
             if verbose:
                 print('+++ tgt {}: {}'.format(len(otgt), ' '.join(otgt)))
@@ -171,8 +182,10 @@ def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, maxl, m
             break
 
     if not printed: ### normal sentence (no priming)
+        slen2n[len(curr_src)] += 1
         fout_src.write(' '.join(curr_src) + '\n')
         if fout_tgt is not None: ### learning
+            tlen2n[len(curr_tgt)] += 1
             fout_tgt.write(' '.join(curr_tgt) + '\n') 
         nsim2n[0] += 1
         return
@@ -428,5 +441,16 @@ if __name__ == '__main__':
         sys.stderr.write('{}-similars => {}\n'.format(n,N))
         nexamples += N
     sys.stderr.write('Examples => {}\n'.format(nexamples))
+    for n, N in sorted(slen.items()):
+        sys.stderr.write('slen-{} => {}\n'.format(n,N))
+    for n, N in sorted(tlen.items()):
+        sys.stderr.write('tlen-{} => {}\n'.format(n,N))
+    for n, N in sorted(plen.items()):
+        sys.stderr.write('plen-{} => {}\n'.format(n,N))
+
+
+
+
+
 
             
