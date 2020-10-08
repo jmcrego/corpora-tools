@@ -442,9 +442,9 @@ if __name__ == '__main__':
         nexamples += N
     sys.stderr.write('Examples => {}\n'.format(nexamples))
 
-    sys.stderr.write('slen {}\n'.format(sorted(slen2n.items())))
-    sys.stderr.write('tlen {}\n'.format(sorted(tlen2n.items())))
-    sys.stderr.write('plen {}\n'.format(sorted(plen2n.items())))
+    sys.stderr.write('### slen ### {}\n'.format(sorted(slen2n.items())))
+    sys.stderr.write('### tlen ### {}\n'.format(sorted(tlen2n.items())))
+    sys.stderr.write('### plen ### {}\n'.format(sorted(plen2n.items())))
 #    for n, N in sorted(slen2n.items()):
 #        sys.stderr.write('slen-{} => {}\n'.format(n,N))
 #    for n, N in sorted(tlen2n.items()):
