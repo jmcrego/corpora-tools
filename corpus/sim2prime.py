@@ -91,18 +91,14 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fou
 
     len_curr_tgt = len(curr_tgt) if curr_tgt is not None else 0
 
-    if len(src_similars) == 0: ### normal sentence (no priming)
-        fout_src.write(' '.join(curr_src) + '\n')
-        fout_pref.write('\n')
-        if fout_tgt is not None: ### learning
-            fout_tgt.write(' '.join(curr_tgt) + '\n') 
-        nsim2n[0] += 1
-        return
-
+    printed = False
     while len(src_similars):
         example_src = src_similars.pop(0)
         example_tgt = tgt_similars.pop(0)
         nsim = 1
+
+        if len(example_src) + len(curr_src) >= maxl or len(example_tgt) + len_curr_tgt >= maxl or len(example_src) >= maxL or len(example_tgt) >= maxL: 
+            continue
 
         while len(src_similars) and nsim < maxn and len(example_src) + len(src_similars[0]) + len(curr_src) <= maxl and len(example_tgt) + len(tgt_similars[0]) + len_curr_tgt <= maxl and len(example_src) + len(tgt_similars[0]) < maxL and len(example_tgt) + len(tgt_similars[0]) < maxL:
             example_src = src_similars.pop(0) + example_src
@@ -112,6 +108,7 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fou
         osrc = example_src + [tok_curr] + curr_src
         opref = example_tgt + [tok_curr]
 
+        printed = True
         fout_src.write(' '.join(osrc) + '\n')
         fout_pref.write(' '.join(opref) + '\n')
         nsim2n[nsim] += 1
@@ -128,6 +125,14 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fou
         else: ### inference
             break
 
+    if not printed: ### normal sentence (no priming)
+        fout_src.write(' '.join(curr_src) + '\n')
+        fout_pref.write('\n')
+        if fout_tgt is not None: ### learning
+            fout_tgt.write(' '.join(curr_tgt) + '\n') 
+        nsim2n[0] += 1
+        return
+
 
 
 def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, maxl, maxL, maxn, verbose):
@@ -138,21 +143,19 @@ def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, maxl, m
         print('--- nsimilar: {}'.format(len(src_similars)))
         print('--- src_sims: {}'.format(src_similars))
 
-    if len(src_similars) == 0: ### normal sentence (no priming)
-        fout_src.write(' '.join(curr_src) + '\n')
-        if fout_tgt is not None: ### learning
-            fout_tgt.write(' '.join(curr_tgt) + '\n') 
-        nsim2n[0] += 1
-        return
-
+    printed = False
     while len(src_similars):
         example_src = src_similars.pop(0)
         nsim = 1
+
+        if len(example_src) + len(curr_src) >= maxl or len(example_src) >= maxL: 
+            continue
 
         while len(src_similars) and nsim < maxn and len(example_src) + len(src_similars[0]) + len(curr_src) <= maxl and len(example_src) + len(src_similars[0]) < maxL:
             example_src = src_similars.pop(0) + example_src
             nsim += 1
 
+        printed = True
         osrc = example_src + [tok_curr] + curr_src
         fout_src.write(' '.join(osrc) + '\n')
         nsim2n[nsim] += 1
@@ -166,6 +169,13 @@ def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, maxl, m
                 print('+++ tgt {}: {}'.format(len(otgt), ' '.join(otgt)))
         else: ### inference
             break
+
+    if not printed: ### normal sentence (no priming)
+        fout_src.write(' '.join(curr_src) + '\n')
+        if fout_tgt is not None: ### learning
+            fout_tgt.write(' '.join(curr_tgt) + '\n') 
+        nsim2n[0] += 1
+        return
 
 
 
