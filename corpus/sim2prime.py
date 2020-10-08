@@ -97,7 +97,7 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fou
         example_tgt = tgt_similars.pop(0)
         nsim = 1
 
-        if len(example_src) + len(curr_src) >= maxl or len(example_tgt) + len_curr_tgt >= maxl or len(example_src) >= maxL or len(example_tgt) >= maxL: 
+        if len(example_src) + len(curr_src) >= maxl or len(example_tgt) + len_curr_tgt >= maxl or len(example_src) >= maxL or len(example_tgt) >= maxL: ### current src_similar or tgt_similar is too large
             continue
 
         while len(src_similars) and nsim < maxn and len(example_src) + len(src_similars[0]) + len(curr_src) <= maxl and len(example_tgt) + len(tgt_similars[0]) + len_curr_tgt <= maxl and len(example_src) + len(tgt_similars[0]) < maxL and len(example_tgt) + len(tgt_similars[0]) < maxL:
