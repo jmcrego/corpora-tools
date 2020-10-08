@@ -80,7 +80,7 @@ def get_tag(use_range, score=0.0):
 
 
 
-def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fout_tgt, fout_pref, maxl, maxn, verbose):
+def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fout_tgt, fout_pref, maxl, maxL, maxn, verbose):
     if verbose:
         print('+++ PRIMING ++++++++++++++++++++++++++++++++++++++')
         print('+++ curr_src: {}'.format(curr_src))
@@ -104,7 +104,7 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fou
         example_tgt = tgt_similars.pop(0)
         nsim = 1
 
-        while len(src_similars) and nsim < maxn and len(example_src) + len(src_similars[0]) + len(curr_src) <= maxl and len(example_tgt) + len(tgt_similars[0]) + len_curr_tgt <= maxl:
+        while len(src_similars) and nsim < maxn and len(example_src) + len(src_similars[0]) + len(curr_src) <= maxl and len(example_tgt) + len(tgt_similars[0]) + len_curr_tgt <= maxl and len(example_tgt)+1 <= maxL:
             example_src = src_similars.pop(0) + example_src
             example_tgt = tgt_similars.pop(0) + example_tgt
             nsim += 1
@@ -175,9 +175,10 @@ def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, maxl, m
 
 if __name__ == '__main__':
 
-    n = 999
+    n = 5999
     t = 0.0
     l = 999
+    L = 999
     pp = 0.0
     seed = 1234
     v = False
@@ -199,7 +200,8 @@ if __name__ == '__main__':
    -fuzzymatch    : indexs start by 1
    -perfect FLOAT : probability of injecting perfect matchs (default 0.0)
    -n         INT : up to n-best similar sentences (default 999)
-   -l         INT : max sentence length (default 999)
+   -l         INT : max src/tgt sentences length (default 999)
+   -L         INT : max prefix length (default 999)
    -t       FLOAT : min similarity threshold (default 0.0)
    -seed    FLOAT : seed for randomness (default 1234)
    -v             : verbose
@@ -235,6 +237,9 @@ if __name__ == '__main__':
         elif tok=="-l" and len(sys.argv):
             l = int(sys.argv.pop(0))
             print("l={}".format(l))
+        elif tok=="-L" and len(sys.argv):
+            L = int(sys.argv.pop(0))
+            print("L={}".format(L))
         elif tok=="-seed" and len(sys.argv):
             seed = int(sys.argv.pop(0))
             print("seed={}".format(seed))
@@ -394,7 +399,7 @@ if __name__ == '__main__':
         ### output
         ###########################
         if is_priming:
-            output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fout_tgt, fout_pref, l, n, v)
+            output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fout_tgt, fout_pref, l, L, n, v)
         else:
             output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, l, n, v)
 
