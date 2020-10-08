@@ -122,7 +122,7 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fou
             fout_tgt.write(' '.join(otgt) + '\n') 
             if verbose:
                 print('+++ tgt {}: {}'.format(len(otgt), ' '.join(otgt)))
-        else: ### inference
+        else: ### inference (print only one)
             break
 
     if not printed: ### normal sentence (no priming)
@@ -167,7 +167,7 @@ def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, maxl, m
             fout_tgt.write(' '.join(otgt) + '\n') 
             if verbose:
                 print('+++ tgt {}: {}'.format(len(otgt), ' '.join(otgt)))
-        else: ### inference
+        else: ### inference (print only one)
             break
 
     if not printed: ### normal sentence (no priming)
