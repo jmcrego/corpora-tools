@@ -29,12 +29,6 @@ slen2n = defaultdict(int)
 tlen2n = defaultdict(int)
 plen2n = defaultdict(int)
 
-def progress(n_line):
-    if n_line%10000 == 0:
-        if n_line%100000 == 0:
-            sys.stderr.write("{}".format(n_line))
-        else:
-            sys.stderr.write(".")
 
 def read_file(file):
     if file.endswith('.gz'): 
@@ -83,7 +77,7 @@ def get_tag(use_range, score=0.0):
 
 
 
-def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fout_tgt, fout_pref, maxl, maxL, maxn, verbose):
+def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fout_tgt, fout_pref, maxl, maxL, maxn, single_example, verbose):
     if verbose:
         print('+++ PRIMING ++++++++++++++++++++++++++++++++++++++')
         print('+++ curr_src: {}'.format(curr_src))
@@ -122,13 +116,13 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fou
             print('+++ src {}: {}'.format(len(osrc), ' '.join(osrc)))
             print('+++ ref {}: {}'.format(len(opref), ' '.join(opref)))
 
-        if fout_tgt is not None: ### learning
+        if fout_tgt is not None and single_example == False: ### learning or several example
             otgt = example_tgt + [tok_curr] + curr_tgt
             tlen2n[len(otgt)] += 1
             fout_tgt.write(' '.join(otgt) + '\n') 
             if verbose:
                 print('+++ tgt {}: {}'.format(len(otgt), ' '.join(otgt)))
-        else: ### inference (print only one)
+        else: ### (print only one)
             break
 
     if not printed: ### normal sentence (no priming)
@@ -144,7 +138,7 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fou
 
 
 
-def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, maxl, maxL, maxn, verbose):
+def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, maxl, maxL, maxn, single_example, verbose):
     if verbose:
         print('--- AUGMENT --------------------------------------')
         print('--- curr_src: {}'.format(curr_src))
@@ -172,13 +166,13 @@ def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, maxl, m
         if verbose:
             print('+++ src {}: {}'.format(len(osrc), ' '.join(osrc)))
 
-        if fout_tgt is not None: ### learning
+        if fout_tgt is not None and single_example == False: ### learning or several examples
             otgt = [tok_curr] + curr_tgt
             tlen2n[len(otgt)] += 1
             fout_tgt.write(' '.join(otgt) + '\n') 
             if verbose:
                 print('+++ tgt {}: {}'.format(len(otgt), ' '.join(otgt)))
-        else: ### inference (print only one)
+        else: ### (print only one)
             break
 
     if not printed: ### normal sentence (no priming)
@@ -207,28 +201,30 @@ if __name__ == '__main__':
     v = False
     use_range = False
     fuzzymatch = False
+    single_example = False
     fdb_src = None
     fdb_tgt = None
     fq_src = None
     fq_tgt = None
     fout = None
     name = sys.argv.pop(0)
-    usage = '''usage: {} -o FILE -db_tgt FILE -q_src FILE [-db_src FILE] [-q_tgt FILE] [-range] [-fuzzymatch] [-perfect FLOAT] [-n INT] [-l INT] [-t FLOAT] [-v] < FILE_QSIM
-   -o        FILE : FILE.src FILE.pref FILE.tgt files are built
-   -db_src   FILE : db file with src strings (PRIMING)
-   -db_tgt   FILE : db file with tgt strings
-   -q_src    FILE : query file with src strings
-   -q_tgt    FILE : query file with tgt strings (TRAINING)
-   -range         : use score ranges to separate similar sentences
-   -fuzzymatch    : indexs start by 1
-   -perfect FLOAT : probability of injecting perfect matchs (default 0.0)
-   -n         INT : up to n-best similar sentences (default 999)
-   -l         INT : max src/tgt sentences length (default 999)
-   -L         INT : max prefix length (default 999)
-   -t       FLOAT : min similarity threshold (default 0.0)
-   -seed    FLOAT : seed for randomness (default 1234)
-   -v             : verbose
-   -h             : this help
+    usage = '''usage: {} -o FILE -db_tgt FILE -q_src FILE [-db_src FILE] [-q_tgt FILE] [-range] [-single_example] [-fuzzymatch] [-perfect FLOAT] [-n INT] [-l INT] [-t FLOAT] [-v] < FILE_QSIM
+   -o         FILE : FILE.src FILE.pref FILE.tgt files are built
+   -db_src    FILE : db file with src strings (PRIMING)
+   -db_tgt    FILE : db file with tgt strings
+   -q_src     FILE : query file with src strings
+   -q_tgt     FILE : query file with tgt strings (TRAINING)
+   -range          : use score ranges to separate similar sentences
+   -fuzzymatch     : indexs start by 1
+   -single_example : output a single example
+   -perfect  FLOAT : probability of injecting perfect matchs (default 0.0)
+   -n          INT : up to n-best similar sentences (default 999)
+   -l          INT : max src/tgt sentences length (default 999)
+   -L          INT : max prefix length (default 999)
+   -t        FLOAT : min similarity threshold (default 0.0)
+   -seed     FLOAT : seed for randomness (default 1234)
+   -v              : verbose
+   -h              : this help
 
 - use -q_tgt when preparing TRAINING pairs otherwise INFERENCE is assumed
 - use -db_src for PRIMING otherwise AUGMENTATION is assumed
@@ -269,6 +265,8 @@ if __name__ == '__main__':
         elif tok=="-perfect" and len(sys.argv):
             pp = float(sys.argv.pop(0))
             print("perfect={}".format(pp))
+        elif tok=="-single_example":
+            single_example = True
         elif tok=="-v":
             v = True
         elif tok=="-range":
@@ -354,8 +352,10 @@ if __name__ == '__main__':
     random.seed(seed)
 
     for n_query, line in enumerate(sys.stdin):
-        line = line.rstrip()
+        curr_src = Q_src[n_query].split()
+        curr_tgt = None if is_inference else Q_tgt[n_query].split()
 
+        line = line.rstrip()
         if line == '':
             toks = []
         else:
@@ -364,18 +364,8 @@ if __name__ == '__main__':
         if len(toks) % 2 != 0:
             sys.stderr.write('error: unparsed line {}'.format(line))
 
-        curr_src = Q_src[n_query].split()
-        len_curr_src = len(curr_src)
-        if is_inference:
-            curr_tgt = None
-            len_curr_tgt = 0
-        else:
-            curr_tgt = Q_tgt[n_query].split()
-            len_curr_tgt = len(curr_tgt)
-
         src_similars = []
         tgt_similars = []
-
         ###
         ### add similar sentence/s
         ###########################
@@ -385,13 +375,10 @@ if __name__ == '__main__':
                 tag = get_tag(use_range, 1.0)
                 tag2n[tag] += 1
                 if is_priming: ### PRIMING: augment source and target sides
-                    src_similar = [tag] + curr_src
-                    tgt_similar = [tag] + curr_tgt
-                    src_similars.append(src_similar)
-                    tgt_similars.append(tgt_similar)
+                    src_similars.append([tag] + curr_src)
+                    tgt_similars.append([tag] + curr_tgt)
                 else: ### AUGMENT: augment source side with DB_tgt (Bulté et al, 2019)
-                    src_similar = [tag] + curr_tgt
-                    src_similars.append(src_similar)
+                    src_similars.append([tag] + curr_tgt)
 
         while len(toks):
             score = float(toks.pop(0)) ### similar sentences are sorted by similarity (most similar first)
@@ -399,8 +386,6 @@ if __name__ == '__main__':
 
             if score < t:
                 break
-#            if len(src_similars) >= n: ### already augmented n similar sentences
-#                break
             if fuzzymatch: ### fuzzymatch indexs start by 1
                 n_db -= 1 
             if n_db < 0 or n_db >= len(DB_tgt):
@@ -410,21 +395,18 @@ if __name__ == '__main__':
             tag = get_tag(use_range, score)
             tag2n[tag] += 1
             if is_priming: ### PRIMING: augment source and target sides
-                src_similar = [tag] + DB_src[n_db].split()
-                tgt_similar = [tag] + DB_tgt[n_db].split()
-                src_similars.append(src_similar)
-                tgt_similars.append(tgt_similar)
+                src_similars.append([tag] + DB_src[n_db].split())
+                tgt_similars.append([tag] + DB_tgt[n_db].split())
             else: ### AUGMENT: augment source side with DB_tgt (Bulté et al, 2019)
-                src_similar = [tag] + DB_tgt[n_db].split()
-                src_similars.append(src_similar)
+                src_similars.append([tag] + DB_tgt[n_db].split())
 
         ###
         ### output
         ###########################
         if is_priming:
-            output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fout_tgt, fout_pref, l, L, n, v)
+            output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fout_tgt, fout_pref, l, L, n, single_example, v)
         else:
-            output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, l, L, n, v)
+            output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, l, L, n, single_example, v)
 
     fout_src.close()
     if not is_inference:
