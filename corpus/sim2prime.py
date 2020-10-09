@@ -424,7 +424,7 @@ if __name__ == '__main__':
         if is_priming:
             output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fout_tgt, fout_pref, l, L, n, v)
         else:
-            output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, l, n, v)
+            output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, l, L, n, v)
 
     fout_src.close()
     if not is_inference:
