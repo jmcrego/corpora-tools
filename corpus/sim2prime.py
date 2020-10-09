@@ -116,12 +116,14 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fou
             print('+++ src {}: {}'.format(len(osrc), ' '.join(osrc)))
             print('+++ ref {}: {}'.format(len(opref), ' '.join(opref)))
 
-        if fout_tgt is not None and single_example == False: ### learning or several example
+        if fout_tgt is not None: ### learning
             otgt = example_tgt + [tok_curr] + curr_tgt
             tlen2n[len(otgt)] += 1
             fout_tgt.write(' '.join(otgt) + '\n') 
             if verbose:
                 print('+++ tgt {}: {}'.format(len(otgt), ' '.join(otgt)))
+            if single_example:
+                break
         else: ### (print only one)
             break
 
@@ -166,12 +168,14 @@ def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, maxl, m
         if verbose:
             print('+++ src {}: {}'.format(len(osrc), ' '.join(osrc)))
 
-        if fout_tgt is not None and single_example == False: ### learning or several examples
+        if fout_tgt is not None: ### learning
             otgt = [tok_curr] + curr_tgt
             tlen2n[len(otgt)] += 1
             fout_tgt.write(' '.join(otgt) + '\n') 
             if verbose:
                 print('+++ tgt {}: {}'.format(len(otgt), ' '.join(otgt)))
+            if single_example:
+                break
         else: ### (print only one)
             break
 
