@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
 import sys
 import os
 import io
@@ -28,6 +27,7 @@ nsim2n = defaultdict(int)
 slen2n = defaultdict(int)
 tlen2n = defaultdict(int)
 plen2n = defaultdict(int)
+nAugmentedPrimed = 0
 
 
 def read_file(file):
@@ -137,6 +137,8 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fou
             fout_tgt.write(' '.join(curr_tgt) + '\n') 
         nsim2n[0] += 1
         return
+    else:
+        nAugmentedPrimed += 1
 
 
 
@@ -187,6 +189,8 @@ def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, maxl, m
             fout_tgt.write(' '.join(curr_tgt) + '\n') 
         nsim2n[0] += 1
         return
+    else:
+        nAugmentedPrimed += 1
 
 
 
@@ -427,6 +431,7 @@ if __name__ == '__main__':
         sys.stderr.write('{}-similars => {}\n'.format(n,N))
         nexamples += N
     sys.stderr.write('Examples => {}\n'.format(nexamples))
+    sys.stderr.write('nAugmentedPrimed => {}\n'.format(nAugmentedPrimed))
     sys.stderr.write('slen {}\n'.format(sorted(slen2n.items())))
     sys.stderr.write('tlen {}\n'.format(sorted(tlen2n.items())))
     sys.stderr.write('plen {}\n'.format(sorted(plen2n.items())))
