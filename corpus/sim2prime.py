@@ -138,7 +138,7 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fou
         nsim2n[0] += 1
         return
     else:
-        nAugmentedPrimed += 1
+        global nAugmentedPrimed += 1
 
 
 
@@ -190,7 +190,7 @@ def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, maxl, m
         nsim2n[0] += 1
         return
     else:
-        nAugmentedPrimed += 1
+        global nAugmentedPrimed += 1
 
 
 
