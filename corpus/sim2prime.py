@@ -27,7 +27,7 @@ nsim2n = defaultdict(int)
 slen2n = defaultdict(int)
 tlen2n = defaultdict(int)
 plen2n = defaultdict(int)
-nAugmentedPrimed = int(0)
+nAugmentedPrimed = 0
 
 
 def read_file(file):
@@ -78,6 +78,7 @@ def get_tag(use_range, score=0.0):
 
 
 def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fout_tgt, fout_pref, maxl, maxL, maxn, single_example, verbose):
+    global nAugmentedPrimed
     if verbose:
         print('+++ PRIMING ++++++++++++++++++++++++++++++++++++++')
         print('+++ curr_src: {}'.format(curr_src))
@@ -143,6 +144,7 @@ def output_priming(src_similars, tgt_similars, curr_src, curr_tgt, fout_src, fou
 
 
 def output_augment(src_similars, curr_src, curr_tgt, fout_src, fout_tgt, maxl, maxL, maxn, single_example, verbose):
+    global nAugmentedPrimed
     if verbose:
         print('--- AUGMENT --------------------------------------')
         print('--- curr_src: {}'.format(curr_src))
