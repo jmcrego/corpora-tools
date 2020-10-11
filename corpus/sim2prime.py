@@ -27,7 +27,7 @@ nsim2n = defaultdict(int)
 slen2n = defaultdict(int)
 tlen2n = defaultdict(int)
 plen2n = defaultdict(int)
-nAugmentedPrimed = 0
+nAugmentedPrimed = int(0)
 
 
 def read_file(file):
