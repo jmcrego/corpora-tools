@@ -63,7 +63,7 @@ class Args():
    -sep     STRING : context sentence token                         (⸨sep⸩)
    -cur     STRING : current sentence token                         (⸨cur⸩)
    -range          : use score ranges to separate similar sentences (False)
-   -inference      : output a single example for all sentence       (False)
+   -inference      : output a single example for all sentences      (False)
 
    -seed     FLOAT : seed for randomness                            (1234)
    -h              : this help
