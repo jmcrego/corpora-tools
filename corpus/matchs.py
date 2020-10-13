@@ -46,7 +46,7 @@ class Args():
 
     seed = 12345
     log_file = None
-    log_level = 'debug'
+    log_level = 'info'
     prog = argv.pop(0)
     usage = '''usage: {} -db_src FILE -db_tgt FILE -q_src FILE -q_tgt FILE -q_match FILE
   -db_src    FILE : db file with src strings
@@ -55,16 +55,18 @@ class Args():
   -q_tgt     FILE : query file with tgt strings
   -q_match   FILE : query file with matchs
 
-  -mins     FLOAT : min similarity score                           (0.5)
-  -maxn       INT : inject up to n-best context sentences          (1)
-  -perfect  FLOAT : probability of injecting perfect matchs        (0.0) <not implemented>
-  -sep     STRING : context sentence first token                   (⸨sep⸩)
-  -cur     STRING : current sentence first token                   (⸨cur⸩)
-  -range          : use score ranges to separate similar sentences (False)
-  -inference      : output a single example for all sentences      (False)
+  -mins       FLOAT : min similarity score                              (0.5)
+  -maxn         INT : inject up to n-best context sentences             (1)
+  -perfect    FLOAT : probability of injecting perfect matchs           (0.0) <not implemented>
+  -sep       STRING : context sentence first token                      (⸨sep⸩)
+  -cur       STRING : current sentence first token                      (⸨cur⸩)
+  -range            : use score ranges to separate similar sentences    (False)
+  -inference        : output a single example for all sentences         (False)
 
-  -seed     FLOAT : seed for randomness                            (1234)
-  -h              : this help
+  -log_file    FILE : log file                                          (stderr)
+  -log_level STRING : log level [debug, info, warning, critical, error] (info)
+  -seed       FLOAT : seed for randomness                               (1234)
+  -h                : this help
 '''.format(prog)
     
     while len(sys.argv):
