@@ -228,7 +228,7 @@ if __name__ == '__main__':
     count_tgt = 0
     printed = False
     for k,ind in enumerate(contexts_inds):
-      if count_src>100 or count_tgt>100 or count>=args.maxn: ### cannot continue to accumulate contexts, just print
+      if count_src>200 or count_tgt>200 or count>=args.maxn: ### cannot continue to accumulate contexts, just print
         print(" ".join(prefix_src) + " {} ".format(args.cur) + src, file=fq_osrc_prime)
         print(" ".join(prefix_tgt) + " {} ".format(args.cur) + src, file=fq_osrc_augm)
         print(" ".join(prefix_tgt) + " {} ".format(args.cur),       file=fq_otgt_pref)
