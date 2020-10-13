@@ -159,9 +159,9 @@ def get_contexts(match, args, db_src, db_tgt):
       contexts_tgt.append(context_tgt)
       contexts_src.append(context_src)
 
-  logging.info(contexts_scores)
-  logging.info(contexts_src)
-  logging.info(contexts_tgt)
+  logging.debug(contexts_scores)
+  logging.debug(contexts_src)
+  logging.debug(contexts_tgt)
   return contexts_src, contexts_tgt, contexts_scores 
 
 ######################################################################
