@@ -142,6 +142,7 @@ def get_contexts(match, args, db_src, db_tgt):
   if match=="":
     return contexts_src, contexts_tgt, contexts_scores 
 
+  logging.debug("match: {}".format(match))
   matches = match.split("\t")
   for m in range(len(matches)):
     if m%2 != 0:
