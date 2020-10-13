@@ -258,7 +258,7 @@ if __name__ == '__main__':
       count_tgt += len(contexts_tgt[ind])
 
     if args.inference and printed:
-      break
+      continue
 
     if len(prefix_src) and len(prefix_tgt):
       print(" ".join(prefix_src) + " {} ".format(args.cur) + src, file=fq_osrc_prime)
