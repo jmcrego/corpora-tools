@@ -142,7 +142,7 @@ def get_contexts(match, args, db_src, db_tgt):
   if match=="":
     return contexts_src, contexts_tgt, contexts_scores 
 
-  logging.debug("match: {}".format(match))
+#  logging.debug("match: {}".format(match))
   matches = match.split("\t")
   for m in range(len(matches)):
     if m%2 != 0:
@@ -160,11 +160,12 @@ def get_contexts(match, args, db_src, db_tgt):
       contexts_scores.append(score)
       contexts_tgt.append(context_tgt)
       contexts_src.append(context_src)
-      logging.debug(score)
-      logging.debug(context_src)
-      logging.debug(context_tgt)
+#      logging.debug(score)
+#      logging.debug(context_src)
+#      logging.debug(context_tgt)
     else:
-      logging.debug("repeated context")
+      pass
+#      logging.debug("repeated context")
 
   return contexts_src, contexts_tgt, contexts_scores 
 
@@ -220,7 +221,6 @@ if __name__ == '__main__':
     ### context, print primed sentences ########
     ############################################
     contexts_inds = np.argsort(contexts_scores)[::-1] #sort in descending order
-    logging.debug("len(contexts_inds)={}".format(len(contexts_inds)))
     prefix_src = []
     prefix_tgt = []
     count = 0
@@ -228,24 +228,25 @@ if __name__ == '__main__':
     count_tgt = 0
     printed = False
     for k,ind in enumerate(contexts_inds):
-      if count_src>100 or count_tgt>100 or count>=args.maxn: ### cannot continue accumulate
+      if count_src>100 or count_tgt>100 or count>=args.maxn: ### cannot continue to accumulate contexts, just print
         print(" ".join(prefix_src) + " {} ".format(args.cur) + src, file=fq_osrc_prime)
         print(" ".join(prefix_tgt) + " {} ".format(args.cur) + src, file=fq_osrc_augm)
         print(" ".join(prefix_tgt) + " {} ".format(args.cur),       file=fq_otgt_pref)
         print(" ".join(prefix_tgt) + " {} ".format(args.cur) + tgt, file=fq_otgt_prime)
         print("{} ".format(args.cur) + tgt, file=fq_otgt_augm)
+        ### stats
         ctx2n[count] += 1
         slen2n[len(prefix_src)+1+len(src.split())] += 1
         tlen2n[len(prefix_tgt)+1+len(tgt.split())] += 1
+        ### reinitialize
         prefix_src = []
         prefix_tgt = []
         count = 0
         count_src = 0
         count_tgt = 0
-        printed = True
-
-      if args.inference and printed: 
-        break
+        if args.inference: 
+          printed = True
+          break
 
       ### accumulate
       prefix_src.insert(0,contexts_src[ind])
