@@ -150,7 +150,7 @@ def get_contexts(match, args, db_src, db_tgt):
     id_db = int(matches[m+1])-1
     if score < args.mins:
       continue
-    tag = "⸨" + "{:.1f}".format(score) + "⸩" if args.range else args.sep
+    tag = "⸨" + str(score)[0:3] + "⸩" if args.range else args.sep
     context_tgt = tag + " " + db_tgt[id_db]
     context_src = tag + " " + db_src[id_db]
 
