@@ -146,10 +146,11 @@ def get_contexts(match, args, db_src, db_tgt):
   for m in range(len(matches)):
     if m%2 != 0:
       continue
-    score = min(float(matches[m]), 1.0)
+    score = max(0.0,min(float(matches[m]), 1.0))
     id_db = int(matches[m+1])-1
     if score < args.mins:
       continue
+
     tag = "⸨" + "{:.6f}".format(score)[0:3] + "⸩" if args.range else args.sep
     context_tgt = tag + " " + db_tgt[id_db]
     context_src = tag + " " + db_src[id_db]
@@ -158,12 +159,12 @@ def get_contexts(match, args, db_src, db_tgt):
       contexts_scores.append(score)
       contexts_tgt.append(context_tgt)
       contexts_src.append(context_src)
+      logging.debug(context_score)
+      logging.debug(context_src)
+      logging.debug(context_tgt)
     else:
       logging.debug("repeated context")
 
-  logging.debug(contexts_scores)
-  logging.debug(contexts_src)
-  logging.debug(contexts_tgt)
   return contexts_src, contexts_tgt, contexts_scores 
 
 ######################################################################
