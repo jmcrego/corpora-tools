@@ -226,18 +226,10 @@ if __name__ == '__main__':
     count = 0
     count_src = 0
     count_tgt = 0
+    printed = False
     for k,ind in enumerate(contexts_inds):
-      logging.debug('k={} ind={}'.format(k,ind))
-      if count_src<=100 and count_tgt<=100 and count<args.maxn:
-        logging.debug('accum')
-        tag2n[contexts_src[ind].split()[0]] += 1
-        prefix_src.insert(0,contexts_src[ind])
-        prefix_tgt.insert(0,contexts_tgt[ind])
-        count +=1
-        count_src += len(contexts_src[ind])
-        count_tgt += len(contexts_tgt[ind])
-      else:
-        logging.debug('print1 n={}'.format(len(prefix_src)))
+      if count_src>100 or count_tgt>100 or count>=args.maxn:
+        logging.debug('print n={}'.format(len(prefix_src)))
         print(" ".join(prefix_src) + " {} ".format(args.cur) + src, file=fq_osrc_prime)
         print(" ".join(prefix_tgt) + " {} ".format(args.cur) + src, file=fq_osrc_augm)
         print(" ".join(prefix_tgt) + " {} ".format(args.cur),       file=fq_otgt_pref)
@@ -251,11 +243,22 @@ if __name__ == '__main__':
         count = 0
         count_src = 0
         count_tgt = 0
-        if args.inference: ### if inference print one single example
-          logging.debug('break')
+        if args.inference: 
+          printed = True
           break
+
+      prefix_src.insert(0,contexts_src[ind])
+      prefix_tgt.insert(0,contexts_tgt[ind])
+      tag2n[contexts_src[ind].split()[0]] += 1
+      count += 1
+      count_src += len(contexts_src[ind])
+      count_tgt += len(contexts_tgt[ind])
+
+    if args.inference and printed:
+      break
+
     if len(prefix_src) and len(prefix_tgt):
-      logging.debug('print2 n={}'.format(len(prefix_src)))
+      logging.debug('print n={}'.format(len(prefix_src)))
       print(" ".join(prefix_src) + " {} ".format(args.cur) + src, file=fq_osrc_prime)
       print(" ".join(prefix_tgt) + " {} ".format(args.cur) + src, file=fq_osrc_augm)
       print(" ".join(prefix_tgt) + " {} ".format(args.cur),       file=fq_otgt_pref)
