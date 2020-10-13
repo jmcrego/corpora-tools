@@ -160,7 +160,7 @@ def get_contexts(match, args, db_src, db_tgt, src, tgt):
 
   r = random.random()
   if not args.inference and r < args.perfect:
-    tag = "⸨1.0⸩ " if args.range else args.sep
+    tag = "⸨1.0⸩" if args.range else args.sep
     context_tgt = tag + " " + tgt
     context_src = tag + " " + src
     if context_tgt not in contexts_tgt and context_src not in contexts_src:
