@@ -43,8 +43,6 @@ class Args():
     self.perfect = 0.0
     self.inference = False
     self.verbose = False
-    self.ctx2n = defaultdict(int)
-    self.tag2n = defaultdict(int)
 
     seed = 12345
     log_file = None
@@ -172,9 +170,15 @@ def get_contexts(match, args, db_src, db_tgt):
 ### MAIN #############################################################
 ######################################################################
 
+ctx2n = defaultdict(int)
+tag2n = defaultdict(int)
+
 if __name__ == '__main__':
 
   args = Args(sys.argv)
+  for key,val in vars(args).items():
+    logging.info("{}: {}".format(key,val))
+
   db_src = read_file(args.fdb_src)
   db_tgt = read_file(args.fdb_tgt)
   q_match = read_file(args.fq_match)
@@ -204,7 +208,7 @@ if __name__ == '__main__':
       print("",  file=fq_otgt_pref)
       print(tgt, file=fq_otgt_prime)
       print(tgt, file=fq_otgt_augm)
-      args.ctx2n[0] += 1
+      ctx2n[0] += 1
       continue
     ############################################
     ### context, print primed sentences ########
@@ -217,7 +221,7 @@ if __name__ == '__main__':
     count_tgt = 0
     for k,ind in enumerate(contexts_inds):
       if count_src<=100 and count_tgt<=100 and count<args.maxn:
-        args.tag2n[contexts_src[ind].split()[0]] += 1
+        tag2n[contexts_src[ind].split()[0]] += 1
         prefix_src.insert(0,contexts_src[ind])
         prefix_tgt.insert(0,contexts_tgt[ind])
         count +=1
@@ -229,7 +233,7 @@ if __name__ == '__main__':
         print(" ".join(prefix_tgt) + " {} ".format(args.cur),       file=fq_otgt_pref)
         print(" ".join(prefix_tgt) + " {} ".format(args.cur) + tgt, file=fq_otgt_prime)
         print("{} ".format(args.cur) + tgt, file=fq_otgt_augm)
-        args.ctx2n[count] += 1
+        ctx2n[count] += 1
         prefix_src = []
         prefix_tgt = []
         count = 0
@@ -243,7 +247,7 @@ if __name__ == '__main__':
       print(" ".join(prefix_tgt) + " {} ".format(args.cur),       file=fq_otgt_pref)
       print(" ".join(prefix_tgt) + " {} ".format(args.cur) + tgt, file=fq_otgt_prime)
       print("{} ".format(args.cur) + tgt, file=fq_otgt_augm)
-      args.ctx2n[count] += 1
+      ctx2n[count] += 1
 
   logging.info('Done')
 
@@ -254,11 +258,11 @@ if __name__ == '__main__':
   fq_otgt_augm.close()
 
   nexamples = 0
-  for n, N in sorted(args.ctx2n.items()):
+  for n, N in sorted(ctx2n.items()):
     logging.info('{}-contexts => {}'.format(n,N))
     nexamples += N
   logging.info('Examples => {}'.format(nexamples))
-  for n, N in sorted(args.tag2n.items()):
+  for n, N in sorted(tag2n.items()):
     logging.info('tag-{} => {}'.format(n,N))
 
 
