@@ -142,7 +142,6 @@ def get_contexts(match, args, db_src, db_tgt):
   if match=="":
     return contexts_src, contexts_tgt, contexts_scores 
 
-#  logging.debug("match: {}".format(match))
   matches = match.split("\t")
   for m in range(len(matches)):
     if m%2 != 0:
@@ -160,12 +159,6 @@ def get_contexts(match, args, db_src, db_tgt):
       contexts_scores.append(score)
       contexts_tgt.append(context_tgt)
       contexts_src.append(context_src)
-#      logging.debug(score)
-#      logging.debug(context_src)
-#      logging.debug(context_tgt)
-    else:
-      pass
-#      logging.debug("repeated context")
 
   return contexts_src, contexts_tgt, contexts_scores 
 
@@ -220,26 +213,27 @@ if __name__ == '__main__':
     ############################################
     ### context, print primed sentences ########
     ############################################
-    contexts_inds = np.argsort(contexts_scores)[::-1] #sort in descending order
+    ### initialize
     prefix_src = []
     prefix_tgt = []
     count = 0
     count_src = 0
     count_tgt = 0
+
+    contexts_inds = np.argsort(contexts_scores)[::-1] #sort in descending order
     printed = False
     for k,ind in enumerate(contexts_inds):
-      if count_src>200 or count_tgt>200 or count>=args.maxn: ### cannot continue to accumulate contexts, just print
+      if count_src>100 or count_tgt>100 or count>=args.maxn: ### cannot continue to accumulate contexts, just print
         print(" ".join(prefix_src) + " {} ".format(args.cur) + src, file=fq_osrc_prime)
         print(" ".join(prefix_tgt) + " {} ".format(args.cur) + src, file=fq_osrc_augm)
         print(" ".join(prefix_tgt) + " {} ".format(args.cur),       file=fq_otgt_pref)
         print(" ".join(prefix_tgt) + " {} ".format(args.cur) + tgt, file=fq_otgt_prime)
         print("{} ".format(args.cur) + tgt, file=fq_otgt_augm)
         ### stats
-        print('count is {}'.format(count))
         ctx2n[count] += 1
         slen2n[len(prefix_src)+1+len(src.split())] += 1
         tlen2n[len(prefix_tgt)+1+len(tgt.split())] += 1
-        ### reinitialize
+        ### initialize
         prefix_src = []
         prefix_tgt = []
         count = 0
@@ -266,7 +260,7 @@ if __name__ == '__main__':
       print(" ".join(prefix_tgt) + " {} ".format(args.cur),       file=fq_otgt_pref)
       print(" ".join(prefix_tgt) + " {} ".format(args.cur) + tgt, file=fq_otgt_prime)
       print("{} ".format(args.cur) + tgt, file=fq_otgt_augm)
-      print('count is {}'.format(count))
+      ### stats
       ctx2n[count] += 1
       slen2n[len(prefix_src)+1+len(src.split())] += 1
       tlen2n[len(prefix_tgt)+1+len(tgt.split())] += 1
