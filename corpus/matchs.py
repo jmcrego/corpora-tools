@@ -40,7 +40,7 @@ class Args():
     self.range = False
     self.maxn = 1
     self.mins = 0.5
-    self.perfect = 0.0
+    self.perfect = 0.1
     self.inference = False
 
     seed = 12345
@@ -56,7 +56,7 @@ class Args():
 
   -mins       FLOAT : min similarity score                              (0.5)
   -maxn         INT : inject up to n-best context sentences             (1)
-  -perfect    FLOAT : probability of injecting perfect matchs           (0.0) <not implemented>
+  -perfect    FLOAT : probability of injecting perfect matchs           (0.1) 
   -sep       STRING : context sentence first token                      (⸨sep⸩)
   -cur       STRING : current sentence first token                      (⸨cur⸩)
   -range            : use score ranges to separate similar sentences    (False)
@@ -135,16 +135,14 @@ class Args():
 ### get_contexts #####################################################
 ######################################################################
 
-def get_contexts(match, args, db_src, db_tgt):
+def get_contexts(match, args, db_src, db_tgt, src, tgt):
   contexts_src = []
   contexts_tgt = []
   contexts_scores = []
-  if match=="":
-    return contexts_src, contexts_tgt, contexts_scores 
 
   matches = match.split("\t")
   for m in range(len(matches)):
-    if m%2 != 0:
+    if m%2 != 0 or len(matches)<2:
       continue
     score = max(0.0,min(float(matches[m]), 1.0))
     id_db = int(matches[m+1])-1
@@ -159,6 +157,16 @@ def get_contexts(match, args, db_src, db_tgt):
       contexts_scores.append(score)
       contexts_tgt.append(context_tgt)
       contexts_src.append(context_src)
+
+  r = random.random()
+  if not args.inference and r < args.perfect:
+    context_tgt = "⸨1.0⸩ " + tgt
+    context_src = "⸨1.0⸩ " + src
+    if context_tgt not in contexts_tgt and context_src not in contexts_src:
+      contexts_scores.append(1.0)
+      contexts_tgt.append(context_tgt)
+      contexts_src.append(context_src)
+
 
   return contexts_src, contexts_tgt, contexts_scores 
 
@@ -196,7 +204,7 @@ if __name__ == '__main__':
   fq_otgt_augm  = open(args.fq_tgt + ext + '.augm',"w");
 
   for i,(src,tgt,match) in enumerate(zip(q_src,q_tgt,q_match)):
-    contexts_src, contexts_tgt, contexts_scores = get_contexts(match, args, db_src, db_tgt)
+    contexts_src, contexts_tgt, contexts_scores = get_contexts(match, args, db_src, db_tgt, src, tgt)
     ############################################
     ### no context, print original sentences ###
     ############################################
