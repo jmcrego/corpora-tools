@@ -159,7 +159,7 @@ def get_contexts(match, args, db_src, db_tgt):
       contexts_scores.append(score)
       contexts_tgt.append(context_tgt)
       contexts_src.append(context_src)
-      logging.debug(context_score)
+      logging.debug(score)
       logging.debug(context_src)
       logging.debug(context_tgt)
     else:
