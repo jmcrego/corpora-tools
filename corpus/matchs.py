@@ -270,6 +270,10 @@ if __name__ == '__main__':
   logging.info('Examples => {}'.format(nexamples))
   for n, N in sorted(tag2n.items()):
     logging.info('tag-{} => {}'.format(n,N))
+  for n, N in sorted(slen2n.items()):
+    logging.info('slen:{} => {}'.format(n,N))
+  for n, N in sorted(tlen2n.items()):
+    logging.info('tlen:{} => {}'.format(n,N))
 
 
 
