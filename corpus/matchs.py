@@ -220,7 +220,7 @@ if __name__ == '__main__':
     ### context, print primed sentences ########
     ############################################
     contexts_inds = np.argsort(contexts_scores)[::-1] #sort in descending order
-    print("len(contexts_inds)={}".format(len(contexts_inds)))
+    logging.debug("len(contexts_inds)={}".format(len(contexts_inds)))
     prefix_src = []
     prefix_tgt = []
     count = 0
@@ -235,7 +235,7 @@ if __name__ == '__main__':
         count_src += len(contexts_src[ind])
         count_tgt += len(contexts_tgt[ind])
       else:
-        print('print1')
+        logging.debug('print1')
         print(" ".join(prefix_src) + " {} ".format(args.cur) + src, file=fq_osrc_prime)
         print(" ".join(prefix_tgt) + " {} ".format(args.cur) + src, file=fq_osrc_augm)
         print(" ".join(prefix_tgt) + " {} ".format(args.cur),       file=fq_otgt_pref)
@@ -250,10 +250,10 @@ if __name__ == '__main__':
         count_src = 0
         count_tgt = 0
         if args.inference: ### if inference print one single example
-          print('break')
+          logging.debug('break')
           break
     if len(prefix_src) and len(prefix_tgt):
-      print('print2')
+      logging.debug('print2')
       print(" ".join(prefix_src) + " {} ".format(args.cur) + src, file=fq_osrc_prime)
       print(" ".join(prefix_tgt) + " {} ".format(args.cur) + src, file=fq_osrc_augm)
       print(" ".join(prefix_tgt) + " {} ".format(args.cur),       file=fq_otgt_pref)
