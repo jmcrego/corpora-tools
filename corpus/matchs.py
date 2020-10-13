@@ -250,6 +250,7 @@ if __name__ == '__main__':
         count_src = 0
         count_tgt = 0
         if args.inference: ### if inference print one single example
+          print('break')
           break
     if len(prefix_src) and len(prefix_tgt):
       print('print2')
