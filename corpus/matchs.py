@@ -57,11 +57,11 @@ class Args():
    -q_tgt     FILE : query file with tgt strings
    -q_match   FILE : query file with matchs
 
-   -maxn       INT : up to n-best context sentences                 (1)
    -mins     FLOAT : min similarity score                           (0.5)
+   -maxn       INT : inject up to n-best context sentences          (1)
    -perfect  FLOAT : probability of injecting perfect matchs        (0.0) <not implemented>
-   -sep     STRING : context sentence token                         (⸨sep⸩)
-   -cur     STRING : current sentence token                         (⸨cur⸩)
+   -sep     STRING : context sentence first token                   (⸨sep⸩)
+   -cur     STRING : current sentence first token                   (⸨cur⸩)
    -range          : use score ranges to separate similar sentences (False)
    -inference      : output a single example for all sentences      (False)
 
