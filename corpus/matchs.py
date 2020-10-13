@@ -43,7 +43,7 @@ class Args():
     self.perfect = 0.0
     self.inference = False
     self.verbose = False
-    self.ncontext2n = defaultdict(int)
+    self.ctx2n = defaultdict(int)
     self.tag2n = defaultdict(int)
 
     seed = 12345
@@ -51,14 +51,14 @@ class Args():
     log_level = 'debug'
     prog = argv.pop(0)
     usage = '''usage: {} -db_src FILE -db_tgt FILE -q_src FILE -q_tgt FILE -q_match FILE
-   -db_src    FILE : db file with src strings (PRIMING)
+   -db_src    FILE : db file with src strings
    -db_tgt    FILE : db file with tgt strings
    -q_src     FILE : query file with src strings
-   -q_tgt     FILE : query file with tgt strings (TRAINING)
+   -q_tgt     FILE : query file with tgt strings
    -q_match   FILE : query file with matchs
 
-   -maxn   INT : up to n-best context sentences                 (1)
-   -mins FLOAT : min similarity score                           (0.5)
+   -maxn       INT : up to n-best context sentences                 (1)
+   -mins     FLOAT : min similarity score                           (0.5)
    -perfect  FLOAT : probability of injecting perfect matchs        (0.0) <not implemented>
    -sep     STRING : context sentence token                         (⸨sep⸩)
    -cur     STRING : current sentence token                         (⸨cur⸩)
@@ -66,7 +66,6 @@ class Args():
    -inference      : output a single example for all sentence       (False)
 
    -seed     FLOAT : seed for randomness                            (1234)
-   -v              : verbose
    -h              : this help
 
 '''.format(prog)
@@ -206,7 +205,7 @@ if __name__ == '__main__':
       print("",  file=fq_otgt_pref)
       print(tgt, file=fq_otgt_prime)
       print(tgt, file=fq_otgt_augm)
-      args.ncontext2n[0] += 1
+      args.ctx2n[0] += 1
       continue
     ############################################
     ### context, print primed sentences ########
@@ -231,7 +230,7 @@ if __name__ == '__main__':
         print(" ".join(prefix_tgt) + " {} ".format(args.cur),       file=fq_otgt_pref)
         print(" ".join(prefix_tgt) + " {} ".format(args.cur) + tgt, file=fq_otgt_prime)
         print("{} ".format(args.cur) + tgt, file=fq_otgt_augm)
-        args.ncontext2n[count] += 1
+        args.ctx2n[count] += 1
         prefix_src = []
         prefix_tgt = []
         count = 0
@@ -245,7 +244,7 @@ if __name__ == '__main__':
       print(" ".join(prefix_tgt) + " {} ".format(args.cur),       file=fq_otgt_pref)
       print(" ".join(prefix_tgt) + " {} ".format(args.cur) + tgt, file=fq_otgt_prime)
       print("{} ".format(args.cur) + tgt, file=fq_otgt_augm)
-      args.ncontext2n[count] += 1
+      args.ctx2n[count] += 1
 
   logging.info('Done')
 
@@ -256,7 +255,7 @@ if __name__ == '__main__':
   fq_otgt_augm.close()
 
   nexamples = 0
-  for n, N in sorted(args.ncontext2n.items()):
+  for n, N in sorted(args.ctx2n.items()):
     logging.info('{}-contexts => {}'.format(n,N))
     nexamples += N
   logging.info('Examples => {}'.format(nexamples))
