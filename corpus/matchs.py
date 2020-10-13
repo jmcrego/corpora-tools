@@ -228,6 +228,7 @@ if __name__ == '__main__':
     count_tgt = 0
     for k,ind in enumerate(contexts_inds):
       if count_src<=100 and count_tgt<=100 and count<args.maxn:
+        logging.debug('accum')
         tag2n[contexts_src[ind].split()[0]] += 1
         prefix_src.insert(0,contexts_src[ind])
         prefix_tgt.insert(0,contexts_tgt[ind])
