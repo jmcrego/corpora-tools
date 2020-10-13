@@ -235,6 +235,7 @@ if __name__ == '__main__':
         print(" ".join(prefix_tgt) + " {} ".format(args.cur) + tgt, file=fq_otgt_prime)
         print("{} ".format(args.cur) + tgt, file=fq_otgt_augm)
         ### stats
+        print('count is {}'.format(count))
         ctx2n[count] += 1
         slen2n[len(prefix_src)+1+len(src.split())] += 1
         tlen2n[len(prefix_tgt)+1+len(tgt.split())] += 1
@@ -265,6 +266,7 @@ if __name__ == '__main__':
       print(" ".join(prefix_tgt) + " {} ".format(args.cur),       file=fq_otgt_pref)
       print(" ".join(prefix_tgt) + " {} ".format(args.cur) + tgt, file=fq_otgt_prime)
       print("{} ".format(args.cur) + tgt, file=fq_otgt_augm)
+      print('count is {}'.format(count))
       ctx2n[count] += 1
       slen2n[len(prefix_src)+1+len(src.split())] += 1
       tlen2n[len(prefix_tgt)+1+len(tgt.split())] += 1
