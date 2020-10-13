@@ -140,6 +140,13 @@ def get_contexts(match, args, db_src, db_tgt, src, tgt):
   contexts_tgt = []
   contexts_scores = []
 
+  r = random.random()
+  if not args.inference and r < args.perfect:
+    tag = "⸨1.0⸩" if args.range else args.sep
+    contexts_scores.append(1.0)
+    contexts_tgt.append(tag + " " + tgt)
+    contexts_src.append(tag + " " + src)
+
   if match != "":
     matches = match.split("\t")
     for m in range(len(matches)):
@@ -158,16 +165,6 @@ def get_contexts(match, args, db_src, db_tgt, src, tgt):
         contexts_scores.append(score)
         contexts_tgt.append(context_tgt)
         contexts_src.append(context_src)
-
-  r = random.random()
-  if not args.inference and r < args.perfect:
-    tag = "⸨1.0⸩" if args.range else args.sep
-    context_tgt = tag + " " + tgt
-    context_src = tag + " " + src
-    if context_tgt not in contexts_tgt and context_src not in contexts_src:
-      contexts_scores.append(1.0)
-      contexts_tgt.append(context_tgt)
-      contexts_src.append(context_src)
 
   return contexts_src, contexts_tgt, contexts_scores 
 
