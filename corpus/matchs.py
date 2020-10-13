@@ -228,8 +228,7 @@ if __name__ == '__main__':
     count_tgt = 0
     printed = False
     for k,ind in enumerate(contexts_inds):
-      if count_src>100 or count_tgt>100 or count>=args.maxn:
-        logging.debug('print n={}'.format(len(prefix_src)))
+#      if (count_src>100 or count_tgt>100) and count<args.maxn:
         print(" ".join(prefix_src) + " {} ".format(args.cur) + src, file=fq_osrc_prime)
         print(" ".join(prefix_tgt) + " {} ".format(args.cur) + src, file=fq_osrc_augm)
         print(" ".join(prefix_tgt) + " {} ".format(args.cur),       file=fq_otgt_pref)
@@ -258,7 +257,6 @@ if __name__ == '__main__':
       break
 
     if len(prefix_src) and len(prefix_tgt):
-      logging.debug('print n={}'.format(len(prefix_src)))
       print(" ".join(prefix_src) + " {} ".format(args.cur) + src, file=fq_osrc_prime)
       print(" ".join(prefix_tgt) + " {} ".format(args.cur) + src, file=fq_osrc_augm)
       print(" ".join(prefix_tgt) + " {} ".format(args.cur),       file=fq_otgt_pref)
