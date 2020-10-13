@@ -140,23 +140,24 @@ def get_contexts(match, args, db_src, db_tgt, src, tgt):
   contexts_tgt = []
   contexts_scores = []
 
-  matches = match.split("\t")
-  for m in range(len(matches)):
-    if m%2 != 0 or len(matches)<2:
-      continue
-    score = max(0.0,min(float(matches[m]), 1.0))
-    id_db = int(matches[m+1])-1
-    if score < args.mins:
-      continue
+  if match != "":
+    matches = match.split("\t")
+    for m in range(len(matches)):
+      if m%2 != 0:
+        continue
+      score = max(0.0,min(float(matches[m]), 1.0))
+      id_db = int(matches[m+1])-1
+      if score < args.mins:
+        continue
 
-    tag = "⸨" + "{:.6f}".format(score)[0:3] + "⸩" if args.range else args.sep
-    context_tgt = tag + " " + db_tgt[id_db]
-    context_src = tag + " " + db_src[id_db]
+      tag = "⸨" + "{:.6f}".format(score)[0:3] + "⸩" if args.range else args.sep
+      context_tgt = tag + " " + db_tgt[id_db]
+      context_src = tag + " " + db_src[id_db]
 
-    if context_tgt not in contexts_tgt and context_src not in contexts_src: ### not repeated pairs
-      contexts_scores.append(score)
-      contexts_tgt.append(context_tgt)
-      contexts_src.append(context_src)
+      if context_tgt not in contexts_tgt and context_src not in contexts_src: ### not repeated pairs
+        contexts_scores.append(score)
+        contexts_tgt.append(context_tgt)
+        contexts_src.append(context_src)
 
   r = random.random()
   if not args.inference and r < args.perfect:
@@ -167,7 +168,6 @@ def get_contexts(match, args, db_src, db_tgt, src, tgt):
       contexts_scores.append(1.0)
       contexts_tgt.append(context_tgt)
       contexts_src.append(context_src)
-
 
   return contexts_src, contexts_tgt, contexts_scores 
 
