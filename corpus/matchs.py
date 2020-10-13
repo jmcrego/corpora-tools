@@ -172,6 +172,8 @@ def get_contexts(match, args, db_src, db_tgt):
 
 ctx2n = defaultdict(int)
 tag2n = defaultdict(int)
+slen2n = defaultdict(int)
+tlen2n = defaultdict(int)
 
 if __name__ == '__main__':
 
@@ -209,6 +211,8 @@ if __name__ == '__main__':
       print(tgt, file=fq_otgt_prime)
       print(tgt, file=fq_otgt_augm)
       ctx2n[0] += 1
+      slen2n[len(src.split())] += 1
+      tlen2n[len(tgt.split())] += 1
       continue
     ############################################
     ### context, print primed sentences ########
@@ -234,6 +238,8 @@ if __name__ == '__main__':
         print(" ".join(prefix_tgt) + " {} ".format(args.cur) + tgt, file=fq_otgt_prime)
         print("{} ".format(args.cur) + tgt, file=fq_otgt_augm)
         ctx2n[count] += 1
+        slen2n[len(prefix_src)+1+len(src.split())] += 1
+        tlen2n[len(prefix_tgt)+1+len(tgt.split())] += 1
         prefix_src = []
         prefix_tgt = []
         count = 0
@@ -248,8 +254,8 @@ if __name__ == '__main__':
       print(" ".join(prefix_tgt) + " {} ".format(args.cur) + tgt, file=fq_otgt_prime)
       print("{} ".format(args.cur) + tgt, file=fq_otgt_augm)
       ctx2n[count] += 1
-
-  logging.info('Done')
+      slen2n[len(prefix_src)+1+len(src.split())] += 1
+      tlen2n[len(prefix_tgt)+1+len(tgt.split())] += 1
 
   fq_osrc_prime.close()
   fq_osrc_augm.close()
