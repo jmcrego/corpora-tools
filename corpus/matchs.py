@@ -189,11 +189,11 @@ if __name__ == '__main__':
   q_src = read_file(args.fq_src) if args.fdb_src != args.fq_src else db_src
   q_tgt = read_file(args.fq_tgt) if args.fdb_tgt != args.fq_tgt else db_tgt
 
-  ext = ".mins{}.maxn{}".format(args.mins,args.maxn)
+  ext = ".mins{}-maxn{}".format(args.mins,args.maxn)
   if args.range:
-    ext += ".range"
+    ext += "-range"
   if args.inference:
-    ext += ".inference"
+    ext += "-inference"
 
   fq_osrc_prime = open(args.fq_src + ext + '.prime' ,"w");
   fq_osrc_augm  = open(args.fq_src + ext + '.augm' ,"w");
