@@ -42,7 +42,6 @@ class Args():
     self.mins = 0.5
     self.perfect = 0.0
     self.inference = False
-    self.verbose = False
 
     seed = 12345
     log_file = None
@@ -98,8 +97,6 @@ class Args():
         self.inference = True
       elif tok=="-range":
         self.range = True
-      elif tok=="-v":
-        self.verbose = True
       elif tok=="-seed" and len(sys.argv):
         seed = int(sys.argv.pop(0))
       elif tok=="-log_file" and len(sys.argv):
@@ -162,10 +159,9 @@ def get_contexts(match, args, db_src, db_tgt):
       contexts_tgt.append(context_tgt)
       contexts_src.append(context_src)
 
-  if args.verbose:
-    logging.info(contexts_scores)
-    logging.info(contexts_src)
-    logging.info(contexts_tgt)
+  logging.info(contexts_scores)
+  logging.info(contexts_src)
+  logging.info(contexts_tgt)
   return contexts_src, contexts_tgt, contexts_scores 
 
 ######################################################################
