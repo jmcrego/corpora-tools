@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import sys
-#import gzip
 import io
-import glob
+#import glob
 import spacy
-#import json
 import logging
 
 def create_logger(logfile, loglevel):
@@ -68,8 +66,10 @@ class Args():
 if __name__ == "__main__":
 
     args = Args(sys.argv) #creates logger
-    nlp = spacy.load(args.model, disable=["parser"])
+    #nlp = spacy.load(args.model, disable=["parser"])
+    nlp = spacy.load(args.model)
     #nlp.add_pipe(length_component, first=True) # Add the component first in the pipeline
+
     logging.info('pipeline: {}'.format(nlp.pipe_names)) #print(nlp.pipeline)
 
     TEXTS = []
@@ -86,22 +86,31 @@ if __name__ == "__main__":
 
     while len(docs):
         doc = docs.pop(0)
-#        for ent in doc.ents:
-#            print('[ENT][{},{}] {} => {}'.format(ent.start_char, ent.end_char, ent.text, ent.label_))
-#        for chk in doc.noun_chunks:
-#            print('[CHK] {} root({},{},{})'.format(chk.text, chk.root.text, chk.root.head.text, chk.root.dep_))
         sentence = []
+        start_char2i = {}
+        end_char2i = {}
         for token in doc:
+            start_char2i[token.idx] = token.i
             feats = []
+            feats.append(str(token.i))
             feats.append(token.text)
             feats.append(token.lemma_)
-            #feats.append(token.pos_)
             feats.append(token.tag_)
+            #feats.append(token.pos_)
             #feats.append(token.dep_)
             #feats.append(token.ent_iob_)
-            feats.append(token.ent_type_)
+            #feats.append(token.ent_type_)
             sentence.append(args.joiner.join(feats))
-        print(' '.join(sentence))
 
+        Ents = []
+        for ent in doc.ents:
+            i = start_char2i[ent.start_char]
+            Ents.append("Ent:{}[{},{}] {}".format(ent.label_, i, i + len(ent.text.split()) - 1, ent.text))
 
-### for large streams use:
+        NPs = []
+        for chk in doc.noun_chunks:
+            i = start_char2i[chk.start_char]
+            NPs.append("NP[{},{}] {}".format(i,i + len(chk.text.split()) - 1, chk.text))
+            
+        print(' '.join(sentence) + '\t' + '\t'.join(Ents) + '\t' + '\t'.join(NPs))
+
