@@ -3,6 +3,7 @@
 import sys
 import io
 import math
+from time import time
 import spacy
 import logging
 
@@ -30,13 +31,17 @@ class Args():
         self.joiner = '￨'
         self.log_file = 'stderr'
         self.log_level = 'info'
+        self.ents = False
+        self.NPs = False
         self.bucket = 1000
         self.prog = argv.pop(0)
-        self.usage = '''usage: {} [-model MODEL] [-data FILE] [-joiner STRING] [-bucket_size INT] [-log_file FILE] [log_level LEVEL]
+        self.usage = '''usage: {} [-model MODEL] [-data FILE] [-joiner STRING] [-bucket_size INT] [-ents] [-NPs] [-log_file FILE] [log_level LEVEL]
    -data       FILE : input file                            (stdin)
    -model     MODEL : spacy model                           (en) [equivalent to en_core_web_sm]
    -joiner   STRING : string to join linguistic features    (￨)
    -bucket      INT : bucket size                           (1000)
+   -ents            : output entities                       (False)
+   -NPs             : output NPs                            (False) if used, activates parsing
    -log_file   FILE : log file (use stderr for STDERR)      (stderr)
    -log_level LEVEL : debug, info, warning, critical, error (debug) 
    -h               : this help
@@ -55,6 +60,10 @@ class Args():
             elif (tok=="-bucket" and len(argv)): self.bucket = int(argv.pop(0))
             elif (tok=="-log_file" and len(argv)): self.log_file = argv.pop(0)
             elif (tok=="-log_level" and len(argv)): self.log_level = argv.pop(0)
+            elif (tok=="-ents"):
+                self.ents = True
+            elif (tok=="-NPs"):
+                self.NPs = True
             elif (tok=="-h"):
                 sys.stderr.write("{}".format(self.usage))
                 sys.exit()
@@ -69,8 +78,11 @@ class Args():
 if __name__ == "__main__":
 
     args = Args(sys.argv) #creates logger
-    nlp = spacy.load(args.model, disable=["parser"])
-    #nlp = spacy.load(args.model)
+    if args.NPs:
+        nlp = spacy.load(args.model)
+    else:
+        nlp = spacy.load(args.model, disable=["parser"])
+        
     logging.info('pipeline: {}'.format(nlp.pipe_names)) #print(nlp.pipeline)
 
     TEXTS = []
@@ -85,6 +97,7 @@ if __name__ == "__main__":
     nlines = len(TEXTS)
     logging.info('read {} with {} lines, {} buckets'.format(args.data, nlines, nbuckets))
 
+    tic = time()
     nbucket = 0
     nline = 0
     while len(TEXTS):
@@ -116,19 +129,23 @@ if __name__ == "__main__":
                 #feats.append(token.dep_)
                 #feats.append(token.ent_iob_)
                 #feats.append(token.ent_type_)
-                #sentence.append(args.joiner.join(feats))
+                ### add token to sentence
+                sentence.append(args.joiner.join(feats))
 
             oline = ' '.join(sentence)
-            
-#            for ent in doc.ents:
-#                i = start_char2i[ent.start_char]
-#                oline += "\t" + "Ent[{},{}]:{} {}".format(i, i + len(ent.text.split()) - 1, ent.label_, ent.text)
+
+            if args.ents:
+                for ent in doc.ents:
+                    i = start_char2i[ent.start_char]
+                    oline += "\t" + "Ent[{},{}]:{} {}".format(i, i + len(ent.text.split()) - 1, ent.label_, ent.text)
                 
-#            for chk in doc.noun_chunks:
-#                i = start_char2i[chk.start_char]
-#                oline += "\t" + "NP[{},{}] {}".format(i, i + len(chk.text.split()) - 1, chk.text)
+            if args.NPs:
+                for chk in doc.noun_chunks:
+                    i = start_char2i[chk.start_char]
+                    oline += "\t" + "NP[{},{}] {}".format(i, i + len(chk.text.split()) - 1, chk.text)
             
             print(oline)
 
         logging.info('processed {}/{} lines, {}/{} buckets'.format(nline, nlines, nbucket, nbuckets))
-
+    toc = time()
+    logging.info('End ({:.2f} seconds)'.format(toc-tic))
