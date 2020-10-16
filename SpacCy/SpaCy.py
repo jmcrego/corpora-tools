@@ -69,8 +69,8 @@ class Args():
 if __name__ == "__main__":
 
     args = Args(sys.argv) #creates logger
-    #nlp = spacy.load(args.model, disable=["parser"])
-    nlp = spacy.load(args.model)
+    nlp = spacy.load(args.model, disable=["parser"])
+    #nlp = spacy.load(args.model)
     logging.info('pipeline: {}'.format(nlp.pipe_names)) #print(nlp.pipeline)
 
     TEXTS = []
@@ -111,22 +111,22 @@ if __name__ == "__main__":
                 #feats.append(str(token.i))
                 feats.append(token.text)
                 #feats.append(token.lemma_)
-                feats.append(token.tag_)
-                #feats.append(token.pos_)
+                #feats.append(token.tag_)
+                feats.append(token.pos_)
                 #feats.append(token.dep_)
                 #feats.append(token.ent_iob_)
                 #feats.append(token.ent_type_)
-                sentence.append(args.joiner.join(feats))
+                #sentence.append(args.joiner.join(feats))
 
             oline = ' '.join(sentence)
             
-            for ent in doc.ents:
-                i = start_char2i[ent.start_char]
-                oline += "\t" + "Ent[{},{}]:{} {}".format(i, i + len(ent.text.split()) - 1, ent.label_, ent.text)
+#            for ent in doc.ents:
+#                i = start_char2i[ent.start_char]
+#                oline += "\t" + "Ent[{},{}]:{} {}".format(i, i + len(ent.text.split()) - 1, ent.label_, ent.text)
                 
-            for chk in doc.noun_chunks:
-                i = start_char2i[chk.start_char]
-                oline += "\t" + "NP[{},{}] {}".format(i, i + len(chk.text.split()) - 1, chk.text)
+#            for chk in doc.noun_chunks:
+#                i = start_char2i[chk.start_char]
+#                oline += "\t" + "NP[{},{}] {}".format(i, i + len(chk.text.split()) - 1, chk.text)
             
             print(oline)
 
