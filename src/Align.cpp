@@ -150,7 +150,7 @@ std::vector<std::vector<size_t> > Align::extend_phrase(size_t s_min, size_t s_ma
   for (size_t s_from=s_min; s_from==s_min or x2y[s_from].empty(); s_from--){
     for (size_t s_to=s_max; s_to==s_max or x2y[s_to].empty(); s_to++){
       for (size_t t_from=t_min; t_from==t_min or y2x[t_from].empty(); t_from--){
-        for (size_t t_to=t_max; t_to==t_max or t2x[t_to].empty(); t_to++){
+        for (size_t t_to=t_max; t_to==t_max or y2x[t_to].empty(); t_to++){
           std::vector<size_t> phrase;
           phrase.push_back(s_from);
           phrase.push_back(s_to);
