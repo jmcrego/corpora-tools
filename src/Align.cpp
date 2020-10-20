@@ -145,19 +145,25 @@ std::set<size_t> Align::phrase_s(std::set<size_t> t){
 }
 */
 
-std::vector<std::vector<size_t> > Align::extend_phrase(size_t s_min, size_t s_max, size_t t_min, size_t t_max){
+std::vector<std::vector<size_t> > Align::extend_phrase(size_t s_min, size_t s_max, size_t t_min, size_t t_max, bool verbose){
+  if (verbose) std::cout << "extend_phrase [" << s_min << "," << s_max << "] [" << t_min << "," << t_max << "]" << std::endl; 
   std::vector<std::vector<size_t> > phrases;
   for (size_t s_from=s_min; s_from==s_min or x2y[s_from].empty(); s_from--){
+    if (verbose) std::cout << "\ts_from=" << s_from << std::endl;
     for (size_t s_to=s_max; s_to==s_max or x2y[s_to].empty(); s_to++){
+      if (verbose) std::cout << "\ts_to=" << s_to << std::endl;
       for (size_t t_from=t_min; t_from==t_min or y2x[t_from].empty(); t_from--){
+        if (verbose) std::cout << "\tt_from=" << t_from << std::endl;
         for (size_t t_to=t_max; t_to==t_max or y2x[t_to].empty(); t_to++){
+          if (verbose) std::cout << "\tt_to=" << t_to << std::endl;
           std::vector<size_t> phrase;
           phrase.push_back(s_from);
           phrase.push_back(s_to);
           phrase.push_back(t_from);
           phrase.push_back(t_to);
           phrases.push_back(phrase);
-          if (t_to == len_y-1) break;
+          if (verbose) std::cout << "\tadded [" << s_from << "," << s_to << "] [" << t_from << "," << t_to << "]" << std::endl; 
+          if (t_to == len_y-1) break; 
         }
         if (t_from == 0) break;
       }

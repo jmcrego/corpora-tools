@@ -11,7 +11,7 @@ public:
   void aligned_to_s(std::set<size_t>&, std::set<size_t>&, bool, std::vector<std::set<size_t> >&, std::vector<std::set<size_t> >&);
   std::set<size_t> phrase_t(size_t,size_t);
   std::set<size_t> phrase_s(size_t,size_t);
-  std::vector<std::vector<size_t> > extend_phrase(size_t,size_t,size_t,size_t);
+  std::vector<std::vector<size_t> > extend_phrase(size_t,size_t,size_t,size_t,bool);
   /*
   size_t len_s;
   size_t len_t;
