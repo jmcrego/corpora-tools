@@ -157,13 +157,13 @@ std::vector<std::vector<size_t> > Align::extend_phrase(size_t s_min, size_t s_ma
           phrase.push_back(t_from);
           phrase.push_back(t_to);
           phrases.push_back(phrase);
-          if t_to == len_y-1 break;
+          if (t_to == len_y-1) break;
         }
-        if t_from == 0 break;
+        if (t_from == 0) break;
       }
-      if s_to == len_x-1 break;
+      if (s_to == len_x-1) break;
     }
-    if s_from == 0 break;
+    if (s_from == 0) break;
   }
   return phrases;
 }
