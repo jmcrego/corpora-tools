@@ -129,7 +129,7 @@ std::set<size_t> Align::phrase_t(std::set<size_t> s){
 std::set<size_t> Align::phrase_s(size_t t_min, size_t t_max){
   //returns the set of s words aligned to words in range [t_min, t_max]
   std::set<size_t> s_aligned_to_t_min_t_max;
-  for (size_t t=t_min; t<=t_max; s++){
+  for (size_t t=t_min; t<=t_max; t++){
     for (std::set<size_t>::iterator it=y2x[t].begin(); it!=y2x[t].end(); it++){
       s_aligned_to_t_min_t_max.insert(*it);
     }
