@@ -115,7 +115,7 @@ std::set<size_t> Align::phrase_t(size_t s_min, size_t s_max){
       t_aligned_to_s_min_s_max.insert(*it);
     }
   }
-  return t_aligned_to_s_min_s_max
+  return t_aligned_to_s_min_s_max;
 }
 
 /*
@@ -134,7 +134,7 @@ std::set<size_t> Align::phrase_s(size_t t_min, size_t t_max){
       s_aligned_to_t_min_t_max.insert(*it);
     }
   }
-  return s_aligned_to_t_min_t_max
+  return s_aligned_to_t_min_t_max;
 }
 
 /*
