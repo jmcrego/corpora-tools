@@ -67,9 +67,9 @@ int main(int argc, char** argv) {
   }
 
   for (size_t i = 0; i< vsrc.size(); i++){
-    std::vector<std::string> S = split(vsrc[i],sepwords,false);
-    std::vector<std::string> T = split(vtgt[i],sepwords,false);
-    std::vector<std::string> A = split(vali[i],sepwords,false);
+    std::vector<std::string> S = split(vsrc[i],sepwords,false,"");
+    std::vector<std::string> T = split(vtgt[i],sepwords,false,"");
+    std::vector<std::string> A = split(vali[i],sepwords,false,"");
     if (verbose) {
       std::cout << "i: " << i << std::endl;
       std::cout << "S: " << vsrc[i] << std::endl;
