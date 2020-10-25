@@ -235,8 +235,8 @@ int main(int argc, char** argv) {
       std::cout << "i=" << i << std::endl;
       std::cout << "X: " << vtst[i] << std::endl;
     }
-    std::vector<std::string> X = split(vtst[i],sepwords,false,"");
-    std::vector<std::string> cols = split(vmatch[i],"\t",false,"");
+    std::vector<std::string> X = split(vtst[i],sepwords,false);
+    std::vector<std::string> cols = split(vmatch[i],"\t",false);
     std::vector<std::string> vf1;
     std::vector<std::string> vf2;
     /*** there is no match ********************/
@@ -255,11 +255,11 @@ int main(int argc, char** argv) {
 	score = std::atof(cols[colS].c_str());
       }
       if (score >= minS){
-	std::vector<std::string> S = split(vsrc[j],sepwords,false,"");
-	std::vector<std::string> T = split(vtgt[j],sepwords,false,"");
-	std::vector<std::string> A = split(vali[j],sepwords,false,"");
+	std::vector<std::string> S = split(vsrc[j],sepwords,false);
+	std::vector<std::string> T = split(vtgt[j],sepwords,false);
+	std::vector<std::string> A = split(vali[j],sepwords,false);
 	std::vector<std::string> R;
-	if (vref.size()) R = split(vref[i],sepwords,false,"");
+	if (vref.size()) R = split(vref[i],sepwords,false);
 	if (verbose) {
 	  std::cout << "match=" << j << std::endl;
 	  std::cout << "S: " << vsrc[j] << std::endl;
