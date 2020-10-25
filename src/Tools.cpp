@@ -29,6 +29,23 @@ std::vector<std::string> split(std::string str, std::string sep, bool allow_empt
   return v;
 }
 
+std::vector<std::string> split(std::string str, std::string sep, bool allow_empty) {
+  std::vector<std::string> v;
+  size_t to;
+  size_t from = 0;
+  while ((to = str.find(sep,from)) != std::string::npos){
+    if (allow_empty || to > from){
+      v.push_back(str.substr(from, to-from));
+    }
+    from = to + sep.length();
+  }
+  to = str.size();
+  if (allow_empty || to > from){
+    v.push_back(str.substr(from, to-from));
+  }
+  return v;
+}
+
 bool load(std::string file, std::vector<std::string>& v){
   std::string str;
   std::ifstream in(file.c_str());

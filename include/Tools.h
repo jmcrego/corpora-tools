@@ -2,7 +2,7 @@
 #define TOOLS_H
 //g++ -c Tools.cpp
 
-std::vector<std::string> split(std::string, std::string, bool, std::string);
+std::vector<std::string> split(std::string, std::string, bool);
 bool load(std::string, std::vector<std::string>&);
 
 #endif
