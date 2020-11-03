@@ -138,7 +138,7 @@ def do_call(cmd):
     logging.info('RUNNING: {}'.format(cmd))
     os.system(cmd)
 
-def do_calls(cmds)
+def do_calls(cmds):
     fd_s = []
     p_s = []
     for i in range(len(cmds)):
