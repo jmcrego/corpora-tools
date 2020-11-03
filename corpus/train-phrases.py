@@ -167,9 +167,6 @@ def run_lexscore(args):
         sys.exit()
     tic = time()
     do_call('perl {} -s {} -t {} -a {} -o {} 2> {}'.format(args.lexscore, args.s, args.t, args.a, args.o, args.o+'.log.lex-s2t'))
-    #cmd = 'perl {} -s {} -t {} -a {} -o {} 2> {}'.format(args.lexscore, args.s, args.t, args.a, args.o, args.o+'.log.lex-s2t')
-    #logging.info('RUNNING: {}'.format(cmd))
-    #os.system(cmd)    
     toc = time()
     logging.info("lexscore took {:.2f} seconds".format(toc-tic))
 
@@ -182,21 +179,8 @@ def run_extract(args):
     tic = time()
     cmd = [args.extract, args.t, args.s, args.a, args.o+'.extract', args.l, '--GZOutput', args.o+'.log.extract']
     do_calls([cmd])
-    #cmd = [args.extract, args.t, args.s, args.a, args.o+'.extract', args.l, '--GZOutput']
-    #logging.info('RUNNING: {}'.format(' '.join(cmd)))
-    #ferr=open(args.o+'.log.extract', "w")
-    #p = subprocess.Popen(cmd, stderr=ferr)
-    #p.wait()
-    #ferr.close()
-
     do_call('zcat {} | {} | gzip -c - > {}'.format(args.o+'.extract.gz', args.sort, args.o+'.extract.sorted.gz'))
-    #cmd = 'zcat {} | {} | gzip -c - > {}'.format(args.o+'.extract.gz', args.sort, args.o+'.extract.sorted.gz')
-    #logging.info('RUNNING: {}'.format(cmd))
-    #os.system(cmd)
     do_call('zcat {} | {} | gzip -c - > {}'.format(args.o+'.extract.inv.gz', args.sort, args.o+'.extract.inv.sorted.gz'))
-    #cmd = 'zcat {} | {} | gzip -c - > {}'.format(args.o+'.extract.inv.gz', args.sort, args.o+'.extract.inv.sorted.gz')
-    #logging.info('RUNNING: {}'.format(cmd))
-    #os.system(cmd)
     toc = time()
     logging.info("extract took {:.2f} seconds".format(toc-tic))
 
@@ -210,26 +194,7 @@ def run_score(args):
     cmd1 = [args.score, args.o+'.extract.sorted.gz', args.o+'.lex-t2s', args.o+'.phrases.s2t.gz', args.o+'.log.phrases.s2t']
     cmd2 = [args.score, args.o+'.extract.inv.sorted.gz', args.o+'.lex-s2t', args.o+'.phrases.t2s.gz', '--Inverse', args.o+'.log.phrases.t2s']
     do_calls([cmd1, cmd2])
-
-    #cmd1 = [args.score, args.o+'.extract.sorted.gz', args.o+'.lex-t2s', args.o+'.phrases.s2t.gz']
-    #logging.info('RUNNING: {}'.format(' '.join(cmd1)))
-    #ferr1=open(args.o+'.log.phrases.s2t', "w")
-    #p1 = subprocess.Popen(cmd1, stderr=ferr1)
-
-    #cmd2 = [args.score, args.o+'.extract.inv.sorted.gz', args.o+'.lex-s2t', args.o+'.phrases.t2s.gz', '--Inverse']
-    #logging.info('RUNNING: {}'.format(' '.join(cmd2)))
-    #ferr2=open(args.o+'.log.phrases.t2s', "w")
-    #p2 = subprocess.Popen(cmd2, stderr=ferr2)
-
-    #p1.wait()
-    #p2.wait()  
-    #ferr1.close()
-    #ferr2.close()  
-
     do_call('zcat {} | {} | gzip -c - > {}'.format(args.o+'.phrases.t2s.gz', args.sort, args.o+'.phrases.t2s.sorted.gz'))
-    #cmd = 'zcat {} | {} | gzip -c - > {}'.format(args.o+'.phrases.t2s.gz', args.sort, args.o+'.phrases.t2s.sorted.gz')
-    #logging.info('RUNNING: {}'.format(cmd))
-    #os.system(cmd)    
     toc = time()
     logging.info("score took {:.2f} seconds".format(toc-tic))
 
@@ -242,9 +207,6 @@ def run_consolidate(args):
 
     tic = time()
     do_call('{} {} {} {} 2> {}'.format(args.consolidate, args.o+'.phrases.s2t.gz', args.o+'.phrases.t2s.sorted.gz', args.o+'.phrases.gz', args.o+'.log.phrases'))
-    #cmd = '{} {} {} {} 2> {}'.format(args.consolidate, args.o+'.phrases.s2t.gz', args.o+'.phrases.t2s.sorted.gz', args.o+'.phrases.gz', args.o+'.log.phrases')
-    #logging.info('RUNNING: {}'.format(cmd))
-    #os.system(cmd)    
     toc = time()
     logging.info("consolidate took {:.2f} seconds".format(toc-tic))
 
