@@ -179,7 +179,8 @@ def run_extract(args):
         sys.exit()
 
     tic = time()
-    do_calls([args.extract, args.t, args.s, args.a, args.o+'.extract', args.l, '--GZOutput', args.o+'.log.extract'])
+    cmd = [args.extract, args.t, args.s, args.a, args.o+'.extract', args.l, '--GZOutput', args.o+'.log.extract']
+    do_calls([cmd])
     #cmd = [args.extract, args.t, args.s, args.a, args.o+'.extract', args.l, '--GZOutput']
     #logging.info('RUNNING: {}'.format(' '.join(cmd)))
     #ferr=open(args.o+'.log.extract', "w")
