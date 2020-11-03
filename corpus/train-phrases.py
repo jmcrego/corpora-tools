@@ -62,7 +62,7 @@ class Args():
   -log_level STRING : log level [debug, info, warning, critical, error] (info)
   -h                : this help
 
-steps are:
+Steps:
  + 1:lexscore
  + 2:phrase extract
  + 3:phrase score
