@@ -5,7 +5,7 @@ $usage="$0 [-s FILE] [-t FILE] [-a FILE]
     -t FILE : training target file
     -a FILE : s2t alignment file
     -o FILE : output pattern file
-Moses-like lexical scores are written in [o].lex.{t2s,s2t}
+Moses-like lexical scores are written in [o].lex-{t2s,s2t}
 ";
 
 while ($#ARGV>=0){
