@@ -67,8 +67,8 @@ sub get_lexical {
     close(A);
     close(S);
     close(T);
-    open(S2T,">$fout.lex.s2t") or die "ERROR: Can't write $fout.lex.t2s";
-    open(T2S,">$fout.lex.t2s") or die "ERROR: Can't write $fout.lex.t2s";
+    open(S2T,">$fout.lex-s2t") or die "ERROR: Can't write $fout.lex-t2s";
+    open(T2S,">$fout.lex-t2s") or die "ERROR: Can't write $fout.lex-t2s";
     foreach $s (keys %WORD_TRANSLATION) {
         foreach $t (keys %{$WORD_TRANSLATION{$s}}) {
             printf T2S "%s %s %.7f\n",$t,$s,$WORD_TRANSLATION{$s}{$t}/$TOTAL_SOURCE{$s};
@@ -77,5 +77,5 @@ sub get_lexical {
     }
     close(T2S);
     close(S2T);
-    print STDERR "Saved: $fout.lex.s2t and $fout.lex.t2s\n";
+    print STDERR "Saved: $fout.lex-s2t and $fout.lex-t2s\n";
 }
