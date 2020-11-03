@@ -4,7 +4,8 @@ $usage="$0 [-s FILE] [-t FILE] [-a FILE]
     -s FILE : training source file
     -t FILE : training target file
     -a FILE : s2t alignment file
-Moses-like lexical scores are written in [a].lex.{t2s,s2t}
+    -o FILE : output pattern file
+Moses-like lexical scores are written in [o].lex.{t2s,s2t}
 ";
 
 while ($#ARGV>=0){
@@ -12,12 +13,14 @@ while ($#ARGV>=0){
     if ($tok eq "-s"         && $#ARGV>=0) {$fsrc=shift @ARGV; next;}
     if ($tok eq "-t"         && $#ARGV>=0) {$ftgt=shift @ARGV; next;}
     if ($tok eq "-a"         && $#ARGV>=0) {$fali=shift @ARGV; next;}
+    if ($tok eq "-o"         && $#ARGV>=0) {$fout=shift @ARGV; next;}
     die "error: unparsed option $tok\n$usage";
 }
 
 die "error: missing -s option\n$usage" unless (defined $fsrc);
 die "error: missing -t option\n$usage" unless (defined $ftgt);
 die "error: missing -a option\n$usage" unless (defined $fali);
+$fout=$fali unless (defined $fout);
 
 &get_lexical;
 
@@ -64,8 +67,8 @@ sub get_lexical {
     close(A);
     close(S);
     close(T);
-    open(S2T,">$fali.lex.s2t") or die "ERROR: Can't write $fali.lex.t2s";
-    open(T2S,">$fali.lex.t2s") or die "ERROR: Can't write $fali.lex.t2s";
+    open(S2T,">$fout.lex.s2t") or die "ERROR: Can't write $fout.lex.t2s";
+    open(T2S,">$fout.lex.t2s") or die "ERROR: Can't write $fout.lex.t2s";
     foreach $s (keys %WORD_TRANSLATION) {
         foreach $t (keys %{$WORD_TRANSLATION{$s}}) {
             printf T2S "%s %s %.7f\n",$t,$s,$WORD_TRANSLATION{$s}{$t}/$TOTAL_SOURCE{$s};
@@ -74,5 +77,5 @@ sub get_lexical {
     }
     close(T2S);
     close(S2T);
-    print STDERR "Saved: $fali.lex.s2t and $fali.lex.t2s\n";
+    print STDERR "Saved: $fout.lex.s2t and $fout.lex.t2s\n";
 }
