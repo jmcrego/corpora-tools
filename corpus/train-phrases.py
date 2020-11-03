@@ -144,7 +144,7 @@ def do_calls(cmds):
     for i in range(len(cmds)):
         ferr = cmds[i].pop()
         fd = open(ferr, "w")
-        logging.info('RUNNING: {} 2> ferr'.format(cmds[i]))
+        logging.info('RUNNING: {} 2> ferr'.format(' '.join(cmds[i])))
         p = subprocess.Popen(cmds[i], stderr=fd)
         p_s.append(p)
         fd_s.append(fd)
