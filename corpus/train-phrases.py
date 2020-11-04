@@ -188,7 +188,7 @@ def run_parallelold(parallel, *functions):
 
 
 def run_parallel(args, *functions):
-    n_cpu = 2 if parallel else 1
+    n_cpu = 2 if args.parallel else 1
     futures = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=n_cpu) as executor:
         for function in functions:
