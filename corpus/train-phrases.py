@@ -176,19 +176,17 @@ def run_parallel(*functions):
     logging.info('Parallel processing')
     processes = []
     for function in functions:
-        proc = Process(target=function)
-        proc.start()
-        processes.append(proc)
-    for proc in processes:
-        proc.join()
+        p = Process(target=function)
+        p.start()
+        processes.append(p)
+    for p in processes:
+        p.join()
 
 ######################################################################
 ### MAIN #############################################################
 ######################################################################
             
-if __name__ == '__main__':
-
-    args = Args(sys.argv)
+def main(args):
 
     if args.step <= 1:
         logging.info('*** LEXSCORE ***')
@@ -200,14 +198,6 @@ if __name__ == '__main__':
 
     if args.parallel:
         run_parallel(run_dir(args), run_inv(args))
-#        p_dir = Process(target=run_dir(args))
-#        p_inv = Process(target=run_inv(args))
-        #run both
-#        p_dir.start()
-#        p_inv.start()
-        #wait
-#        p_dir.join()
-#        p_inv.join()
     else:
         logging.info('Sequential processing')
         run_dir(args)
@@ -218,6 +208,12 @@ if __name__ == '__main__':
         run('{} {} {} {} 2> {}'.format(args.consolidate, args.o+'.phrases.s2t.gz', args.o+'.phrases.t2s.sorted.gz', args.o+'.phrases.gz', args.o+'.log.phrases'))
 
     logging.info('Done')
+
+
+if __name__ == '__main__':
+
+    args = Args(sys.argv)
+    main(args)
 
 
 
