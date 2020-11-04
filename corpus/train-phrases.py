@@ -3,9 +3,10 @@
 import io
 import os
 import sys
+import time
 import logging
 from multiprocessing import Process
-from time import time
+#from time import time
 
 def create_logger(logfile, loglevel):
     numeric_level = getattr(logging, loglevel.upper(), None)
