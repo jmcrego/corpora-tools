@@ -180,7 +180,9 @@ def run_dir(args):
 def run_parallel(args, *functions):
     n_cpu = 2 if args.parallel else 1
     with concurrent.futures.ThreadPoolExecutor(max_workers=n_cpu) as executor:
+        ### run parallel jobs
         futures = [executor.submit(f, args) for f in functions]
+        ### wait for rewsults
         results = [f.result() for f in futures]
 
 ######################################################################
