@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import io
+import os
 import sys
-#import gzip
 import logging
-#import os
-import os.path
-import subprocess
+from multiprocessing import Process
 from time import time
 
 def create_logger(logfile, loglevel):
@@ -33,7 +31,8 @@ class Args():
     self.a = None
     self.o = None
     self.l = '7'
-    self.steps = ['1','2','3','4']
+    self.step = 1
+    self.parallel = False
     
     self.lexscore = 'corpora-tools/corpus/lexical_score.perl'
     self.extract = '/TOOLS/3rdParty/linux/ubuntu-18.04/gcc-7.4.0/c++11/64/release-12/moses/4.0.16/bin/extract'
@@ -50,8 +49,9 @@ class Args():
   -a           FILE : source-to-target alignment file
   -o           FILE : output pattern file
 
+  -parallel         : run in parallel      (False) 
   -l            INT : max phrase length    (7)
-  -steps        INT : comma-separated list (1,2,3,4)
+  -step         INT : begin on this step   (1)
   -lexscore    FILE : lexical scorer       (corpora-tools/corpus/lexical_score.perl)
   -extract     FILE : phrase extractor     (/TOOLS/3rdParty/linux/ubuntu-18.04/gcc-7.4.0/c++11/64/release-12/moses/4.0.16/bin/extract)
   -score       FILE : phrase scorer        (/TOOLS/3rdParty/linux/ubuntu-18.04/gcc-7.4.0/c++11/64/release-12/moses/4.0.16/bin/score)
@@ -74,6 +74,8 @@ Steps:
       if tok=="-h":
         sys.stderr.write("{}".format(usage))
         sys.exit()
+      elif tok=="-parallel":
+        self.parallel = True
       elif tok=="-s" and len(sys.argv):
         self.s = sys.argv.pop(0)
       elif tok=="-t" and len(sys.argv):
@@ -84,8 +86,8 @@ Steps:
         self.o = sys.argv.pop(0)
       elif tok=="-l" and len(sys.argv):
         self.l = sys.argv.pop(0)
-      elif tok=="-steps" and len(sys.argv):
-        self.steps = sys.argv.pop(0).split(',')
+      elif tok=="-step" and len(sys.argv):
+        self.step = int(sys.argv.pop(0))
       elif tok=="-lexscore" and len(sys.argv):
         self.lexscore = sys.argv.pop(0)
       elif tok=="-extract" and len(sys.argv):
@@ -127,6 +129,22 @@ Steps:
         sys.stderr.write("{}".format(usage))
         sys.exit()
         
+    if self.step <= 1 and not os.path.isfile(self.lexscore):
+        logging.error('{} does not exist'.format(self.lexscore))
+        sys.exit()
+
+    if self.step <= 2 and not os.path.isfile(self.extract):
+        logging.error('{} does not exist'.format(self.extract))
+        sys.exit()
+
+    if self.step <= 3 and not os.path.isfile(self.score):
+        logging.error('{} does not exist'.format(self.score))
+        sys.exit()
+
+    if self.step <= 4 and not os.path.isfile(self.consolidate):
+        logging.error('{} does not exist'.format(self.consolidate))
+        sys.exit()
+
     for key,val in vars(self).items():
         logging.info("{}: {}".format(key,val))
 
@@ -134,81 +152,22 @@ Steps:
 ### calls ########################################################
 ##################################################################
 
-def do_call(cmd):
+def run(cmd):
     logging.info('RUNNING: {}'.format(cmd))
     os.system(cmd)
 
-def do_calls(cmds):
-    fd_s = []
-    p_s = []
-    for i in range(len(cmds)):
-        ferr = cmds[i].pop()
-        fd = open(ferr, "w")
-        logging.info('RUNNING: {} 2> ferr'.format(' '.join(cmds[i])))
-        p = subprocess.Popen(cmds[i], stderr=fd)
-        p_s.append(p)
-        fd_s.append(fd)
+def run_inv(args):
+    if args.step <= 2:
+        run('zcat {} | {} | gzip -c - > {}'.format(args.o+'.extract.inv.gz', args.sort, args.o+'.extract.inv.sorted.gz'))
+    if args.step <= 3:
+        run('{} {} {} {} 2> {}'.format(args.score, args.o+'.extract.inv.sorted.gz', args.o+'.lex-s2t', args.o+'.phrases.t2s.gz', args.o+'.log.phrases.t2s'))
+        run('zcat {} | {} | gzip -c - > {}'.format(args.o+'.phrases.t2s.gz', args.sort, args.o+'.phrases.t2s.sorted.gz'))
 
-    for i in range(len(p_s)):
-        p_s[i].wait()
-
-    for i in range(len(fd_s)):
-        fd_s[i].close()
-
-
-##################################################################
-### steps ########################################################
-##################################################################
-
-def run_lexscore(args):
-    logging.info('<<<<<<<<<< Step 1:lexscore >>>>>>>>>>>>>>>>>>>>>>>')
-    if not os.path.isfile(args.lexscore):
-        logging.error('{} does not exist'.format(args.lexscore))
-        sys.exit()
-    tic = time()
-    do_call('perl {} -s {} -t {} -a {} -o {} 2> {}'.format(args.lexscore, args.s, args.t, args.a, args.o, args.o+'.log.lex-s2t'))
-    toc = time()
-    logging.info("lexscore took {:.2f} seconds".format(toc-tic))
-
-def run_extract(args):
-    logging.info('<<<<<<<<<< Step 2:extract >>>>>>>>>>>>>>>>>>>>>>>>')
-    if not os.path.isfile(args.extract):
-        logging.error('{} does not exist'.format(args.extract))
-        sys.exit()
-
-    tic = time()
-    cmd = [args.extract, args.t, args.s, args.a, args.o+'.extract', args.l, '--GZOutput', args.o+'.log.extract']
-    do_calls([cmd])
-    do_call('zcat {} | {} | gzip -c - > {}'.format(args.o+'.extract.gz', args.sort, args.o+'.extract.sorted.gz'))
-    do_call('zcat {} | {} | gzip -c - > {}'.format(args.o+'.extract.inv.gz', args.sort, args.o+'.extract.inv.sorted.gz'))
-    toc = time()
-    logging.info("extract took {:.2f} seconds".format(toc-tic))
-
-def run_score(args):
-    logging.info('<<<<<<<<<< Step 3:score >>>>>>>>>>>>>>>>>>>>>>>>>>')
-    if not os.path.isfile(args.score):
-        logging.error('{} does not exist'.format(args.score))
-        sys.exit()
-
-    tic = time()
-    cmd1 = [args.score, args.o+'.extract.sorted.gz', args.o+'.lex-t2s', args.o+'.phrases.s2t.gz', args.o+'.log.phrases.s2t']
-    cmd2 = [args.score, args.o+'.extract.inv.sorted.gz', args.o+'.lex-s2t', args.o+'.phrases.t2s.gz', '--Inverse', args.o+'.log.phrases.t2s']
-    do_calls([cmd1, cmd2])
-    do_call('zcat {} | {} | gzip -c - > {}'.format(args.o+'.phrases.t2s.gz', args.sort, args.o+'.phrases.t2s.sorted.gz'))
-    toc = time()
-    logging.info("score took {:.2f} seconds".format(toc-tic))
-
-    
-def run_consolidate(args):
-    logging.info('<<<<<<<<<< Step 4:consolidate >>>>>>>>>>>>>>>>>>>>')
-    if not os.path.isfile(args.consolidate):
-        logging.error('{} does not exist'.format(args.consolidate))
-        sys.exit()
-
-    tic = time()
-    do_call('{} {} {} {} 2> {}'.format(args.consolidate, args.o+'.phrases.s2t.gz', args.o+'.phrases.t2s.sorted.gz', args.o+'.phrases.gz', args.o+'.log.phrases'))
-    toc = time()
-    logging.info("consolidate took {:.2f} seconds".format(toc-tic))
+def run_dir(args):
+    if args.step <= 2:
+        run('zcat {} | {} | gzip -c - > {}'.format(args.o+'.extract.gz', args.sort, args.o+'.extract.sorted.gz'))
+    if args.step <= 3:
+        run('{} {} {} {} 2> {}'.format(args.score, args.o+'.extract.sorted.gz', args.o+'.lex-t2s', args.o+'.phrases.s2t.gz', args.o+'.log.phrases.s2t'))
 
 ######################################################################
 ### MAIN #############################################################
@@ -217,15 +176,38 @@ def run_consolidate(args):
 if __name__ == '__main__':
 
     args = Args(sys.argv)
-    if '1' in args.steps:
-        run_lexscore(args)
-    if '2' in args.steps:
-        run_extract(args)
-    if '3' in args.steps:
-        run_score(args)
-    if '4' in args.steps:
-        run_consolidate(args)
+
+    if args.step <= 1:
+        run('perl {} -s {} -t {} -a {} -o {} 2> {}'.format(args.lexscore, args.s, args.t, args.a, args.o, args.o+'.log.lex-s2t'))
+
+
+    if args.step <= 2:
+        run('{} {} {} {} {} {} {} 2> {}'.format(args.extract, args.t, args.s, args.a, args.o+'.extract', args.l, '--GZOutput', args.o+'.log.extract'))
+
+    if args.parallel:
+        p_dir = Process(target=run_dir)
+        p_dir.start()
+        p_inv = Process(target=run_inv)
+        p_inv.start()
+        p_dir.join()
+        p_inv.join()
+    else:
+        run_dir(args)
+        run_inv(args)
+
+    if args.step <= 4:
+        run('{} {} {} {} 2> {}'.format(args.consolidate, args.o+'.phrases.s2t.gz', args.o+'.phrases.t2s.sorted.gz', args.o+'.phrases.gz', args.o+'.log.phrases'))
+
     logging.info('Done')
+
+
+
+
+
+
+
+
+
 
 
     
