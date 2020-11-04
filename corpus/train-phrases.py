@@ -177,14 +177,6 @@ def run_dir(args):
         logging.info('*** SCORE (dir) ***')
         run('{} {} {} {} 2> {}'.format(args.score, args.o+'.extract.sorted.gz', args.o+'.lex-t2s', args.o+'.phrases.s2t.gz', args.o+'.log.phrases.s2t'))
 
-def run_parallel(args, *functions):
-    n_cpu = 2 if args.parallel else 1
-    with concurrent.futures.ThreadPoolExecutor(max_workers=n_cpu) as executor:
-        ### run parallel jobs
-        futures = [executor.submit(f, args) for f in functions]
-        ### wait for rewsults
-        results = [f.result() for f in futures]
-
 ######################################################################
 ### MAIN #############################################################
 ######################################################################
@@ -202,7 +194,14 @@ if __name__ == '__main__':
         logging.info('*** EXTRACT ***')
         run('{} {} {} {} {} {} {} 2> {}'.format(args.extract, args.t, args.s, args.a, args.o+'.extract', args.l, '--GZOutput', args.o+'.log.extract'))
 
-    run_parallel(args, run_dir, run_inv)
+    n_cpu = 2 if args.parallel else 1
+    with concurrent.futures.ThreadPoolExecutor(max_workers=n_cpu) as executor:
+        ### run parallel functions
+        f_dir = executor.submit(run_dir, args)
+        f_inv = executor.submit(run_inv, args)
+        ### wait for rewsults
+        r_dir = f_dir.result()
+        r_inv = f_inv.result()
 
     if args.step <= 4:
         logging.info('*** CONSOLIDATE ***')
