@@ -14,10 +14,10 @@ def create_logger(logfile, loglevel):
         sys.exit()
     if logfile is None or logfile == 'stderr':
         logging.basicConfig(format='[%(asctime)s.%(msecs)03d] %(levelname)s %(message)s', datefmt='%Y-%m-%d_%H:%M:%S', level=numeric_level)
-        logging.info('Created Logger level={}'.format(loglevel))
+        logging.debug('Created Logger level={}'.format(loglevel))
     else:
         logging.basicConfig(filename=logfile, format='[%(asctime)s.%(msecs)03d] %(levelname)s %(message)s', datefmt='%Y-%m-%d_%H:%M:%S', level=numeric_level)
-        logging.info('Created Logger level={} file={}'.format(loglevel, logfile))
+        logging.debug('Created Logger level={} file={}'.format(loglevel, logfile))
 
 ######################################################################
 ### ARGS #############################################################
