@@ -6,7 +6,6 @@ import sys
 import time
 import logging
 import concurrent.futures
-from multiprocessing import Process
 
 def create_logger(logfile, loglevel):
     numeric_level = getattr(logging, loglevel.upper(), None)
@@ -173,7 +172,7 @@ def run_dir(args):
         logging.info('*** SCORE (dir) ***')
         run('{} {} {} {} 2> {}'.format(args.score, args.o+'.extract.sorted.gz', args.o+'.lex-t2s', args.o+'.phrases.s2t.gz', args.o+'.log.phrases.s2t'))
 
-def run_parallel(parallel, *functions):
+def run_parallelold(parallel, *functions):
     processes = []
     for function in functions:
         p = Process(target=function)
@@ -188,19 +187,29 @@ def run_parallel(parallel, *functions):
         p.join() #wait for process to finish
 
 
-def run_parallel2(parallel):
-    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-        future_dir = executor.submit(run_dir, args)
-        if not parallel:
-            result_dir = future_dir.result()
+def run_parallel(args, *functions):
+    n_cpu = 2 if parallel else 1
+    futures = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=n_cpu) as executor:
+        for function in functions:
+            future = executor.submit(function, args)
+            futures.append(future)
 
-        future_inv = executor.submit(run_inv, args)
-        if not parallel:
-            result_inv = future_inv.result()
+        for future in futures:
+            result = future.result()
 
-        if parallel:
-            result_dir = future_dir.result()
-            result_inv = future_inv.result()
+
+#        future_dir = executor.submit(run_dir, args)
+#        if not parallel:
+#            result_dir = future_dir.result()
+
+#        future_inv = executor.submit(run_inv, args)
+#        if not parallel:
+#            result_inv = future_inv.result()
+
+#        if parallel:
+#            result_dir = future_dir.result()
+#            result_inv = future_inv.result()
 
 
 
@@ -219,7 +228,7 @@ def main(args):
         run('{} {} {} {} {} {} {} 2> {}'.format(args.extract, args.t, args.s, args.a, args.o+'.extract', args.l, '--GZOutput', args.o+'.log.extract'))
 
     #run_parallel(args.parallel, run_dir(args), run_inv(args))
-    run_parallel2(args.parallel)
+    run_parallel(args, run_dir, run_inv)
 
     if args.step <= 4:
         logging.info('*** CONSOLIDATE ***')
