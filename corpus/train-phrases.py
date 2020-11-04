@@ -38,7 +38,7 @@ class Args():
     self.extract = '/TOOLS/3rdParty/linux/ubuntu-18.04/gcc-7.4.0/c++11/64/release-12/moses/4.0.16/bin/extract'
     self.score = '/TOOLS/3rdParty/linux/ubuntu-18.04/gcc-7.4.0/c++11/64/release-12/moses/4.0.16/bin/score'
     self.consolidate = '/TOOLS/3rdParty/linux/ubuntu-18.04/gcc-7.4.0/c++11/64/release-12/moses/4.0.16/bin/consolidate'
-    self.sort = 'LC_ALL=C sort --compress-program=gzip --parallel=16 --temporary-directory=/tmp/big_files'
+    self.sort = 'LC_ALL=C sort --parallel=16 --compress-program=gzip --temporary-directory=/tmp/big_files'
 
     log_file = None
     log_level = 'info'
@@ -50,7 +50,7 @@ class Args():
   -o           FILE : output pattern file
 
   -step         INT : begin on this step   (1)
-  -parallel         : run in parallel      (False) 
+  -parallel         : run in parallel      (False)
 
   -l            INT : max phrase length    (7)
   -lexscore    FILE : lexical scorer       (corpora-tools/corpus/lexical_score.perl)
@@ -68,6 +68,11 @@ Steps:
  + 2:phrase extract
  + 3:phrase score
  + 4:consolidate
+
+To sort:
+ + parallelize if available cpu's (--parallel=16)
+ + compress temporary files to reduce disk usage (--compress-program=gzip)
+ + use existing local disk to reduce data transfer (--temporary-directory=/tmp/big_files)
 '''.format(prog)
     
     while len(sys.argv):
