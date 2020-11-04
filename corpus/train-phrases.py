@@ -146,7 +146,7 @@ Steps:
         sys.exit()
 
     for key,val in vars(self).items():
-        logging.info("{}: {}".format(key,val))
+        logging.debug("{}: {}".format(key,val))
 
 ##################################################################
 ### calls ########################################################
@@ -180,7 +180,6 @@ if __name__ == '__main__':
     if args.step <= 1:
         run('perl {} -s {} -t {} -a {} -o {} 2> {}'.format(args.lexscore, args.s, args.t, args.a, args.o, args.o+'.log.lex-s2t'))
 
-
     if args.step <= 2:
         run('{} {} {} {} {} {} {} 2> {}'.format(args.extract, args.t, args.s, args.a, args.o+'.extract', args.l, '--GZOutput', args.o+'.log.extract'))
 
@@ -190,9 +189,7 @@ if __name__ == '__main__':
         p_inv = Process(target=run_inv(args))
         #run both
         p_dir.start()
-        print('aaaaaa')
         p_inv.start()
-        print('bbbbbb')
         #wait
         p_dir.join()
         p_inv.join()
