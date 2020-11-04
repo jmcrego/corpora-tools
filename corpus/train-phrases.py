@@ -3,6 +3,7 @@
 import io
 import os
 import sys
+import time
 import logging
 from multiprocessing import Process
 from time import time
@@ -162,6 +163,8 @@ def run_inv(args):
         run('zcat {} | {} | gzip -c - > {}'.format(args.o+'.extract.inv.gz', args.sort, args.o+'.extract.inv.sorted.gz'))
     if args.step <= 3:
         logging.info('*** SCORE (inv) ***')
+        time.sleep(5)
+        return
         run('{} {} {} {} 2> {}'.format(args.score, args.o+'.extract.inv.sorted.gz', args.o+'.lex-s2t', args.o+'.phrases.t2s.gz', args.o+'.log.phrases.t2s'))
         run('zcat {} | {} | gzip -c - > {}'.format(args.o+'.phrases.t2s.gz', args.sort, args.o+'.phrases.t2s.sorted.gz'))
 
@@ -170,6 +173,8 @@ def run_dir(args):
         run('zcat {} | {} | gzip -c - > {}'.format(args.o+'.extract.gz', args.sort, args.o+'.extract.sorted.gz'))
     if args.step <= 3:
         logging.info('*** SCORE (dir) ***')
+        time.sleep(5)
+        return
         run('{} {} {} {} 2> {}'.format(args.score, args.o+'.extract.sorted.gz', args.o+'.lex-t2s', args.o+'.phrases.s2t.gz', args.o+'.log.phrases.s2t'))
 
 def run_parallel(*functions):
