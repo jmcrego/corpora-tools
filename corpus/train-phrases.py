@@ -176,7 +176,7 @@ def run_parallel(args, *functions):
     n_cpu = 2 if args.parallel else 1
     with concurrent.futures.ThreadPoolExecutor(max_workers=n_cpu) as executor:
         futures = [executor.submit(f, args) for f in functions]
-        result = [future.result() for future in futures]
+        results = [f.result() for f in futures]
 
 ######################################################################
 ### MAIN #############################################################
@@ -185,6 +185,7 @@ def run_parallel(args, *functions):
 if __name__ == '__main__':
 
     args = Args(sys.argv)
+    tic = time()
 
     if args.step <= 1:
         logging.info('*** LEXSCORE ***')
@@ -200,7 +201,8 @@ if __name__ == '__main__':
         logging.info('*** CONSOLIDATE ***')
         run('{} {} {} {} 2> {}'.format(args.consolidate, args.o+'.phrases.s2t.gz', args.o+'.phrases.t2s.sorted.gz', args.o+'.phrases.gz', args.o+'.log.phrases'))
 
-    logging.info('Done')
+    toc = time()
+    logging.info('Done ({} seconds)'.format(toc-tic))
 
 
 
