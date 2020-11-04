@@ -172,7 +172,7 @@ def run_dir(args):
         logging.info('*** SCORE (dir) ***')
         run('{} {} {} {} 2> {}'.format(args.score, args.o+'.extract.sorted.gz', args.o+'.lex-t2s', args.o+'.phrases.s2t.gz', args.o+'.log.phrases.s2t'))
 
-def run_parallel(*functions)
+def run_parallel(*functions):
     logging.info('Parallel processing')
     processes = []
     for function in functions:
