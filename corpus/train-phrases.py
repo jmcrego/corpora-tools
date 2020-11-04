@@ -185,6 +185,7 @@ if __name__ == '__main__':
         run('{} {} {} {} {} {} {} 2> {}'.format(args.extract, args.t, args.s, args.a, args.o+'.extract', args.l, '--GZOutput', args.o+'.log.extract'))
 
     if args.parallel:
+        logging.info('Parallel processing')
         p_dir = Process(target=run_dir(args))
         p_dir.start()
         p_inv = Process(target=run_inv(args))
@@ -192,6 +193,7 @@ if __name__ == '__main__':
         p_dir.join()
         p_inv.join()
     else:
+        logging.info('Sequential processing')
         run_dir(args)
         run_inv(args)
 
