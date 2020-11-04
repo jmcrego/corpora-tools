@@ -186,15 +186,14 @@ if __name__ == '__main__':
 
     if args.parallel:
         logging.info('Parallel processing')
-        p_dir = Process(target=run_dir(args))
         p_inv = Process(target=run_inv(args))
+        p_dir = Process(target=run_dir(args))
         #run both
-        p_dir.start()
         p_inv.start()
+        p_dir.start()
         #wait
         p_dir.join()
         p_inv.join()
-        logging.info('End Parallel processing')
     else:
         logging.info('Sequential processing')
         run_dir(args)
