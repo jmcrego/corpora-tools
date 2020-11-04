@@ -6,7 +6,6 @@ import sys
 import time
 import logging
 from multiprocessing import Process
-#from time import time
 
 def create_logger(logfile, loglevel):
     numeric_level = getattr(logging, loglevel.upper(), None)
@@ -163,8 +162,6 @@ def run_inv(args):
         run('zcat {} | {} | gzip -c - > {}'.format(args.o+'.extract.inv.gz', args.sort, args.o+'.extract.inv.sorted.gz'))
     if args.step <= 3:
         logging.info('*** SCORE (inv) ***')
-        time.sleep(5.0)
-        return
         run('{} {} {} {} 2> {}'.format(args.score, args.o+'.extract.inv.sorted.gz', args.o+'.lex-s2t', args.o+'.phrases.t2s.gz', args.o+'.log.phrases.t2s'))
         run('zcat {} | {} | gzip -c - > {}'.format(args.o+'.phrases.t2s.gz', args.sort, args.o+'.phrases.t2s.sorted.gz'))
 
@@ -173,19 +170,19 @@ def run_dir(args):
         run('zcat {} | {} | gzip -c - > {}'.format(args.o+'.extract.gz', args.sort, args.o+'.extract.sorted.gz'))
     if args.step <= 3:
         logging.info('*** SCORE (dir) ***')
-        time.sleep(5.0)
-        return
         run('{} {} {} {} 2> {}'.format(args.score, args.o+'.extract.sorted.gz', args.o+'.lex-t2s', args.o+'.phrases.s2t.gz', args.o+'.log.phrases.s2t'))
 
-def run_parallel(*functions):
-    logging.info('Parallel processing')
+def run_parallel(parallel, *functions):
     processes = []
     for function in functions:
         p = Process(target=function)
         p.start()
-        processes.append(p)
+        if not parallel:
+            p.join() #run sequential
+        else:
+            processes.append(p)
     for p in processes:
-        p.join()
+        p.join() #wait for process to finish
 
 ######################################################################
 ### MAIN #############################################################
@@ -201,12 +198,7 @@ def main(args):
         logging.info('*** EXTRACT ***')
         run('{} {} {} {} {} {} {} 2> {}'.format(args.extract, args.t, args.s, args.a, args.o+'.extract', args.l, '--GZOutput', args.o+'.log.extract'))
 
-    if args.parallel:
-        run_parallel(run_dir(args), run_inv(args))
-    else:
-        logging.info('Sequential processing')
-        run_dir(args)
-        run_inv(args)
+    run_parallel(args.parallel, run_dir(args), run_inv(args))
 
     if args.step <= 4:
         logging.info('*** CONSOLIDATE ***')
