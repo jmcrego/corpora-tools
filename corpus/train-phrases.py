@@ -49,9 +49,10 @@ class Args():
   -a           FILE : source-to-target alignment file
   -o           FILE : output pattern file
 
-  -parallel         : run in parallel      (False) 
-  -l            INT : max phrase length    (7)
   -step         INT : begin on this step   (1)
+  -parallel         : run in parallel      (False) 
+
+  -l            INT : max phrase length    (7)
   -lexscore    FILE : lexical scorer       (corpora-tools/corpus/lexical_score.perl)
   -extract     FILE : phrase extractor     (/TOOLS/3rdParty/linux/ubuntu-18.04/gcc-7.4.0/c++11/64/release-12/moses/4.0.16/bin/extract)
   -score       FILE : phrase scorer        (/TOOLS/3rdParty/linux/ubuntu-18.04/gcc-7.4.0/c++11/64/release-12/moses/4.0.16/bin/score)
