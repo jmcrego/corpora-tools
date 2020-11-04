@@ -172,6 +172,16 @@ def run_dir(args):
         logging.info('*** SCORE (dir) ***')
         run('{} {} {} {} 2> {}'.format(args.score, args.o+'.extract.sorted.gz', args.o+'.lex-t2s', args.o+'.phrases.s2t.gz', args.o+'.log.phrases.s2t'))
 
+def run_parallel(*functions)
+    logging.info('Parallel processing')
+    processes = []
+    for function in functions:
+        proc = Process(target=function)
+        proc.start()
+        processes.append(proc)
+    for proc in processes:
+        proc.join()
+
 ######################################################################
 ### MAIN #############################################################
 ######################################################################
@@ -189,15 +199,15 @@ if __name__ == '__main__':
         run('{} {} {} {} {} {} {} 2> {}'.format(args.extract, args.t, args.s, args.a, args.o+'.extract', args.l, '--GZOutput', args.o+'.log.extract'))
 
     if args.parallel:
-        logging.info('Parallel processing')
-        p_dir = Process(target=run_dir(args))
-        p_inv = Process(target=run_inv(args))
+        run_parallel(run_dir(args), run_inv(args))
+#        p_dir = Process(target=run_dir(args))
+#        p_inv = Process(target=run_inv(args))
         #run both
-        p_dir.start()
-        p_inv.start()
+#        p_dir.start()
+#        p_inv.start()
         #wait
-        p_dir.join()
-        p_inv.join()
+#        p_dir.join()
+#        p_inv.join()
     else:
         logging.info('Sequential processing')
         run_dir(args)
