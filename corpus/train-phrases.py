@@ -185,7 +185,7 @@ def run_parallel(args, *functions):
 if __name__ == '__main__':
 
     args = Args(sys.argv)
-    tic = time()
+    tic = time.time()
 
     if args.step <= 1:
         logging.info('*** LEXSCORE ***')
@@ -201,7 +201,7 @@ if __name__ == '__main__':
         logging.info('*** CONSOLIDATE ***')
         run('{} {} {} {} 2> {}'.format(args.consolidate, args.o+'.phrases.s2t.gz', args.o+'.phrases.t2s.sorted.gz', args.o+'.phrases.gz', args.o+'.log.phrases'))
 
-    toc = time()
+    toc = time.time()
     logging.info('Done ({} seconds)'.format(toc-tic))
 
 
