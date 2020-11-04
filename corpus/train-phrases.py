@@ -161,7 +161,7 @@ def run_inv(args):
     if args.step <= 2:
         run('zcat {} | {} | gzip -c - > {}'.format(args.o+'.extract.inv.gz', args.sort, args.o+'.extract.inv.sorted.gz'))
     if args.step <= 3:
-        logging.info('*** SCORE INV ***')
+        logging.info('*** SCORE (inv) ***')
         run('{} {} {} {} 2> {}'.format(args.score, args.o+'.extract.inv.sorted.gz', args.o+'.lex-s2t', args.o+'.phrases.t2s.gz', args.o+'.log.phrases.t2s'))
         run('zcat {} | {} | gzip -c - > {}'.format(args.o+'.phrases.t2s.gz', args.sort, args.o+'.phrases.t2s.sorted.gz'))
 
@@ -169,7 +169,7 @@ def run_dir(args):
     if args.step <= 2:
         run('zcat {} | {} | gzip -c - > {}'.format(args.o+'.extract.gz', args.sort, args.o+'.extract.sorted.gz'))
     if args.step <= 3:
-        logging.info('*** SCORE DIR ***')
+        logging.info('*** SCORE (dir) ***')
         run('{} {} {} {} 2> {}'.format(args.score, args.o+'.extract.sorted.gz', args.o+'.lex-t2s', args.o+'.phrases.s2t.gz', args.o+'.log.phrases.s2t'))
 
 ######################################################################
