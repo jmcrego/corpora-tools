@@ -172,52 +172,19 @@ def run_dir(args):
         logging.info('*** SCORE (dir) ***')
         run('{} {} {} {} 2> {}'.format(args.score, args.o+'.extract.sorted.gz', args.o+'.lex-t2s', args.o+'.phrases.s2t.gz', args.o+'.log.phrases.s2t'))
 
-def run_parallelold(parallel, *functions):
-    processes = []
-    for function in functions:
-        p = Process(target=function)
-        p.start()
-        if not parallel:
-            logging.info('sequential')
-            p.join() #run sequential
-        else:
-            logging.info('parallel')
-            processes.append(p)
-    for p in processes:
-        p.join() #wait for process to finish
-
-
 def run_parallel(args, *functions):
     n_cpu = 2 if args.parallel else 1
-    futures = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=n_cpu) as executor:
-        for function in functions:
-            future = executor.submit(function, args)
-            futures.append(future)
-
-        for future in futures:
-            result = future.result()
-
-
-#        future_dir = executor.submit(run_dir, args)
-#        if not parallel:
-#            result_dir = future_dir.result()
-
-#        future_inv = executor.submit(run_inv, args)
-#        if not parallel:
-#            result_inv = future_inv.result()
-
-#        if parallel:
-#            result_dir = future_dir.result()
-#            result_inv = future_inv.result()
-
-
+        futures = [executor.submit(f, args) for f in functions]
+        result = [future.result() for future in futures]
 
 ######################################################################
 ### MAIN #############################################################
 ######################################################################
             
-def main(args):
+if __name__ == '__main__':
+
+    args = Args(sys.argv)
 
     if args.step <= 1:
         logging.info('*** LEXSCORE ***')
@@ -227,7 +194,6 @@ def main(args):
         logging.info('*** EXTRACT ***')
         run('{} {} {} {} {} {} {} 2> {}'.format(args.extract, args.t, args.s, args.a, args.o+'.extract', args.l, '--GZOutput', args.o+'.log.extract'))
 
-    #run_parallel(args.parallel, run_dir(args), run_inv(args))
     run_parallel(args, run_dir, run_inv)
 
     if args.step <= 4:
@@ -235,12 +201,6 @@ def main(args):
         run('{} {} {} {} 2> {}'.format(args.consolidate, args.o+'.phrases.s2t.gz', args.o+'.phrases.t2s.sorted.gz', args.o+'.phrases.gz', args.o+'.log.phrases'))
 
     logging.info('Done')
-
-
-if __name__ == '__main__':
-
-    args = Args(sys.argv)
-    main(args)
 
 
 
