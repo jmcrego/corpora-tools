@@ -178,8 +178,10 @@ def run_parallel(parallel, *functions):
         p = Process(target=function)
         p.start()
         if not parallel:
+            logging.info('sequential')
             p.join() #run sequential
         else:
+            logging.info('parallel')
             processes.append(p)
     for p in processes:
         p.join() #wait for process to finish
