@@ -194,6 +194,7 @@ if __name__ == '__main__':
         #wait
         p_dir.join()
         p_inv.join()
+        logging.info('End Parallel processing')
     else:
         logging.info('Sequential processing')
         run_dir(args)
