@@ -73,6 +73,7 @@ To sort:
  + parallelize if available cpu's (--parallel=16) [if -parallel is set 16*2 cpu's are used during extract and score steps]
  + compress temporary files to reduce disk usage (--compress-program=gzip)
  + use existing local disk to reduce data transfer (--temporary-directory=/tmp/big_files)
+
 '''.format(prog)
     
     while len(sys.argv):
