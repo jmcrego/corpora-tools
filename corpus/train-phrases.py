@@ -162,13 +162,17 @@ To sort:
 def run(cmd):
     logging.info('RUNNING: {}'.format(cmd))
     #os.system(cmd)
-    ret = os.WEXITSTATUS(os.system(cmd))
-    logging.info("returncode: {}".format(ret))
+    ecode = os.WEXITSTATUS(os.system(cmd))
+    if ecode == 0:
+        logging.error("exitcode: {}".format(ecode))
+        sys.exit()
+    logging.debug("exitcode: {}".format(ecode))
+    return ecode
 
 def run_dir(args):
     if args.step <= 2:
         logging.info('*** EXTRACT-sort (dir) ***')
-        run('zcat {} | {} | gzip -c - > {}'.format(args.o+'.extract.gz', args.sort, args.o+'.extract.sorted.gz'))
+        run('zcat {} | {} | kgzip -c - > {}'.format(args.o+'.extract.gz', args.sort, args.o+'.extract.sorted.gz'))
     if args.step <= 3:
         logging.info('*** SCORE (dir) ***')
         run('{} {} {} {} 2> {}'.format(args.score, args.o+'.extract.sorted.gz', args.o+'.lex-t2s', args.o+'.phrases.s2t.gz', args.o+'.log.phrases.s2t'))
