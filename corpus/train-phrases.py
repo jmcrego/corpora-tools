@@ -30,7 +30,7 @@ class Args():
     self.t = None
     self.a = None
     self.o = None
-    self.l = '7'
+    self.maxl = '7'
     self.step = 1
     self.parallel = False
     
@@ -49,10 +49,10 @@ class Args():
   -a           FILE : source-to-target alignment file
   -o           FILE : output pattern file
 
-  -step         INT : begin on this step   (1)
+  -step         INT : first step to run    (1)
   -parallel         : run in parallel      (False)
 
-  -l            INT : max phrase length    (7)
+  -maxl         INT : max phrase length    (7)
   -lexscore    FILE : lexical scorer       (corpora-tools/corpus/lexical_score.perl)
   -extract     FILE : phrase extractor     (/TOOLS/3rdParty/linux/ubuntu-18.04/gcc-7.4.0/c++11/64/release-12/moses/4.0.16/bin/extract)
   -score       FILE : phrase scorer        (/TOOLS/3rdParty/linux/ubuntu-18.04/gcc-7.4.0/c++11/64/release-12/moses/4.0.16/bin/score)
@@ -91,8 +91,8 @@ To sort:
         self.a = sys.argv.pop(0)
       elif tok=="-o" and len(sys.argv):
         self.o = sys.argv.pop(0)
-      elif tok=="-l" and len(sys.argv):
-        self.l = sys.argv.pop(0)
+      elif tok=="-maxl" and len(sys.argv):
+        self.maxl = sys.argv.pop(0)
       elif tok=="-step" and len(sys.argv):
         self.step = int(sys.argv.pop(0))
       elif tok=="-lexscore" and len(sys.argv):
@@ -195,7 +195,7 @@ if __name__ == '__main__':
 
     if args.step <= 2:
         logging.info('*** EXTRACT ***')
-        run('{} {} {} {} {} {} {} 2> {}'.format(args.extract, args.t, args.s, args.a, args.o+'.extract', args.l, '--GZOutput', args.o+'.log.extract'))
+        run('{} {} {} {} {} {} {} 2> {}'.format(args.extract, args.t, args.s, args.a, args.o+'.extract', args.maxl, '--GZOutput', args.o+'.log.extract'))
 
     n_cpu = 2 if args.parallel else 1
     with concurrent.futures.ThreadPoolExecutor(max_workers=n_cpu) as executor:
