@@ -161,7 +161,9 @@ To sort:
 
 def run(cmd):
     logging.info('RUNNING: {}'.format(cmd))
-    os.system(cmd)
+    #os.system(cmd)
+    ret = os.WEXITSTATUS(os.system(cmd))
+    logging.info("returncode: {}".format(ret))
 
 def run_dir(args):
     if args.step <= 2:
