@@ -163,7 +163,7 @@ def run(cmd):
     logging.info('RUNNING: {}'.format(cmd))
     #os.system(cmd)
     ecode = os.WEXITSTATUS(os.system(cmd))
-    if ecode == 0:
+    if ecode != 0:
         logging.error("exitcode: {}".format(ecode))
         sys.exit()
     logging.debug("exitcode: {}".format(ecode))
