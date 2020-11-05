@@ -161,7 +161,7 @@ To sort:
 
 def run(cmd):
     global ok
-    if ! ok:
+    if not ok:
         sys.exit()
     logging.info('RUNNING: {}'.format(cmd))
     #os.system(cmd)
