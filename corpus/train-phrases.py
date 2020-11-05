@@ -219,7 +219,7 @@ if __name__ == '__main__':
 
     if args.step <= 4:
         logging.info('*** CONSOLIDATE ***')
-        run('{} {} {} {} 2> {}'.format(args.consolidate, args.o+'.phrases.s2t.gz', args.o+'.phrases.t2s.sorted.gz', args.o+'.phrases.gz', args.o+'.log.phrases'))
+        run('{} {} {} {} 2> {}'.format(args.consolidate, args.o+'.phrases.s2t.gz', args.o+'.phrases.t2s.sorted.gz', args.o+'.phrase-table.gz', args.o+'.log.phrase-table'))
 
     toc = time.time()
     logging.info('Done ({:.3f} seconds)'.format(toc-tic))
