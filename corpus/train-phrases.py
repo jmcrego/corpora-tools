@@ -162,6 +162,7 @@ To sort:
 def run(cmd):
     global ok
     if not ok:
+        logging.error('stop thread')
         sys.exit()
     logging.info('RUNNING: {}'.format(cmd))
     #os.system(cmd)
