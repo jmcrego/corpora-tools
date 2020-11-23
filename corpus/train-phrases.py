@@ -43,7 +43,7 @@ class Args():
     log_file = None
     log_level = 'info'
     prog = argv.pop(0)
-    usage = '''usage: {} -s FILE -t FILE -a FILE
+    usage = '''usage: {} -s FILE -t FILE -a FILE -o FILE
   -s           FILE : tokenized source file
   -t           FILE : tokenized target file
   -a           FILE : source-to-target alignment file
@@ -174,18 +174,18 @@ def run(cmd):
 
 def run_dir(args):
     if args.step <= 2:
-        logging.info('*** EXTRACT-sort (dir) ***')
+        logging.info('*** (2.5) EXTRACT-sort (dir) ***')
         run('zcat {} | {} | gzip -c - > {}'.format(args.o+'.extract.gz', args.sort, args.o+'.extract.sorted.gz'))
     if args.step <= 3:
-        logging.info('*** SCORE (dir) ***')
+        logging.info('*** (3) SCORE (dir) ***')
         run('{} {} {} {} 2> {}'.format(args.score, args.o+'.extract.sorted.gz', args.o+'.lex-t2s', args.o+'.phrases.s2t.gz', args.o+'.log.phrases.s2t'))
 
 def run_inv(args):
     if args.step <= 2:
-        logging.info('*** EXTRACT-sort (inv) ***')
+        logging.info('*** (2.5) EXTRACT-sort (inv) ***')
         run('zcat {} | {} | gzip -c - > {}'.format(args.o+'.extract.inv.gz', args.sort, args.o+'.extract.inv.sorted.gz'))
     if args.step <= 3:
-        logging.info('*** SCORE (inv) ***')
+        logging.info('*** (3) SCORE (inv) ***')
         run('{} {} {} {} --Inverse 2> {}'.format(args.score, args.o+'.extract.inv.sorted.gz', args.o+'.lex-s2t', args.o+'.phrases.t2s.gz', args.o+'.log.phrases.t2s'))
         run('zcat {} | {} | gzip -c - > {}'.format(args.o+'.phrases.t2s.gz', args.sort, args.o+'.phrases.t2s.sorted.gz'))
 
@@ -201,11 +201,11 @@ if __name__ == '__main__':
     tic = time.time()
 
     if args.step <= 1:
-        logging.info('*** LEXSCORE ***')
+        logging.info('*** (1) LEXSCORE ***')
         run('perl {} -s {} -t {} -a {} -o {} 2> {}'.format(args.lexscore, args.s, args.t, args.a, args.o, args.o+'.log.lex-s2t'))
 
     if args.step <= 2:
-        logging.info('*** EXTRACT ***')
+        logging.info('*** (2) EXTRACT ***')
         run('{} {} {} {} {} {} {} 2> {}'.format(args.extract, args.t, args.s, args.a, args.o+'.extract', args.maxl, '--GZOutput', args.o+'.log.extract'))
 
     n_cpu = 2 if args.parallel else 1
@@ -218,7 +218,7 @@ if __name__ == '__main__':
         r_inv = f_inv.result()
 
     if args.step <= 4:
-        logging.info('*** CONSOLIDATE ***')
+        logging.info('*** (4) CONSOLIDATE ***')
         run('{} {} {} {} 2> {}'.format(args.consolidate, args.o+'.phrases.s2t.gz', args.o+'.phrases.t2s.sorted.gz', args.o+'.phrase-table.gz', args.o+'.log.phrase-table'))
 
     toc = time.time()
