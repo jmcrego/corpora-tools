@@ -1,11 +1,11 @@
 #!/bin/bash
 
-ODIR=$HOME/raw
+ODIR=$PWD/raw
 
 newscrawl_fr(){
     DIR=$ODIR/newscrawl/fr
     if [ -e $DIR ]; then echo "warning: directory $DIR already exists"; return; fi
-    for year in 2017 2016 2015 2014 2013 2012 2011 2010 2009 2008 2007; do
+    for year in 2019 2018 2017 2016 2015 2014 2013 2012 2011 2010 2009 2008 2007; do
 	wget -P $DIR http://data.statmt.org/news-crawl/fr/news.$year.fr.shuffled.deduped.gz
 	gunzip $DIR/news.$year.fr.shuffled.deduped.gz
     done
@@ -56,7 +56,7 @@ UNPC_enfr(){
     rm -f $DIR/README $DIR/LICENSE $DIR/UNPC.en-fr.xml $DIR/download.php?f=UNPC%2Fv1.0%2Fmoses%2Fen-fr.txt.zip
 }
 
-news_enfr(){
+NEWS_enfr(){
     DIR=$ODIR/news-commentary/enfr
     if [ -e $DIR ]; then echo "warning: directory $DIR already exists"; return; fi
     wget -P $DIR http://data.statmt.org/news-commentary/v14/training/news-commentary-v14.en-fr.tsv.gz
@@ -66,12 +66,33 @@ news_enfr(){
     rm -f $DIR/news-commentary-v14.en-fr.tsv
 }
 
+NEWS_testsets_enfr(){
+    DIR=$ODIR/news-commentary/enfr/testsets
+    if [ -e $DIR ]; then echo "warning: directory $DIR already exists"; return; fi
+
+    wget -P $DIR http://www.statmt.org/wmt14/dev.tgz
+    tar xvzf $DIR/dev.tgz -C $DIR
+    mv raw/news-commentary/enfr/testsets/dev/news*test????.{fr,en} $DIR/
+    rm -rf $DIR/dev
+    mv $DIR/news-test2008.en $DIR/newstest2008.en
+    mv $DIR/news-test2008.fr $DIR/newstest2008.fr
+    
+    wget -P $DIR http://www.statmt.org/wmt14/test-full.tgz
+    tar xvzf $DIR/test-full.tgz -C $DIR    
+    cat $DIR/test-full/newstest2014-fren-ref.en.sgm | grep '^<seg' | perl -pe 's/^<seg id[^>]*>(.*)\<\/seg\>$/$1/' > $DIR/newstest2014.en
+    cat $DIR/test-full/newstest2014-fren-ref.fr.sgm | grep '^<seg' | perl -pe 's/^<seg id[^>]*>(.*)\<\/seg\>$/$1/' > $DIR/newstest2014.fr
+
+    rm -rf $DIR/test-full*
+    rm -rf $DIR/dev*
+}
+
+
 TED2013_enfr(){
     DIR=$ODIR/TED2013/enfr
     if [ -e $DIR ]; then echo "warning: directory $DIR already exists"; return; fi
     wget -P $DIR http://opus.nlpl.eu/download.php?f=TED2013/en-fr.txt.zip
     unzip -d $DIR $DIR/download.php?f=TED2013%2Fen-fr.txt.zip
-    rm -f $DIR/README $DIR/TED2013.en-fr.ids $DIR/download.php?f=TED2013%2Fen-fr.txt.zip
+    rm -f $DIR/README $DIR/TED2013.en-fr.ids $DIR/download.php?fT=ED2013%2Fen-fr.txt.zip
 }
 
 GNOME_enfr(){
@@ -123,85 +144,19 @@ OpenSubtitles_enfr(){
 }
 
 #newscrawl_fr
-#jrc_enfr
-#emea_enfr
-#ecb_enfr
-#epps_enfr
-#unpc_enfr
-#news_enfr
+#JRC_enfr
+#EMEA_enfr
+#ECB_enfr
+#EPPS_enfr
+#UNPC_enfr
+#NEWS_enfr
 #TED2013_enfr
 #GNOME_enfr
 #KDE4_enfr
-#Ubuntu_enfr
 #PHP_enfr
+#Ubuntu_enfr
 #Wikipedia_enfr
 #OSub_enfr
 
-exit
-
-#mkdir -p $PWD/epps/testsets
-#wget http://www.statmt.org/europarl/v7/fr-en.tgz
-#wget http://www.statmt.org/europarl/v7/de-en.tgz
-#cp /DEV/Projects/Generic-Models/OfficialTestSets/wmt/enfr/test200*enfr* $PWD/epps/testsets/
-#cp /DEV/Projects/Generic-Models/OfficialTestSets/wmt/ende/test200*ende* $PWD/epps/testsets/
-
-#mkdir -p $PWD/ted/testsets
-#wget http://opus.nlpl.eu/download.php?f=TED2013/de-en.txt.zip
-#wget http://opus.nlpl.eu/download.php?f=TED2013/en-fr.txt.zip
-#download test sets from:
-# https://wit3.fbk.eu/mt.php?release=2016-01
-# https://wit3.fbk.eu/mt.php?release=2017-01-trnmted
-#into: $PWD/ted/testsets/
-#for f in `ls -1 ted/testsets/IWSLT*.xml | perl -pe 's/\.xml//'`
-#do
-#    echo $f
-#    cat $f.xml | perl -pe 's/^\<seg id=\"\d+\"\> (.+) \<\/seg\>$/$1/' | grep -v "^<" > $f
-#done
-
-#wget https://download.microsoft.com/download/1/4/8/1489BF45-93AA-4B38-B4DA-5CA5678B2121/MSLT_Corpus.zip
-
-#rm -f $PWD/ted/testsets/mslt_test_fren.fr
-#for f in `ls -1 $PWD/ted/testsets/MSLT_Test_FR_*/MSLT_Test_FR_*.T2.fr.snt`
-#do
-#    iconv -f UTF-16 -t UTF-8 $f >> $PWD/ted/testsets/mslt_test_fren.fr
-#done
-#rm -f $PWD/ted/testsets/mslt_test_fren.en
-#for f in `ls -1 $PWD/ted/testsets/MSLT_Test_FR_*/MSLT_Test_FR_*.T3.en.snt`
-#do
-#    iconv -f UTF-16 -t UTF-8 $f >> $PWD/ted/testsets/mslt_test_fren.en
-#done
-
-#rm -f $PWD/ted/testsets/mslt_dev_fren.fr
-#for f in `ls -1 $PWD/ted/testsets/MSLT_Dev_FR_*/MSLT_Dev_FR_*.T2.fr.snt`
-#do
-#    iconv -f UTF-16 -t UTF-8 $f >> $PWD/ted/testsets/mslt_dev_fren.fr
-#done
-#rm -f $PWD/ted/testsets/mslt_dev_fren.en
-#for f in `ls -1 $PWD/ted/testsets/MSLT_Dev_FR_*/MSLT_Dev_FR_*.T3.en.snt`
-#do
-#    iconv -f UTF-16 -t UTF-8 $f >> $PWD/ted/testsets/mslt_dev_fren.en
-#done
-
-#rm -f $PWD/ted/testsets/mslt_test_deen.de
-#for f in `ls -1 $PWD/ted/testsets/MSLT_Test_DE_*/MSLT_Test_DE_*.T2.de.snt`
-#do
-#    iconv -f UTF-16 -t UTF-8 $f >> $PWD/ted/testsets/mslt_test_deen.de
-#done
-#rm -f $PWD/ted/testsets/mslt_test_deen.en
-#for f in `ls -1 $PWD/ted/testsets/MSLT_Test_DE_*/MSLT_Test_DE_*.T3.en.snt`
-#do
-#    iconv -f UTF-16 -t UTF-8 $f >> $PWD/ted/testsets/mslt_test_deen.en
-#done
-
-#rm -f $PWD/ted/testsets/mslt_dev_deen.de
-#for f in `ls -1 $PWD/ted/testsets/MSLT_Dev_DE_*/MSLT_Dev_DE_*.T2.de.snt`
-#do
-#    iconv -f UTF-16 -t UTF-8 $f >> $PWD/ted/testsets/mslt_dev_deen.de
-#done
-#rm -f $PWD/ted/testsets/mslt_dev_deen.en
-#for f in `ls -1 $PWD/ted/testsets/MSLT_Dev_DE_*/MSLT_Dev_DE_*.T3.en.snt`
-#do
-#    iconv -f UTF-16 -t UTF-8 $f >> $PWD/ted/testsets/mslt_dev_deen.en
-#done
-
+NEWS_testsets_enfr
 
