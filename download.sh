@@ -158,5 +158,5 @@ OpenSubtitles_enfr(){
 #Wikipedia_enfr
 #OSub_enfr
 
-NEWS_testsets_enfr
+#NEWS_testsets_enfr
 
