@@ -38,6 +38,10 @@ if __name__ == '__main__':
    -inference      : test set
    -seed       INT : seed for randomness (default {})
    -h              : this help
+Output:
+0.000000      => no match
+1.000000      => perfect match
+[t, 0.999999] => match
 '''.format(name,p,n,t,seed)
     while len(sys.argv):
         tok = sys.argv.pop(0)
@@ -157,7 +161,7 @@ if __name__ == '__main__':
         while len(toks):
             score = float(toks.pop(0)) ### most similar sorted first
             if score > 1.0:
-                score = 1.0
+                score = 0.999999
             n_db = int(toks.pop(0))
             N += 1
             if n_db < 0 or n_db >= len(DB_tgt):
