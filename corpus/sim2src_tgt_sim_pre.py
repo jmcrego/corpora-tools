@@ -28,7 +28,7 @@ if __name__ == '__main__':
     inference = False
     fuzzymatch = False
     usage = '''usage: {} -o FILE -db_tgt FILE -q_src FILE -db_src FILE -q_tgt FILE [-p FLOAT] [-n INT] [-l INT] [-t FLOAT] [-inference] [-fuzzymatch] < FILE_QSIM
-   -o         FILE : prefix for output files: FILE.src FILE.tgt FILE.sim FILE.pre
+   -o         FILE : prefix for output files: FILE.num FILE.src FILE.tgt FILE.sim FILE.pre
    -db_src    FILE : db file with src strings
    -db_tgt    FILE : db file with tgt strings
    -q_src     FILE : query file with src strings
