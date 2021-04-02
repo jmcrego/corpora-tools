@@ -26,7 +26,8 @@ if __name__ == '__main__':
     t = 0.0
     seed = 1234
     inference = False
-    usage = '''usage: {} -o FILE -db_tgt FILE -q_src FILE -db_src FILE -q_tgt FILE [-p FLOAT] [-n INT] [-l INT] [-t FLOAT] [-inference] < FILE_QSIM
+    fuzzymatch = False
+    usage = '''usage: {} -o FILE -db_tgt FILE -q_src FILE -db_src FILE -q_tgt FILE [-p FLOAT] [-n INT] [-l INT] [-t FLOAT] [-inference] [-fuzzymatch] < FILE_QSIM
    -o         FILE : prefix for output files: FILE.src FILE.tgt FILE.sim FILE.pre
    -db_src    FILE : db file with src strings
    -db_tgt    FILE : db file with tgt strings
@@ -36,6 +37,7 @@ if __name__ == '__main__':
    -n          INT : maximum number of similar sentences used (default {})
    -t        FLOAT : minimum similarity threshold (default {})
    -inference      : test set
+   -fuzzymatch     : fuzzy matches (indexs start by 1)
    -seed       INT : seed for randomness (default {})
    -h              : this help
 Output:
@@ -50,6 +52,8 @@ Output:
             sys.exit()
         elif tok=="-inference":
             inference = True
+        elif tok=="-fuzzymatch":
+            fuzzymatch = True
         elif tok=="-o" and len(sys.argv):
             fout = sys.argv.pop(0)
         elif tok=="-db_src" and len(sys.argv):
@@ -78,6 +82,7 @@ Output:
     print("t={}".format(t))
     print("seed={}".format(seed))
     print('inference={}'.format(inference))
+    print('fuzzymatch={}'.format(fuzzymatch))
     random.seed(seed)
     
     if fout is None:
@@ -163,6 +168,8 @@ Output:
             if score > 1.0:
                 score = 0.999999
             n_db = int(toks.pop(0))
+            if fuzzymatch:
+                n_db = n_db - 1
             N += 1
             if n_db < 0 or n_db >= len(DB_tgt):
                 sys.stderr.write('error: index n_db={} out of bounds'.format(n_db))
