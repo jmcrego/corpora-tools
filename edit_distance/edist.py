@@ -73,5 +73,7 @@ Needs edit_distance module: pip install edit_distance
     if fa is not None and fb is not None:
         with open(fa) as f1, open(fb) as f2:
             for a, b in zip(f1, f2):
+                print('a: [{}]'.format(a))
+                print('b: [{}]'.format(b))
                 dist, l1, l2 = mask(a.strip().split(' '), b.strip().split(' '))
                 print("{:.6f}\t{}\t{}".format(dist,' '.join(l1),' '.join(l2)))
