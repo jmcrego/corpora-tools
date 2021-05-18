@@ -42,6 +42,7 @@ if __name__ == '__main__':
     -u STRING : token to mark unrelated words (default {})
     -lc       : lowercase string before computing edit distance (default {})
     -h        : this help
+Needs edit_distance module: pip install edit_distance
 '''.format(prog,u,lc)
     
     while len(sys.argv):
