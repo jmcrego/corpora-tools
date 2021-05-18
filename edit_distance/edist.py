@@ -64,6 +64,10 @@ Needs edit_distance module: pip install edit_distance
             a = sys.argv.pop(0)
         elif tok=="-b":
             b = sys.argv.pop(0)
+        elif tok=="-lc":
+            lc = True
+        elif tok=="-u":
+            lc = sys.argv.pop(0)
         else:
             sys.stderr.write('Unrecognized {} option\n'.format(tok))
             sys.stderr.write(usage)
