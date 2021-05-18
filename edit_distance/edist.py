@@ -10,8 +10,10 @@ class mask_unrelated():
         self.lc = lc
 
     def __call__(self, l1, l2):
-        if (len(l1) == 1 and len(l1[0]) == 0) or (len(l2) == 0 and len(l2[0]) == 0):
-            return 0.0, ['EMPTY'], ['EMPTY']
+        print(l1)
+        print(l2)
+#        if (len(l1) == 1 and len(l1[0]) == 0) or (len(l2) == 0 and len(l2[0]) == 0):
+#            return 0.0, ['EMPTY'], ['EMPTY']
 
         ### initially all discarded
         L1 = [self.u] * len(l1)
