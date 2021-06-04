@@ -15,5 +15,5 @@ for l in sys.stdin:
         if len(feats) < feat:
             sys.stderr.write('not enough features in token {}\n'.format(toks[i]))
             sys.exit()
-        toks[i] = feats[feat]
+        toks[i] = feats[feat] if len(feats[feat]) else '-'
     print(' '.join(toks))

@@ -16,7 +16,7 @@ def analyse(BUCKET):
         toks = []
         for token in doc:
             m += 1
-            toks.append("{}￨{}￨{}￨{}".format(token.text, token.lemma_, token.pos_, token.morph)) #token.tag_, #token.dep_, #token.shape_, #token.is_alpha, #token.is_stop
+            toks.append("{}￨{}￨{}￨{}".format(token.text.replace(' ','▁'), token.lemma_.replace(' ','▁'), token.pos_, token.morph)) #token.tag_, #token.dep_, #token.shape_, #token.is_alpha, #token.is_stop
         print(' '.join(toks))
     return m
 
