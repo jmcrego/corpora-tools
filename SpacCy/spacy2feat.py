@@ -8,12 +8,19 @@ if len(sys.argv) == 0 or len(sys.argv) > 1:
 else:
     feat = int(sys.argv.pop(0))
 
+nline = 0
 for l in sys.stdin:
+    nline += 1
     toks = l.strip().split()
     for i in range(len(toks)):
+        #print('tok: {}'.format(toks[i]))
         feats = toks[i].split('￨')
-        if len(feats) < feat:
-            sys.stderr.write('not enough features in token {}\n'.format(toks[i]))
-            sys.exit()
-        toks[i] = feats[feat] if len(feats[feat]) else '-'
+        #print('feats: {}'.format(feats))
+        if feat >= len(feats):
+            sys.stderr.write('not enough features in token {} of line {}\n'.format(toks[i], nline))
+            toks[i] = '-'
+        elif len(feats[feat]):
+            toks[i] = feats[feat]
+        else:
+            toks[i] = '-'
     print(' '.join(toks))
