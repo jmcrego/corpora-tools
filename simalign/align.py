@@ -11,6 +11,7 @@ import codecs
 import logging
 import argparse
 import numpy as np
+import edit_distance
 from sklearn.metrics.pairwise import cosine_similarity
 from transformers import BertModel, BertTokenizer, XLMModel, XLMTokenizer, RobertaModel, RobertaTokenizer, XLMRobertaModel, XLMRobertaTokenizer
 
@@ -24,6 +25,17 @@ def create_logger(logfile, loglevel):
     else:
         logging.basicConfig(filename=logfile, format="[%(asctime)s.%(msecs)03d] %(levelname)s %(message)s", datefmt="%Y-%m-%d_%H:%M:%S", level=numeric_level,)
 
+def unrelated(l1, l2):
+    if (len(l1) == 1 and len(l1[0]) == 0) or (len(l2) == 1 and len(l2[0]) == 0):
+        return [0] * len(l2)
+    sm = edit_distance.SequenceMatcher(a=[s.casefold() for s in l1], b=[s.casefold() for s in l2], action_function=edit_distance.highest_match_action)
+    ### initially all non-related
+    L2 = [0] * len(l2)
+    for (code, b1, e1, b2, e2) in sm.get_opcodes():
+        if code == 'equal': ### keep words
+            L2[b2] = 1
+    return L2
+
 def get_tokenizer_model(model,device):
     model_class = BertModel
     tokenizer_class = BertTokenizer
@@ -33,21 +45,26 @@ def get_tokenizer_model(model,device):
     emb_model.to(device)
     return tokenizer, emb_model
         
-def matrix(lsim, ltgt, sim):
-    #lsim = [tokenizer.decode([s]) for s in sim]
-    #ltgt = [tokenizer.decode([t]) for t in tgt]
+def matrix(usim, lsim, ltgt, x, y):
+    #lsim : [nsim]
+    #ltgt : [ntgt]
+    #x : [ntgt, nsim]
+    #y : [ntgt]
+    lsim = [str(usim[s])+":"+lsim[s] for s in range(len(lsim))]
     maxl = max([len(x) for x in lsim+ltgt] + [4]) + 1
-    for i in range(len(lsim)):
-        lsim[i] += " "*(maxl - len(lsim[i]))
-    for i in range(len(ltgt)):
-        ltgt[i] += " "*(maxl - len(ltgt[i]))
-    print(' '*maxl+''.join(ltgt))
-    for i in range(sim.shape[0]):
-        lsim_i = [lsim[i]]
-        for j in range(sim.shape[1]):
-            t = "{:.2f}".format(sim[i,j]) if sim[i,j] > 0.0 else ""
-            lsim_i.append(t+ " "*(maxl - len(t)))
-        print(''.join(lsim_i))
+    for s in range(len(lsim)):
+        lsim[s] += " "*(maxl - len(lsim[s]))
+    for t in range(len(ltgt)):
+        ltgt[t] += " "*(maxl - len(ltgt[t]))
+
+    print(' '*maxl+''.join(lsim)+'ATTENTION')
+    for t in range(x.shape[0]):
+        ltgt_t = [ltgt[t]]
+        for s in range(x.shape[1]):
+            u = "{:.2f}".format(x[t,s]) if x[t,s] > 0.0 else ""
+            ltgt_t.append(u+ " "*(maxl - len(u)))
+        ltgt_t.append("{:.7f}".format(y[t]))
+        print(''.join(ltgt_t))
 
 
 def reformat(ids,embed):
@@ -70,12 +87,15 @@ def reformat(ids,embed):
         while ids[last] != SEP and ids[last] != PAD and lids[last].startswith("##"):
             last += 1
         lstr.append(''.join(lids[curr:last]).replace('##',''))
-        lemb.append(np.average(embed[curr:last], axis=0))
+        if embed is not None:
+            lemb.append(np.average(embed[curr:last], axis=0))
         curr = last
-
-    return lstr, np.asarray(lemb)
+    if embed is not None:
+        lemb = np.asarray(lemb)    
+    return lstr, lemb
 
 def process_batch(batch_src, batch_sim, batch_tgt, tokenizer, emb_model, args):
+    inputs_src = tokenizer(batch_src, is_split_into_words=False, padding=True, truncation=True, return_tensors="pt")
     inputs_sim = tokenizer(batch_sim, is_split_into_words=False, padding=True, truncation=True, return_tensors="pt")
     inputs_tgt = tokenizer(batch_tgt, is_split_into_words=False, padding=True, truncation=True, return_tensors="pt")
     hidden_sim = emb_model(**inputs_sim.to(device))["hidden_states"]
@@ -85,18 +105,26 @@ def process_batch(batch_src, batch_sim, batch_tgt, tokenizer, emb_model, args):
     hidden_sim = hidden_sim[args.layer] # [bs, nsim, ed]
     hidden_tgt = hidden_tgt[args.layer] # [bs, ntgt, ed]
     for i in range(hidden_sim.shape[0]): ### for each sentence
+        lsrc, _ = reformat(inputs_src['input_ids'][i].detach().numpy(),None)
         lsim, embed_sim = reformat(inputs_sim['input_ids'][i].detach().numpy(), hidden_sim[i])
+        usim = np.asarray(unrelated(lsrc,lsim)).transpose()
         ltgt, embed_tgt = reformat(inputs_tgt['input_ids'][i].detach().numpy(), hidden_tgt[i])
-        cosine = (cosine_similarity(embed_sim, embed_tgt) + 1.0 ) / 2.0 # [nsim, ntgt], ranges [0,+1] instead of [-1,+1]
-        x = scipy.special.softmax(cosine/args.temperature, axis=1) ### softmax with temperature
-        x = np.maximum(np.zeros_like(x), np.minimum(np.ones_like(x), args.slope*(x-args.min))) ### activation function
-        matrix(lsim, ltgt, x)
+        logging.debug('SRC: '+str(lsrc))
+        logging.debug('SIM: '+str(lsim))
+        logging.debug('UNR: '+str(usim))
+        logging.debug('TGT: '+str(ltgt))
+        cosine = (cosine_similarity(embed_tgt, embed_sim) + 1.0 ) / 2.0 # [ntgt, nsim], ranges [0,+1] instead of [-1,+1]
+        x = scipy.special.softmax(cosine/args.temperature, axis=1) ### [ntgt, nsim] softmax with temperature
+        x = np.maximum(np.zeros_like(x), np.minimum(np.ones_like(x), args.slope*(x-args.min))) ### [ntgt, nsim] activation function
+        y = np.matmul(x, np.expand_dims(usim,axis=1)).squeeze() #[ntgt, nsim] x [nsim, 1] = [ntgt]
+        logging.debug('ATT: '+str(y))
+        matrix(usim, lsim, ltgt, x, y)
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('fsrc', help='Input source file')
-    parser.add_argument('fsim', help='Input similar file (with sentences similar to those in source file)')
-    parser.add_argument('ftgt', help='Input target file (with translation of sentences in similar file)')
+    parser.add_argument('fsrc', help='SOURCE file (one sentence per line)')
+    parser.add_argument('fsim', help='SIMILAR file (with sentences similar to those in source file)')
+    parser.add_argument('ftgt', help='TARGET file (with translation of sentences in similar file)')
     parser.add_argument('-t', '--temperature', type=float, default=0.01, help='Softmax temperature (def 0.01)')
     parser.add_argument('-s', '--slope', type=float, default=1.0, help='Slope for activation function (def 1.0)')
     parser.add_argument('-m', '--min', type=float, default=0.1, help='Minimum for activation function (def 0.1)')
