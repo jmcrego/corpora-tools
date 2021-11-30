@@ -127,7 +127,7 @@ if __name__ == '__main__':
     parser.add_argument('ftgt', help='TARGET file (with translation of sentences in similar file)')
     parser.add_argument('-t', '--temperature', type=float, default=0.01, help='Softmax temperature (def 0.01)')
     parser.add_argument('-s', '--slope', type=float, default=1.0, help='Slope for activation function (def 1.0)')
-    parser.add_argument('-m', '--min', type=float, default=0.1, help='Minimum for activation function (def 0.1)')
+    parser.add_argument('-m', '--min', type=float, default=0.0, help='Minimum for activation function (def 0.0)')
     parser.add_argument('-l', '--layer', type=int, default=8, help='Encoder layer to use (def 8)')
     parser.add_argument('-b', '--batch_size', type=int, default=1, help='Batch size (def 1)')
     parser.add_argument('-log', default='info', help="Logging level [debug, info, warning, critical, error] (info)")
