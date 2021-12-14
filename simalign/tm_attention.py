@@ -34,6 +34,7 @@ def batch(linp, lref, lsrc, ltgt, s, args):
         curr_ref = tok[1*n+i]
         curr_src = tok[2*n+i]
         curr_tgt = tok[3*n+i]
+        assert nsrc == len(curr_src), "{} != {}\t{}".format(nsrc, len(curr_src), curr_src)
         rsrc = related(curr_src, curr_inp).first()
         rsrc = tf.expand_dims(tf.convert_to_tensor(rsrc,dtype=tf.float32), axis=0) #[1,nsrc]
         curr_att = tf.squeeze(tf.linalg.matmul(rsrc,curr_sim),axis=0) #[1,nsrc] x [nsrc,ntgt] = [1,ntgt] = [ntgt]
@@ -44,8 +45,26 @@ def batch(linp, lref, lsrc, ltgt, s, args):
         input_ref = curr_ref
         input_att = ["1.000000" for i in range(len(curr_inp))] + ['0.000000'] + ["{:.6f}".format(a) for a in curr_att]
         assert(len(input_tok) == len(input_att))
+        input_att.insert(0,"1.000000") #bos
+        input_att.append("1.000000") #eos
         print(' '.join(input_tok) + "\t" + ' '.join(input_ref) + "\t" + ' '.join(input_att))
-        
+
+def nomatchfound(inp, ref):
+    input_tok, _ = tokenizer.tokenize(inp)
+    refer_tok, _ = tokenizer.tokenize(ref)
+    atten_tok = ["1.000000" for i in range(len(input_tok))]
+    assert(len(input_tok) == len(atten_tok))
+    atten_tok.insert(0,"1.000000") #bos
+    atten_tok.append("1.000000") #eos
+    print(' '.join(input_tok) + "\t" + ' '.join(refer_tok) + "\t" + ' '.join(atten_tok))
+
+def getmatch(match_score, match):
+    score = float(match_score)
+    pos = match.find("=")
+    src,tgt = match[pos+1:].split('￭')
+    return score, src, tgt
+
+    
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-m', '--model_dir', type=str, help='ONMT model dir', required=True)
@@ -53,12 +72,17 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--voc', type=str, help='Source/target vocabulary file', required=True)
     parser.add_argument('-t', '--temperature', type=float, default=1, help='Softmax temperature (def 1)')
     parser.add_argument('-B', '--batch_size', type=int, default=1, help='Batch size (def 1)')
+    parser.add_argument('-n', '--max_n', type=int, default=0, help='Max number of similar examples per sentence (def 0)')
+    parser.add_argument('-s', '--min_score', type=float, default=0.5, help='Min score to keep a similar example (def .50)')
     parser.add_argument('-l', '--layer', type=int, default=8, help='Encoder layer to use (def 8)')
+    parser.add_argument('--inference', action='store_true', help='preparing input stream for inference')
     parser.add_argument('-sep', '--separator', type=str, default="｟fuzzymatch｠", help='Token used to separate input/target sentences')
     parser.add_argument('-log', default='info', help="Logging level [debug, info, warning, critical, error] (info)")
     args = parser.parse_args()
     create_logger('stderr',args.log)
-
+    if args.inference:
+        args.batch_size = 1
+    
     tokenizer = pyonmttok.Tokenizer("aggressive", joiner_annotate=True, bpe_model_path=args.bpe_model_path) ### build tokenizer    
     model = opennmt.load_model(args.model_dir) ### build/restore model
     model.initialize({"source_vocabulary": args.voc, "target_vocabulary": args.voc})
@@ -75,28 +99,34 @@ if __name__ == '__main__':
     n_out2 = 0
     for line in sys.stdin:
         n_in += 1
-        input_refer_matchs = line.strip().split('\t')
-        if len(input_refer_matchs) < 4:
-            continue
+        input_refer_matchs = line.rstrip("\n").split('\t')
+        if len(input_refer_matchs) < 2:
+            sys.stderr.write('error: input must conatin at least 2 fields (input and reference)\n')
+            sys.exit()
         inp = input_refer_matchs.pop(0)
         ref = input_refer_matchs.pop(0)
-        if len(inp.split()) == 0 or len(ref.split()) == 0:
-            continue
         matchs = input_refer_matchs
+        if len(matchs) < 2: ### no matchs found
+            if args.inference:
+                nomatchfound(inp, ref)
+            continue
+        if len(inp.split()) == 0 or len(ref.split()) == 0:
+            if args.inference:
+                nomatchfound(inp, ref)
+            continue
         ok = False
+        n = 0
         for i in range(0,len(matchs),2):
-            score = float(matchs[i])
-            if score < 0.5:
+            score, src, tgt = getmatch(matchs[i],matchs[i+1])
+            if score < args.min_score or n >= args.max_n:
                 break
-            match = matchs[i+1]
-            pos = match.find("=")
-            src,tgt = match[pos+1:].split('￭')
             if len(src.split()) == 0 or len(tgt.split()) == 0:
                 continue
             linp.append(inp)
             lref.append(ref)
             lsrc.append(src)
             ltgt.append(tgt)
+            n += 1
             n_out2 += 1
             ok = True
             if (len(lsrc) == args.batch_size):
@@ -107,6 +137,10 @@ if __name__ == '__main__':
                 ltgt = []
         if ok:
             n_out1 += 1
+        else:
+            if args.inference:
+                nomatchfound(inp,ref)
+            
     if len(lsrc):
         batch(linp, lref, lsrc, ltgt, s, args)
     sys.stderr.write('Done input {} sentences, {} considered, {} generated!\n'.format(n_in,n_out1,n_out2))
