@@ -1,8 +1,30 @@
 import sys
+import six
+import yaml
 import random
 import logging
 import argparse
+import pyonmttok
 from collections import defaultdict
+
+def build_tokenizer(ftok):
+    with open(ftok) as yamlfile:
+        args = yaml.load(yamlfile, Loader=yaml.FullLoader)
+    local_args = {}
+    for k, v in six.iteritems(args):
+        if isinstance(v, six.string_types):
+            local_args[k] = v.encode('utf-8')
+        else:
+            local_args[k] = v
+    if not 'mode' in local_args:
+        sys.stderr.write('error: missing mode in tokenizer options\n')
+        sys.exit()
+    mode = local_args['mode']
+    del local_args['mode']
+    if 'vocabulary' in local_args:
+        del local_args['vocabulary']
+    return pyonmttok.Tokenizer(mode, **local_args)
+
 
 def create_logger(logfile, loglevel):
     numeric_level = getattr(logging, loglevel.upper(), None)
@@ -45,18 +67,23 @@ def addGap(gap, args):
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generate synthetic data with gaps to fill from parallel sentences.')
-    parser.add_argument('-k', type=int, default=5, help='Max number of gaps in a sentence (def 5)')
+    parser.add_argument('-m', type=int, default=1, help='Min number of gaps in a sentence (def 1)')
+    parser.add_argument('-M', type=int, default=5, help='Max number of gaps in a sentence (def 5)')
     parser.add_argument('-l', type=int, default=5, help='Max length (space-separated tokens) of a gap (def 5)')
     parser.add_argument('-r', type=float, default=0.5, help='Max ratio gap_words/total_words (def 0.5)')
     parser.add_argument('-gap', type=str, default="｟gap｠", help='Token used to mark a gap')
     parser.add_argument('-sep', type=str, default="｟sep｠", help='Token used to separate input stream')
+    parser.add_argument('-tok', type=str, help='Tokenizer config file')
     parser.add_argument('-seed', type=int, default=0, help='Seed for randomness (def 0: no seed)')
     parser.add_argument('-log', default='info', help="Logging [debug, info, warning, critical, error] (info)")
     args = parser.parse_args()
     create_logger('stderr',args.log)
     if args.seed:
         random.seed(args.seed)
-            
+
+    if args.tok:
+        tokenizer = build_tokenizer(args.tok)
+        
     length_gaps = defaultdict(int)
     number_gaps = defaultdict(int)
     nout = 0
@@ -74,13 +101,13 @@ if __name__ == '__main__':
         logging.debug("TOK: {}".format(tok))
         gap = [0] * len(tok) ### gap will be like: [0 0 1 1 0 1 0 0 0 1 1 1 0]
         num_gaps = 0
-        for k in range(random.randint(1,args.k)): ### [1, max_gaps]
+        for k in range(random.randint(args.m,args.M)): ### [min_gaps, max_gaps]
             l = addGap(gap, args)
             if l == 0:
                 break
             num_gaps += 1
             length_gaps[l] += 1
-        if num_gaps == 0:
+        if num_gaps < args.m or num_gaps > args.M:
             continue
         number_gaps[num_gaps] += 1
             
@@ -101,7 +128,16 @@ if __name__ == '__main__':
 
         logging.debug('TGT: {}'.format(tgt))
         logging.debug('GAP: {}'.format(gaps))
-        print("{} {} {}\t{}".format(src, args.sep, ' '.join(tgt), ' '.join(gaps)))
+        tgt = ' '.join(tgt)
+        gaps = ' '.join(gaps)
+        if args.tok:
+            src, _ = tokenizer.tokenize(src)
+            src = ' '.join(src)
+            tgt, _ = tokenizer.tokenize(tgt)
+            tgt = ' '.join(tgt)
+            gaps, _ = tokenizer.tokenize(gaps)
+            gaps = ' '.join(gaps)
+        print("{} {} {}\t{}".format(src, args.sep, tgt, gaps))
         nout += 1
         
     logging.info("Found {} sentences".format(nline))
