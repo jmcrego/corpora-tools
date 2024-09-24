@@ -7,7 +7,7 @@ pip install pyonmttok
 echo "Hello World!" | onmt-tokenize-text --tokenizer OpenNMTTokenizer --tokenizer_config tokconfig
 Hello World ￭!
 ```
-tokconfig indicates tokenization options. Ex:
+tokconfig indicates tokenization options.  Ex:
 ```
 mode: conservative
 joiner_annotate: true
@@ -24,7 +24,7 @@ mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make
-echo "Hello  World!" | cli/tokenize --mode conservative --joiner_annotate
+echo "Hello World!" | cli/tokenize --mode conservative --joiner_annotate
 Hello World ￭!
 ```
 To learn subword models (BPE, SentencePiece), use: 
