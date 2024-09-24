@@ -41,13 +41,14 @@ class File():
             voc_oov = 0
             words_oov = 0
             sents_in_train = 0
-            for w,n in self.w2freq.iteritems():
+            for w,n in self.w2freq.items():
                 if w not in trn.w2freq:
                     voc_oov += 1
                     words_oov += n
             for s in self.sentences:
                 if s in trn.sentences:
                     sents_in_train += 1
+                    sys.stderr.write('TSTinTRN: {}\n'.format(s))
             TstTrn = "\n\tOOV_voc={}\n\tOOV_words={}\n\tsents_in_train={}".format(voc_oov, words_oov, sents_in_train)
 
         sys.stderr.write('Read {}\n\tLines={}\n\tWords={}\n\tVocab={}\n\tLmean={:.2f}\n\tLmin={}\n\tLmax={}{}\n'.format(self.file, self.Lines, self.Words, self.Vocab, self.Lmean, self.Lmin, self.Lmax, TstTrn))
