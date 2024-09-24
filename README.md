@@ -24,7 +24,7 @@ mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make
-echo "Hello World!" | cli/tokenize --mode conservative --joiner_annotate
+echo "Hello  World!" | cli/tokenize --mode conservative --joiner_annotate
 Hello World ￭!
 ```
 To learn subword models (BPE, SentencePiece), use: 
