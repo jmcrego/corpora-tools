@@ -89,6 +89,9 @@ int main(int argc, char** argv) {
         std::vector<std::vector<size_t> > phrases=a.extend_phrase(s_min, s_max, t_min, t_max, verbose);
         for (std::vector<std::vector<size_t> >::iterator it=phrases.begin(); it!=phrases.end(); it++){
           std::vector<size_t> v = *it;
+	  if (extended){
+	    std::cout << "### p: " << v[0] << " " << v[1] << " ||| " << v[2] << " " << v[3] << std::endl;
+	  }
           for (size_t s=v[0]; s<=v[1]; s++) std::cout << (s!=v[0]?septokens:"") << S[s];
           std::cout << trad;
           for (size_t t=v[2]; t<=v[3]; t++) std::cout << (t!=v[2]?septokens:"") << T[t];
