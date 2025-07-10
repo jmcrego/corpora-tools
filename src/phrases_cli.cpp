@@ -72,6 +72,7 @@ int main(int argc, char** argv) {
       std::cout << "### i: " << i+1 << std::endl;
       std::cout << "### S: " << vsrc[i] << std::endl;
       std::cout << "### T: " << vtgt[i] << std::endl;
+      std::cout << "### A: " << vali[i] << std::endl;
     }
     Align a(A,S.size(),T.size());
     for (size_t s_min=0; s_min<S.size(); s_min++){
