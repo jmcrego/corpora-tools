@@ -11,11 +11,11 @@ class tokenizer():
         self.T = None 
         self.tokopts = {
             'mode': "conservative",
-            'bpe_model_path': "",
+#            'bpe_model_path': "",
             'bpe_dropout': 0.0,
             'vocabulary_path': "",
             'vocabulary_threshold': 0,
-            'sp_model_path': "",
+#            'sp_model_path': "",
             'sp_nbest_size': 0,
             'sp_alpha': 0.1,
             'joiner': "￭",
