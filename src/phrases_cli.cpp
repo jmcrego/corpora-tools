@@ -9,11 +9,13 @@
 #include "Tools.h"
 
 void usage(std::string name){
-  std::cerr << "usage: " << name << " -s FILE -t FILE -a FILE [-v]" << std::endl;
+  std::cerr << "usage: " << name << " -s FILE -t FILE -a FILE [-v] [-e]" << std::endl;
   std::cerr << "   -s      FILE : train src file" << std::endl;
   std::cerr << "   -t      FILE : train tgt file" << std::endl;
   std::cerr << "   -a      FILE : train s2t alignment file" << std::endl;
   std::cerr << "   -l       INT : max phrase length (default 7)" << std::endl;
+  std::cerr << "   -e           : extended output" << std::endl;
+  std::cerr << "   -v           : verbose output" << std::endl;
   return;
 }
 
@@ -21,6 +23,7 @@ int main(int argc, char** argv) {
   std::string trad=" ||| ";
   std::string septokens = " ";
   bool verbose = false;
+  bool extended = false;
   std::string fsrc = "";
   std::string ftgt = "";
   std::string fali = "";
@@ -32,6 +35,7 @@ int main(int argc, char** argv) {
     else if (tok == "-a" and i<argc)  { i++; fali = argv[i]; }
     else if (tok == "-l" and i<argc)  { i++; maxl = std::atoi(argv[i]); }
     else if (tok == "-v")             { verbose = true; }
+    else if (tok == "-e")             { extended = true; }
     else if (tok == "-h")             { usage(argv[0]); return 1; }
     else{
       std::cerr << "error: unknown option!" << tok << std::endl;
@@ -63,6 +67,11 @@ int main(int argc, char** argv) {
       std::cout << "S[" << S.size() << "]: " << vsrc[i] << std::endl;
       std::cout << "T[" << T.size() << "]: " << vtgt[i] << std::endl;
       std::cout << "A: " << vali[i] << std::endl;
+    }
+    if (extended) {
+      std::cout << "### i: " << i+1 << std::endl;
+      std::cout << "### S: " << vsrc[i] << std::endl;
+      std::cout << "### T: " << vtgt[i] << std::endl;
     }
     Align a(A,S.size(),T.size());
     for (size_t s_min=0; s_min<S.size(); s_min++){
